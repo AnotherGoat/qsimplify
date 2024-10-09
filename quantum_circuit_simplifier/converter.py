@@ -1,13 +1,12 @@
-from networkx.classes import DiGraph
+from networkx.classes import MultiDiGraph
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.quantumcircuit import BitLocations
 
-
 class GridNode:
-    def __init__(self, name: str, target = None, controlled_by = None):
+    def __init__(self, name: str, targets = None, controlled_by = None):
         self.name = name
-        self.target = target
+        self.targets = [] if targets is None else targets
         self.controlled_by = [] if controlled_by is None else controlled_by
 
 
@@ -15,12 +14,12 @@ class GridNode:
         if not isinstance(other, GridNode):
             return NotImplemented
 
-        return self.name == other.name and self.target == other.target and self.controlled_by == other.controlled_by
+        return self.name == other.name and self.targets == other.targets and self.controlled_by == other.controlled_by
 
 
     def __str__(self) -> str:
         name_data = f"name={self.name}"
-        target_data = f"target={self.target}" if self.target else ""
+        target_data = f"targets={self.targets}" if self.targets else ""
         controlled_by_data = f"controlled_by={self.controlled_by}" if self.controlled_by else ""
         non_empty_data = [data for data in [name_data, target_data, controlled_by_data] if data]
         return f"GridNode({', '.join(non_empty_data)})"
@@ -30,40 +29,10 @@ def draw_grid(grid: list[list[GridNode]]) -> str:
     rows = []
 
     for row_index, row in enumerate(grid):
-        row_data = f"{row_index}: {' '.join(str(value) for value in row)}"
-        rows.append(row_data)
+        row_data = "\t".join(str(value) for value in row)
+        rows.append(f"{row_index}: {row_data}")
 
     return "\n".join(rows)
-
-
-class GateNode:
-    def __init__(self, name: str, qubits: list[int]):
-        self.name = name
-        self.qubits = qubits
-        self.left = None
-        self.right = None
-        self.up = None
-        self.down = None
-        self.target = None
-        self.controlled_by = []
-
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, GateNode):
-            return NotImplemented
-
-        return self.name == other.name and self.qubits == other.qubits
-
-
-    def __str__(self) -> str:
-        left_name = self.left.name if self.left else "None"
-        right_name = self.right.name if self.right else "None"
-        return f"GateNode(name={self.name}, qubits={self.qubits}, left={left_name}, right={right_name})"
-
-
-class CircuitGraph(DiGraph):
-    def gates(self) -> list[GateNode]:
-        return [data["gate"] for (_, data) in self.nodes(data=True)]
 
 
 def fill_grid(filler: any, width: int, height: int) -> list[list[any]]:
@@ -83,7 +52,7 @@ def trim_right_side(grid: list[list[any]], filler: any) -> list[list[any]]:
     return [row[0:width - columns_to_trim] for row in grid]
 
 
-def circuit_to_grid(circuit: QuantumCircuit):
+def circuit_to_grid(circuit: QuantumCircuit) -> list[list[GridNode]]:
     grid = fill_grid(GridNode("i"), len(circuit.data), circuit.num_qubits)
     index = 0
 
@@ -100,12 +69,30 @@ def circuit_to_grid(circuit: QuantumCircuit):
             grid[qubit][index] = GridNode(gate_name)
             continue
 
+        if gate_name == "swap":
+            first_qubit = qubits[0]
+            second_qubit = qubits[1]
+
+            grid[first_qubit][index] = GridNode(gate_name, targets=[second_qubit])
+            grid[second_qubit][index] = GridNode(gate_name, targets=[first_qubit])
+            continue
+
+        if gate_name == "cswap":
+            control_qubit = qubits[0]
+            first_qubit = qubits[1]
+            second_qubit = qubits[2]
+
+            grid[control_qubit][index] = GridNode(gate_name, targets=[first_qubit, second_qubit])
+            grid[first_qubit][index] = GridNode(gate_name, controlled_by=[control_qubit])
+            grid[second_qubit][index] = GridNode(gate_name, controlled_by=[control_qubit])
+            continue
+
         target_qubit = qubits.pop()
         control_qubits = qubits
         grid[target_qubit][index] = GridNode(gate_name, controlled_by=control_qubits)
 
         for control_qubit in control_qubits:
-            grid[control_qubit][index] = GridNode(gate_name, target=target_qubit)
+            grid[control_qubit][index] = GridNode(gate_name, targets=[target_qubit])
 
     return trim_right_side(grid, GridNode("i"))
 
@@ -121,49 +108,52 @@ def get_qubit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) 
     return qubits
 
 
-def add_gate_nodes(circuit: QuantumCircuit, graph: CircuitGraph):
-    for index, instruction in enumerate(circuit.data):
-        gate_name = instruction.operation.name
-        qubits = get_qubit_indexes(circuit, instruction)
-        new_node = GateNode(gate_name, qubits)
-        graph.add_node(index, gate=new_node)
-
-        #graph.add_edge()
+def calculate_gate_index(columns: int, row_index: int, column_index: int) -> int:
+    return columns * row_index + column_index
 
 
+def add_gate_nodes(grid: list[list[GridNode]], graph: MultiDiGraph):
+    rows = len(grid)
+    columns = len(grid[0])
 
-def circuit_to_graph(circuit: QuantumCircuit) -> CircuitGraph:
-    graph = CircuitGraph()
-    last_gate_on_qubit = {}
-
-    add_gate_nodes(circuit, graph)
-
-    for index, instruction in enumerate(circuit.data):
-        operation = instruction.operation
-        qubits = []
-
-        for qubit in instruction.qubits:
-            bit_locations: BitLocations = circuit.find_bit(qubit)
-            (_, qubit_index) = bit_locations.registers[0]
-            qubits.append(qubit_index)
-
-        new_node = GateNode(operation.name, qubits)
-        graph.add_node(index, gate=new_node)
-
-        for qubit in qubits:
-            if qubit in last_gate_on_qubit:
-                last_node = last_gate_on_qubit[qubit]
+    for row_index in range(rows):
+        for column_index in range(columns):
+            grid_node = grid[row_index][column_index]
+            node_index = calculate_gate_index(columns, row_index, column_index)
+            graph.add_node(node_index, name=grid_node.name, position=(row_index, column_index), draw_position=(column_index, rows - row_index - 1))
 
 
+def find_adjacent_positions(column_index, row_index) -> dict[str, tuple[int, int]]:
+    return {
+        "up": (row_index - 1, column_index),
+        "down": (row_index + 1, column_index),
+        "left": (row_index, column_index - 1),
+        "right": (row_index, column_index + 1)
+    }
 
-                new_node.left = last_node
-                last_node.right = new_node
 
-            last_gate_on_qubit[qubit] = new_node
+def add_edges(grid: list[list[GridNode]], graph: MultiDiGraph):
+    rows = len(grid)
+    columns = len(grid[0])
+
+    for row_index in range(rows):
+        for column_index in range(columns):
+            node_index = calculate_gate_index(columns, row_index, column_index)
+            adjacent_positions = find_adjacent_positions(column_index, row_index)
+
+            for direction, (adjacent_row, adjacent_column) in adjacent_positions.items():
+                if 0 <= adjacent_row < rows and 0 <= adjacent_column < columns:
+                    adjacent_index = calculate_gate_index(columns, adjacent_row, adjacent_column)
+                    graph.add_edge(node_index, adjacent_index, name=direction)
 
 
+def circuit_to_graph(circuit: QuantumCircuit) -> MultiDiGraph:
+    grid = circuit_to_grid(circuit)
+    graph = MultiDiGraph()
+    add_gate_nodes(grid, graph)
+    add_edges(grid, graph)
     return graph
 
 
-def graph_to_circuit(graph: CircuitGraph) -> QuantumCircuit:
+def graph_to_circuit(graph: MultiDiGraph) -> QuantumCircuit:
     pass
