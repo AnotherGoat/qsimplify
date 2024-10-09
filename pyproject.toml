@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "quantum-circuit-simplifier"
+version = "0.1.0"
+description = ""
+authors = ["Víctor Mardones <vmardones.dev@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+qiskit = "^1.2.4"
+networkx = "^3.3"
+pytest = "^8.3.3"
+matplotlib = {extras = ["collections"], version = "^3.9.2"}
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
