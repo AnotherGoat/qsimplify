@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from quantum_circuit_simplifier.analyzer import analyze
 from quantum_circuit_simplifier.model import QuantumMetrics
-from quantum_circuit_simplifier.converter import circuit_to_grid, draw_grid, circuit_to_graph
+from quantum_circuit_simplifier.converter import circuit_to_grid, circuit_to_graph
 
 def main():
     circuit = QuantumCircuit(3)
@@ -33,7 +33,7 @@ def main():
 
     grid = circuit_to_grid(circuit)
     print("\n===== Circuit grid =====")
-    print(draw_grid(grid))
+    print(grid)
 
     graph = circuit_to_graph(circuit)
     print("\n===== Circuit graph nodes =====")

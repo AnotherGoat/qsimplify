@@ -1,6 +1,6 @@
 from qiskit import QuantumCircuit
 from quantum_circuit_simplifier.converter import circuit_to_grid, get_qubit_indexes
-from quantum_circuit_simplifier.model import GridNode, QuantumMetrics
+from quantum_circuit_simplifier.model import QuantumMetrics, QuantumGrid
 
 
 def get_operations(circuit: QuantumCircuit) -> list[str]:
@@ -12,10 +12,10 @@ def count_operations(circuit: QuantumCircuit, operation_name: str) -> int:
     return len([operation for operation in operations if operation == operation_name])
 
 
-def calculate_superposition_rate(grid: list[list[GridNode]]) -> float:
+def calculate_superposition_rate(grid: QuantumGrid) -> float:
     superposition_count = 0
 
-    for row in grid:
+    for row in grid.data:
         for grid_node in row:
             if grid_node.name == "i":
                 continue
@@ -37,10 +37,10 @@ def analyze(circuit: QuantumCircuit) -> QuantumMetrics:
     metrics = QuantumMetrics()
 
     grid = circuit_to_grid(circuit)
-    metrics.width = len(grid)
-    metrics.depth = len(grid[0])
+    metrics.width = grid.height
+    metrics.depth = grid.width
 
-    metrics.max_density = len(grid[0])
+    metrics.max_density = grid.width
 
     metrics.gate_count = len(circuit.data)
 
