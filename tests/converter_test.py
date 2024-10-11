@@ -1,44 +1,15 @@
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.converter import circuit_to_graph, GateNode, fill_grid, trim_right_side, \
-    circuit_to_grid, draw_grid
-from quantum_circuit_simplifier.model import GridNode
-
-
-def test_fill_grid():
-    grid = fill_grid("a", 4, 3)
-
-    for row in grid:
-        for value in row:
-            assert value == "a"
-
-    assert len(grid) == 3
-    assert len(grid[0]) == 4
-
-
-def test_trim_right_side():
-    grid = [
-        [1, 2, 3, None],
-        [4, 5, 6, None],
-        [7, 8, 9, None],
-    ]
-
-    trimmed_grid = trim_right_side(grid, None)
-
-    assert trimmed_grid == [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9],
-    ]
+from quantum_circuit_simplifier.converter import circuit_to_graph, circuit_to_grid
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid
 
 
 def test_empty_circuit_to_grid():
     circuit = QuantumCircuit(2)
     grid = circuit_to_grid(circuit)
 
-    assert len(grid) == 2
-    assert len(grid[0]) == 0
-    assert len(grid[1]) == 0
+    assert grid.width == 0
+    assert grid.height == 2
 
 
 def test_one_qubit_to_grid():
@@ -55,14 +26,14 @@ def test_one_qubit_to_grid():
 
     grid = circuit_to_grid(circuit)
 
-    assert grid[0][0] == GridNode("h")
-    assert grid[0][1] == GridNode("x")
-    assert grid[0][2] == GridNode("y")
-    assert grid[0][3] == GridNode("z")
-    assert grid[0][4] == GridNode("x")
-    assert grid[0][5] == GridNode("z")
-    assert grid[0][6] == GridNode("h")
-    assert grid[0][7] == GridNode("y")
+    assert grid[0, 0] == GridNode("h")
+    assert grid[0, 1] == GridNode("x")
+    assert grid[0, 2] == GridNode("y")
+    assert grid[0, 3] == GridNode("z")
+    assert grid[0, 4] == GridNode("x")
+    assert grid[0, 5] == GridNode("z")
+    assert grid[0, 6] == GridNode("h")
+    assert grid[0, 7] == GridNode("y")
 
 
 def test_two_qubits_to_grid():
@@ -77,17 +48,17 @@ def test_two_qubits_to_grid():
 
     grid = circuit_to_grid(circuit)
 
-    assert grid[0][0] == GridNode("h")
-    assert grid[1][0] == GridNode("x")
+    assert grid[0, 0] == GridNode("h")
+    assert grid[1, 0] == GridNode("x")
 
-    assert grid[0][1] == GridNode("cx", targets=[1])
-    assert grid[1][1] == GridNode("cx", controlled_by=[0])
+    assert grid[0, 1] == GridNode("cx", targets=[1])
+    assert grid[1, 1] == GridNode("cx", controlled_by=[0])
 
-    assert grid[0][2] == GridNode("ch", controlled_by=[1])
-    assert grid[1][2] == GridNode("ch", targets=[0])
+    assert grid[0, 2] == GridNode("ch", controlled_by=[1])
+    assert grid[1, 2] == GridNode("ch", targets=[0])
 
-    assert grid[0][3] == GridNode("h")
-    assert grid[1][3] == GridNode("y")
+    assert grid[0, 3] == GridNode("h")
+    assert grid[1, 3] == GridNode("y")
 
 
 def test_entanglement_to_grid():
@@ -98,11 +69,11 @@ def test_entanglement_to_grid():
 
     grid = circuit_to_grid(circuit)
 
-    assert grid[0][0] == GridNode("h")
-    assert grid[1][0] == GridNode("i")
+    assert grid[0, 0] == GridNode("h")
+    assert grid[1, 0] == QuantumGrid.FILLER
 
-    assert grid[0][1] == GridNode("cx", targets=[1])
-    assert grid[1][1] == GridNode("cx", controlled_by=[0])
+    assert grid[0, 1] == GridNode("cx", targets=[1])
+    assert grid[1, 1] == GridNode("cx", controlled_by=[0])
 
 
 def test_three_qubits_to_grid():
@@ -116,21 +87,21 @@ def test_three_qubits_to_grid():
 
     grid = circuit_to_grid(circuit)
 
-    assert grid[0][0] == GridNode("cx", targets=[1])
-    assert grid[1][0] == GridNode("cx", controlled_by=[0])
-    assert grid[2][0] == GridNode("i")
+    assert grid[0, 0] == GridNode("cx", targets=[1])
+    assert grid[1, 0] == GridNode("cx", controlled_by=[0])
+    assert grid[2, 0] == QuantumGrid.FILLER
 
-    assert grid[0][1] == GridNode("h")
-    assert grid[1][1] == GridNode("cz", controlled_by=[2])
-    assert grid[2][1] == GridNode("cz", targets=[1])
+    assert grid[0, 1] == GridNode("h")
+    assert grid[1, 1] == GridNode("cz", controlled_by=[2])
+    assert grid[2, 1] == GridNode("cz", targets=[1])
 
-    assert grid[0][2] == GridNode("ccx", targets=[2])
-    assert grid[1][2] == GridNode("ccx", targets=[2])
-    assert grid[2][2] == GridNode("ccx", controlled_by=[0, 1])
+    assert grid[0, 2] == GridNode("ccx", targets=[2])
+    assert grid[1, 2] == GridNode("ccx", targets=[2])
+    assert grid[2, 2] == GridNode("ccx", controlled_by=[0, 1])
 
-    assert grid[0][3] == GridNode("i")
-    assert grid[1][3] == GridNode("i")
-    assert grid[2][3] == GridNode("h")
+    assert grid[0, 3] == QuantumGrid.FILLER
+    assert grid[1, 3] == QuantumGrid.FILLER
+    assert grid[2, 3] == GridNode("h")
 
 
 def test_one_qubit_nodes():
