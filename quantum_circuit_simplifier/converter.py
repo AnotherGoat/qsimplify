@@ -2,28 +2,7 @@ from networkx.classes import MultiDiGraph
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.quantumcircuit import BitLocations
-
-class GridNode:
-    def __init__(self, name: str, targets = None, controlled_by = None):
-        self.name = name
-        self.targets = [] if targets is None else targets
-        self.controlled_by = [] if controlled_by is None else controlled_by
-
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, GridNode):
-            return NotImplemented
-
-        return self.name == other.name and self.targets == other.targets and self.controlled_by == other.controlled_by
-
-
-    def __str__(self) -> str:
-        name_data = f"name={self.name}"
-        target_data = f"targets={self.targets}" if self.targets else ""
-        controlled_by_data = f"controlled_by={self.controlled_by}" if self.controlled_by else ""
-        non_empty_data = [data for data in [name_data, target_data, controlled_by_data] if data]
-        return f"GridNode({', '.join(non_empty_data)})"
-
+from quantum_circuit_simplifier.model import GridNode
 
 def draw_grid(grid: list[list[GridNode]]) -> str:
     rows = []
@@ -132,7 +111,7 @@ def find_adjacent_positions(column_index, row_index) -> dict[str, tuple[int, int
     }
 
 
-def add_edges(grid: list[list[GridNode]], graph: MultiDiGraph):
+def add_positional_edges(grid: list[list[GridNode]], graph: MultiDiGraph):
     rows = len(grid)
     columns = len(grid[0])
 
@@ -142,16 +121,45 @@ def add_edges(grid: list[list[GridNode]], graph: MultiDiGraph):
             adjacent_positions = find_adjacent_positions(column_index, row_index)
 
             for direction, (adjacent_row, adjacent_column) in adjacent_positions.items():
-                if 0 <= adjacent_row < rows and 0 <= adjacent_column < columns:
+                if is_inside_grid(grid, adjacent_row, adjacent_column):
                     adjacent_index = calculate_gate_index(columns, adjacent_row, adjacent_column)
                     graph.add_edge(node_index, adjacent_index, name=direction)
+
+
+def is_inside_grid(grid: list[list[GridNode]], row: int, column: int):
+    rows = len(grid)
+    columns = len(grid[0])
+    return 0 <= row < rows and 0 <= column < columns
+
+
+def add_connection_edges(grid: list[list[GridNode]], graph: MultiDiGraph):
+    rows = len(grid)
+    columns = len(grid[0])
+
+    for row_index in range(rows):
+        for column_index in range(columns):
+            grid_node = grid[row_index][column_index]
+
+            if len(grid_node.targets) == 0 and len(grid_node.controlled_by) == 0:
+                continue
+
+            node_index = calculate_gate_index(columns, row_index, column_index)
+
+            for target in grid_node.targets:
+                target_index = calculate_gate_index(columns, target, column_index)
+                graph.add_edge(node_index, target_index, name="target")
+
+            for controller in grid_node.controlled_by:
+                controller_index = calculate_gate_index(columns, controller, column_index)
+                graph.add_edge(node_index, controller_index, name="controlled_by")
 
 
 def circuit_to_graph(circuit: QuantumCircuit) -> MultiDiGraph:
     grid = circuit_to_grid(circuit)
     graph = MultiDiGraph()
     add_gate_nodes(grid, graph)
-    add_edges(grid, graph)
+    add_positional_edges(grid, graph)
+    add_connection_edges(grid, graph)
     return graph
 
 

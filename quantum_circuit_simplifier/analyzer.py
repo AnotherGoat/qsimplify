@@ -1,33 +1,6 @@
-from dataclasses import dataclass
 from qiskit import QuantumCircuit
-from quantum_circuit_simplifier.converter import circuit_to_grid, GridNode, get_qubit_indexes
-
-
-@dataclass
-class QuantumMetrics:
-    # Circuit Size
-    width: int = -1
-    depth: int = -1
-
-    # Circuit Density
-    max_density: int = -1
-    average_density: float = -1.0
-
-    # Single-Qubit Gates
-    pauli_x_count: int = -1
-    pauli_y_count: int = -1
-    pauli_z_count: int = -1
-    pauli_count: int = -1
-    hadamard_count: int = -1
-    initial_superposition_rate: float = -1.0
-    other_single_gates_count: int = -1
-    single_gate_count: int = -1
-    controlled_single_qubit_count: int = -1
-
-    # All Gates in the Circuit
-    gate_count: int = -1
-    controlled_gate_count: int = -1
-    single_gate_rate: float = -1.0
+from quantum_circuit_simplifier.converter import circuit_to_grid, get_qubit_indexes
+from quantum_circuit_simplifier.model import GridNode, QuantumMetrics
 
 
 def get_operations(circuit: QuantumCircuit) -> list[str]:
