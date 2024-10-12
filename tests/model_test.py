@@ -1,4 +1,5 @@
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode
+
 
 def test_create_node():
     node = GridNode("a")
@@ -88,3 +89,11 @@ def test_doesnt_have_node_at():
     assert not grid.has_node_at(0, 3)
     assert not grid.has_node_at(3, 0)
     assert not grid.has_node_at(3, 3)
+
+
+def test_add_gate():
+    graph = QuantumGraph()
+
+    graph.add_gate((0, 0), GraphNode("id", draw_position=(0, 2)))
+
+    assert graph[0, 0] == GraphNode("id", draw_position=(0, 2))
