@@ -1,56 +1,56 @@
-from matplotlib.pyplot import legend
+import argparse
+
 from networkx.classes import MultiDiGraph
 from qiskit import QuantumCircuit
 import matplotlib.pyplot as plt
 import networkx as nx
 from quantum_circuit_simplifier.analyzer import analyze
+from quantum_circuit_simplifier.utils import setup_logger, set_debug_mode
 from quantum_circuit_simplifier.model import QuantumMetrics
-from quantum_circuit_simplifier.converter import circuit_to_grid, circuit_to_graph
+from quantum_circuit_simplifier.converter import Converter
 
 def main():
+    parser = argparse.ArgumentParser(description="Quantum circuit simplifier")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    args = parser.parse_args()
+    set_debug_mode(args.debug)
+
     circuit = QuantumCircuit(3)
 
     circuit.h(0)
+    circuit.x(1)
     circuit.cx(0, 1)
+    circuit.z(1)
     circuit.h(2)
-    circuit.cz(2, 1)
-    circuit.t(2)
-    circuit.cx(1, 0)
-    circuit.ccx(0, 2, 1)
-    circuit.x(1)
-    circuit.swap(1, 2)
-    circuit.z(2)
-    circuit.x(1)
-    circuit.y(0)
-    circuit.cx(0, 2)
-    circuit.cswap(0, 1, 2)
+    circuit.cx(1,2)
+    circuit.h(2)
     circuit.h(0)
-    circuit.ccx(0, 1, 2)
-    circuit.h(2)
-    circuit.tdg(1)
+    circuit.id(1)
 
-    print("\n===== Circuit drawing =====")
-    print(circuit.draw())
+    #print("\n===== Circuit drawing =====")
+    #print(circuit.draw())
 
-    grid = circuit_to_grid(circuit)
-    print("\n===== Circuit grid =====")
-    print(grid)
+    converter = Converter()
 
-    graph = circuit_to_graph(circuit)
-    print("\n===== Circuit graph nodes =====")
-    print(graph.nodes(data=True))
+    grid = converter.circuit_to_grid(circuit)
+    #print("\n===== Circuit grid =====")
+    #print(grid)
 
-    print("\n===== Circuit graph edges =====")
-    print(graph.edges(data=True))
+    #graph = converter.circuit_to_graph(circuit)
+    #print("\n===== Circuit graph nodes =====")
+    #print(graph.nodes(data=True))
 
-    metrics = analyze(circuit)
-    print("\n===== Circuit metrics =====")
-    print(metrics)
+    #print("\n===== Circuit graph edges =====")
+    #print(graph.edges(data=True))
+
+    #metrics = analyze(circuit, converter)
+    #print("\n===== Circuit metrics =====")
+    #print(metrics)
 
     figure = circuit.draw("mpl")
     #figure.savefig("circuit_diagram.png")
 
-    draw_graph(graph, metrics)
+    #draw_graph(graph, metrics)
 
 
 def add_tuples(tuple1: tuple[float, float], tuple2: tuple[float, float]) -> tuple[float, float]:

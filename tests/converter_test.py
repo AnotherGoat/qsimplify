@@ -1,8 +1,7 @@
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.converter import circuit_to_graph, circuit_to_grid
+from quantum_circuit_simplifier.converter import circuit_to_grid, circuit_to_graph
 from quantum_circuit_simplifier.model import GridNode, QuantumGrid
-
 
 def test_empty_circuit_to_grid():
     circuit = QuantumCircuit(2)

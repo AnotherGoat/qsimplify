@@ -1,9 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import TypeAlias, List
-
 from networkx.classes import MultiDiGraph
-
+from quantum_circuit_simplifier.utils import setup_logger
 
 class GridNode:
     """
@@ -27,11 +26,14 @@ class GridNode:
         return self.name == other.name and self.targets == other.targets and self.controlled_by == other.controlled_by
 
     def __str__(self) -> str:
-        name_data = f"name={self.name}"
         target_data = f"targets={self.targets}" if self.targets else ""
         controlled_by_data = f"controlled_by={self.controlled_by}" if self.controlled_by else ""
-        non_empty_data = [data for data in [name_data, target_data, controlled_by_data] if data]
-        return f"GridNode({', '.join(non_empty_data)})"
+        extra_data = [data for data in [target_data, controlled_by_data] if data]
+
+        if len(extra_data) == 0:
+            return self.name
+
+        return f"{self.name}({', '.join(extra_data)})"
 
 
 GridData: TypeAlias = List[List[GridNode]]
@@ -50,7 +52,7 @@ class QuantumGrid:
         width (int): The number of columns in the grid.
         height (int): The number of rows (qubits) in the grid.
     """
-    FILLER = GridNode("i")
+    FILLER = GridNode("id")
     width: int
     height: int
     _data: GridData
@@ -76,7 +78,7 @@ class QuantumGrid:
         self.data = data
 
     def trim_right_side(self) -> QuantumGrid:
-        """Create a copy of this grid with the filler removed."""
+        """Create a copy of this grid with the filler on the right side removed."""
         columns_to_trim = 0
 
         for column in range(self.width - 1, -1, -1):
@@ -88,13 +90,28 @@ class QuantumGrid:
         return QuantumGrid([row[0:self.width - columns_to_trim] for row in self.data])
 
     def __str__(self) -> str:
+        columns = zip(*self.data)
+        column_lengths = []
+
+        for column in columns:
+            max_text_length = max(len(str(node)) for node in column)
+            column_lengths.append(max_text_length)
+
         rows = []
 
         for row_index, row in enumerate(self.data):
-            row_data = "\t".join(str(value) for value in row)
+            formatted_values = [
+                f"{str(value):<{max_text_length}}"
+                for value, max_text_length in zip(row, column_lengths)
+            ]
+
+            row_data = "    ".join(formatted_values)
             rows.append(f"{row_index}: {row_data}")
 
         return "\n".join(rows)
+
+    def is_occupied(self, row: int, column: int) -> bool:
+        return self[row, column] != QuantumGrid.FILLER
 
     def has_node_at(self, row: int, column: int) -> bool:
         """Check whether the grid has a node at the specified row and column."""

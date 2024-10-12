@@ -1,23 +1,22 @@
 from qiskit import QuantumCircuit
-from quantum_circuit_simplifier.converter import circuit_to_grid, get_qubit_indexes
+from quantum_circuit_simplifier.converter import Converter
 from quantum_circuit_simplifier.model import QuantumMetrics, QuantumGrid
 
-
-def get_operations(circuit: QuantumCircuit) -> list[str]:
+def _get_operations(circuit: QuantumCircuit) -> list[str]:
     return [instruction.operation.name for instruction in circuit.data]
 
 
-def count_operations(circuit: QuantumCircuit, operation_name: str) -> int:
-    operations = get_operations(circuit)
+def _count_operations(circuit: QuantumCircuit, operation_name: str) -> int:
+    operations = _get_operations(circuit)
     return len([operation for operation in operations if operation == operation_name])
 
 
-def calculate_superposition_rate(grid: QuantumGrid) -> float:
+def _calculate_superposition_rate(grid: QuantumGrid) -> float:
     superposition_count = 0
 
     for row in grid.data:
         for grid_node in row:
-            if grid_node.name == "i":
+            if grid_node == QuantumGrid.FILLER:
                 continue
 
             if grid_node.name == "h":
@@ -28,15 +27,15 @@ def calculate_superposition_rate(grid: QuantumGrid) -> float:
     return superposition_count / len(grid)
 
 
-def count_single_qubit_gates(circuit: QuantumCircuit) -> int:
-    qubit_counts = [len(get_qubit_indexes(circuit, instruction)) for instruction in circuit.data ]
+def _count_single_qubit_gates(circuit: QuantumCircuit) -> int:
+    qubit_counts = [instruction.operation.num_qubits for instruction in circuit.data ]
     return len([qubit_count for qubit_count in qubit_counts if qubit_count == 1])
 
 
-def analyze(circuit: QuantumCircuit) -> QuantumMetrics:
+def analyze(circuit: QuantumCircuit, converter: Converter) -> QuantumMetrics:
     metrics = QuantumMetrics()
 
-    grid = circuit_to_grid(circuit)
+    grid = converter.circuit_to_grid(circuit)
     metrics.width = grid.height
     metrics.depth = grid.width
 
@@ -44,13 +43,13 @@ def analyze(circuit: QuantumCircuit) -> QuantumMetrics:
 
     metrics.gate_count = len(circuit.data)
 
-    metrics.pauli_x_count = count_operations(circuit, "x")
-    metrics.pauli_y_count = count_operations(circuit, "y")
-    metrics.pauli_z_count = count_operations(circuit, "z")
+    metrics.pauli_x_count = _count_operations(circuit, "x")
+    metrics.pauli_y_count = _count_operations(circuit, "y")
+    metrics.pauli_z_count = _count_operations(circuit, "z")
     metrics.pauli_count = metrics.pauli_x_count + metrics.pauli_y_count + metrics.pauli_z_count
-    metrics.hadamard_count = count_operations(circuit, "h")
-    metrics.initial_superposition_rate = calculate_superposition_rate(grid)
-    metrics.single_gate_count = count_single_qubit_gates(circuit)
+    metrics.hadamard_count = _count_operations(circuit, "h")
+    metrics.initial_superposition_rate = _calculate_superposition_rate(grid)
+    metrics.single_gate_count = _count_single_qubit_gates(circuit)
     metrics.other_single_gates_count = metrics.single_gate_count - metrics.pauli_count - metrics.hadamard_count
 
     metrics.single_gate_rate = metrics.single_gate_count / metrics.gate_count

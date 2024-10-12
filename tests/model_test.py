@@ -47,6 +47,30 @@ def test_trim_right_side():
     ]
 
 
+def test_is_occupied():
+    data = [
+        [QuantumGrid.FILLER, GridNode("x"), GridNode("y")],
+        [GridNode("z"), QuantumGrid.FILLER, GridNode("x")],
+        [GridNode("y"), GridNode("z"), QuantumGrid.FILLER],
+    ]
+    grid = QuantumGrid(data)
+
+    assert grid.is_occupied(0, 1)
+    assert grid.is_occupied(0, 2)
+    assert grid.is_occupied(1, 0)
+    assert grid.is_occupied(1, 2)
+    assert grid.is_occupied(2, 0)
+    assert grid.is_occupied(2, 1)
+
+
+def test_is_not_occupied():
+    grid = QuantumGrid.create_empty(3, 3)
+
+    for row in range(3):
+        for column in range(3):
+            assert not grid.is_occupied(row, column)
+
+
 def test_has_node_at():
     grid = QuantumGrid.create_empty(3, 3)
 
