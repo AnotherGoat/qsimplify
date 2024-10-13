@@ -91,9 +91,29 @@ def test_doesnt_have_node_at():
     assert not grid.has_node_at(3, 3)
 
 
-def test_add_gate():
+def test_add_gate_node():
     graph = QuantumGraph()
 
-    graph.add_gate((0, 0), GraphNode("id", draw_position=(0, 2)))
+    graph.add_gate_node((0, 0), GraphNode("id", draw_position=(0, 2)))
 
     assert graph[0, 0] == GraphNode("id", draw_position=(0, 2))
+
+
+def test_graph_width():
+    graph = QuantumGraph()
+
+    graph.add_gate_node((0, 0), GraphNode("x"))
+    assert graph.width == 1
+
+    graph.add_gate_node((0, 5), GraphNode("x"))
+    assert graph.width == 6
+
+
+def test_graph_height():
+    graph = QuantumGraph()
+
+    graph.add_gate_node((0, 0), GraphNode("x"))
+    assert graph.height == 1
+
+    graph.add_gate_node((5, 0), GraphNode("x"))
+    assert graph.height == 6

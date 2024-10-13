@@ -215,14 +215,24 @@ class QuantumGraph(MultiDiGraph):
     Represents a QuantumCircuit as a NetworkX Graph.
     Tuples of the form (row, column) are used to index the graph's nodes.
     """
+    @property
+    def width(self) -> int:
+        return max(position[1] for position in self.nodes) + 1
 
-    def add_gate(self, position: tuple[int, int], node: GraphNode):
+    @property
+    def height(self) -> int:
+        return max(position[0] for position in self.nodes) + 1
+
+    def add_gate_node(self, position: tuple[int, int], node: GraphNode):
         self.add_node(position, **node.to_dict())
 
     def __getitem__(self, position: tuple[int, int]) -> GraphNode:
         """Get the node at the specified (row, column) position."""
         node = self.nodes[position]
         return GraphNode(node["name"], node["draw_position"])
+
+    def get_gate_nodes(self) -> list[GraphNode]:
+        return [GraphNode(node[1]["name"], node[1]["draw_position"]) for node in self.nodes(data=True)]
 
     def find_edges(self, row: int, column: int) -> EdgeData:
         position = (row, column)

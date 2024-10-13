@@ -108,7 +108,7 @@ class Converter:
             for column_index in range(grid.width):
                 grid_node = grid[row_index, column_index]
                 node_position = (row_index, column_index)
-                graph.add_gate(node_position, GraphNode(grid_node.name, (column_index, grid.height - row_index - 1)))
+                graph.add_gate_node(node_position, GraphNode(grid_node.name, (column_index, grid.height - row_index - 1)))
 
 
     @staticmethod
