@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 from typing_extensions import NamedTuple
 
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode, Position
 from quantum_circuit_simplifier.utils import get_qubit_indexes, setup_logger
 
 class PlacingData(NamedTuple):
@@ -102,17 +102,17 @@ class Converter:
         for control_qubit in control_qubits:
             grid[control_qubit, column] = GridNode(gate_name, targets=[target_qubit])
 
-
-    def _add_gate_nodes(self, grid: QuantumGrid, graph: QuantumGraph):
+    @staticmethod
+    def _add_gate_nodes(grid: QuantumGrid, graph: QuantumGraph):
         for row_index in range(grid.height):
             for column_index in range(grid.width):
                 grid_node = grid[row_index, column_index]
                 node_position = (row_index, column_index)
-                graph.add_gate_node(node_position, GraphNode(grid_node.name, (column_index, grid.height - row_index - 1)))
+                graph.add_gate_node(node_position, GraphNode(grid_node.name, node_position))
 
 
     @staticmethod
-    def _find_adjacent_positions(column_index, row_index) -> dict[str, tuple[int, int]]:
+    def _find_adjacent_positions(column_index, row_index) -> dict[str, Position]:
         return {
             "up": (row_index - 1, column_index),
             "down": (row_index + 1, column_index),
@@ -130,10 +130,10 @@ class Converter:
                 for direction, (adjacent_row, adjacent_column) in adjacent_positions.items():
                     if grid.has_node_at(adjacent_row, adjacent_column):
                         adjacent_position = (adjacent_row, adjacent_column)
-                        graph.add_edge(node_position, adjacent_position, name=direction)
+                        graph.add_edge(direction, node_position, adjacent_position)
 
-
-    def _add_connection_edges(self, grid: QuantumGrid, graph: QuantumGraph):
+    @staticmethod
+    def _add_connection_edges(grid: QuantumGrid, graph: QuantumGraph):
         for row_index in range(grid.height):
             for column_index in range(grid.width):
                 grid_node = grid[row_index, column_index]
@@ -145,11 +145,11 @@ class Converter:
 
                 for target in grid_node.targets:
                     target_position = (target, column_index)
-                    graph.add_edge(node_position, target_position, name="target")
+                    graph.add_edge("targets", node_position, target_position)
 
                 for controller in grid_node.controlled_by:
                     controller_position = (controller, column_index)
-                    graph.add_edge(node_position, controller_position, name="controlled_by")
+                    graph.add_edge("controlled_by", node_position, controller_position)
 
 
     def circuit_to_graph(self, circuit: QuantumCircuit) -> QuantumGraph:

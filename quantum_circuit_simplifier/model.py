@@ -1,8 +1,8 @@
 from __future__ import annotations
-from dataclasses import dataclass, asdict
-from typing import TypeAlias, List, Any
+from dataclasses import dataclass
+from typing import TypeAlias, List, Any, Tuple
 from networkx.classes import MultiDiGraph
-
+import textwrap
 
 class GridNode:
     """
@@ -10,8 +10,8 @@ class GridNode:
 
     Attributes:
         name (str): The name of quantum gate represented by this node.
-        targets (list[int]): A list of target node indices that this .
-        controlled_by (list[int]): A list of node indices that control this node.
+        targets (list[int]): A list of target node rows.
+        controlled_by (list[int]): A list of node rows that control this node.
     """
 
     def __init__(self, name: str, targets: list[int] = None, controlled_by: list[int] = None):
@@ -40,6 +40,9 @@ class GridNode:
 
 GridData: TypeAlias = List[List[GridNode]]
 """Represents a 2D list of GridNodes, which is commonly used by a QuantumGrid to hold its data."""
+
+Position: TypeAlias = Tuple[int, int]
+"""Represents a (row, column) position in a QuantumGrid."""
 
 class QuantumGrid:
     """
@@ -119,14 +122,14 @@ class QuantumGrid:
         """Check whether the grid has a node at the specified row and column."""
         return 0 <= row < self.height and 0 <= column < self.width
 
-    def __getitem__(self, index: tuple[int, int]) -> GridNode:
+    def __getitem__(self, position: Position) -> GridNode:
         """Get the node at the specified (row, column) position."""
-        row, column = index
+        row, column = position
         return self._data[row][column]
 
-    def __setitem__(self, index: tuple[int, int], value: GridNode):
+    def __setitem__(self, position: Position, value: GridNode):
         """Set the node at the specified (row, column) position."""
-        row, column = index
+        row, column = position
         self._data[row][column] = value
 
     def __iter__(self):
@@ -151,25 +154,32 @@ class QuantumGrid:
 
 
 class GraphNode:
-    name: str
-    draw_position: tuple[int, int] | None
-
-    def __init__(self, name: str, draw_position: tuple[int, int] | None = None):
+    def __init__(self, name: str, position: Position | None = None):
         self.name = name
-        self.draw_position = draw_position
+        self.position = position
 
     def to_dict(self) -> dict[str, Any]:
         """Return a dictionary representation of this class' attributes."""
-        return {"name": self.name, "draw_position": self.draw_position}
+        return {"name": self.name, "position": self.position}
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, GraphNode):
             return NotImplemented
 
-        return self.name == other.name and self.draw_position == other.draw_position
+        return self.name == other.name and self.position == other.position
 
     def __str__(self):
-        return self.name
+        return f"{self.name} at {self.position}"
+
+
+class GraphEdge:
+    def __init__(self, name: str, start: GraphNode, end: GraphNode):
+        self.name = name
+        self.start = start
+        self.end = end
+
+    def __str__(self):
+        return f"[{self.name}] from {self.start} to {self.end}"
 
 
 class EdgeData:
@@ -210,34 +220,46 @@ class EdgeData:
         return f"{self.origin}({', '.join(extra_data)})"
 
 
-class QuantumGraph(MultiDiGraph):
+class QuantumGraph:
     """
     Represents a QuantumCircuit as a NetworkX Graph.
     Tuples of the form (row, column) are used to index the graph's nodes.
     """
+    def __init__(self):
+        self.network = MultiDiGraph()
+
     @property
     def width(self) -> int:
-        return max(position[1] for position in self.nodes) + 1
+        return max(position[1] for position in self.get_positions()) + 1
 
     @property
     def height(self) -> int:
-        return max(position[0] for position in self.nodes) + 1
+        return max(position[0] for position in self.get_positions()) + 1
 
-    def add_gate_node(self, position: tuple[int, int], node: GraphNode):
-        self.add_node(position, **node.to_dict())
+    def get_positions(self) -> list[Position]:
+        return [position for position in self.network.nodes]
 
-    def __getitem__(self, position: tuple[int, int]) -> GraphNode:
+    def add_gate_node(self, position: Position, node: GraphNode):
+        self.network.add_node(position, **node.to_dict())
+
+    def __getitem__(self, position: Position) -> GraphNode:
         """Get the node at the specified (row, column) position."""
-        node = self.nodes[position]
-        return GraphNode(node["name"], node["draw_position"])
+        node = self.network.nodes[position]
+        return GraphNode(node["name"], node["position"])
 
     def get_gate_nodes(self) -> list[GraphNode]:
-        return [GraphNode(node[1]["name"], node[1]["draw_position"]) for node in self.nodes(data=True)]
+        return [GraphNode(node[1]["name"], node[1]["position"]) for node in self.network.nodes(data=True)]
+
+    def add_edge(self, name: str, start: Position, end: Position):
+        self.network.add_edge(start, end, name=name)
+
+    def get_edges(self) -> list[GraphEdge]:
+        return [GraphEdge(data["name"], self[start], self[end]) for start, end, data in self.network.edges(data=True)]
 
     def find_edges(self, row: int, column: int) -> EdgeData:
         position = (row, column)
         origin = self[position]
-        edges = self.out_edges(position, data=True)
+        edges = self.network.out_edges(position, data=True)
         edge_data = {
             "targets": [],
             "controlled_by": []
@@ -247,7 +269,7 @@ class QuantumGraph(MultiDiGraph):
             edge_name = data["name"]
             destination_node = self[destination]
 
-            if edge_name == "target":
+            if edge_name == "targets":
                 edge_data["targets"].append(destination_node)
             elif edge_name == "controlled_by":
                 edge_data["controlled_by"].append(destination_node)
@@ -256,6 +278,12 @@ class QuantumGraph(MultiDiGraph):
 
         return EdgeData(origin, **edge_data)
 
+    def __str__(self):
+        result = ["Nodes:"]
+        result += [str(node) for node in self.get_gate_nodes()]
+        result += ["\nEdges:"]
+        result += [str(edge) for edge in self.get_edges()]
+        return "\n".join(result)
 
 @dataclass
 class QuantumMetrics:
@@ -306,3 +334,32 @@ class QuantumMetrics:
     gate_count: int = -1
     controlled_gate_count: int = -1
     single_gate_rate: float = -1.0
+
+    def __str__(self):
+        return textwrap.dedent(
+            f"""
+            Circuit Size:
+            - Width: {self.width}
+            - Depth: {self.depth}
+        
+            Circuit Density:
+            - Max Density: {self.max_density}
+            - Average Density: {self.average_density:.2f}
+        
+            Single-Qubit Gates:
+            - Pauli-X Count: {self.pauli_x_count}
+            - Pauli-Y Count: {self.pauli_y_count}
+            - Pauli-Z Count: {self.pauli_z_count}
+            - Total Pauli Count: {self.pauli_count}
+            - Hadamard Count: {self.hadamard_count}
+            - Initial Superposition Rate: {self.initial_superposition_rate:.2f}
+            - Other Single-Qubit Gates Count: {self.other_single_gates_count}
+            - Total Single-Qubit Gates: {self.single_gate_count}
+            - Controlled Single-Qubit Gates: {self.controlled_single_qubit_count}
+        
+            All Gates in the Circuit:
+            - Total Gate Count: {self.gate_count}
+            - Controlled Gate Count: {self.controlled_gate_count}
+            - Single Gate Rate: {self.single_gate_rate:.2f}
+            """
+        ).strip()

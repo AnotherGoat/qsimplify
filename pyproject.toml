@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 qiskit = "^1.2.4"
-networkx = "^3.3"
+networkx = "^3.4"
 pytest = "^8.3.3"
 matplotlib = {extras = ["collections"], version = "^3.9.2"}
 

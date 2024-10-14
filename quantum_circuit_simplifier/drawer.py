@@ -2,11 +2,28 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.model import QuantumGraph, QuantumMetrics
+from quantum_circuit_simplifier.model import QuantumGraph, Position, GraphNode
 from quantum_circuit_simplifier.utils import setup_logger
 
+class EdgeType:
+    def __init__(self, name: str, color: str, angle: float):
+        self.name = name
+        self.color = color
+        self.angle = angle
 
 class Drawer:
+    _NODE_COLOR = "lightgray"
+    _NODE_SIZE = 5000
+    _LINE_WIDTH = 2
+    _EDGE_TYPES = [
+        EdgeType("up", "red", 0.15),
+        EdgeType("down", "blue", 0.15),
+        EdgeType("right", "green", 0.15),
+        EdgeType("left", "orange", 0.15),
+        EdgeType("targets", "purple", 0.3),
+        EdgeType("controlled_by", "lightgreen", 0.3),
+    ]
+
     def __init__(self):
         self.logger = setup_logger("Drawer")
 
@@ -20,49 +37,44 @@ class Drawer:
 
     def save_graph(self, graph: QuantumGraph, file_name: str):
         self.logger.info("Saving graph to file %s", file_name)
-
         plt.clf()
-        plt.figure(figsize=(2.75 * graph.width, 2 * graph.height))
+        plt.figure(figsize=(3 * graph.width, 2.5 * graph.height))
 
-        positions = {node[0]: node[1]["draw_position"] for node in graph.nodes(data=True)}
-        nx.draw_networkx_nodes(graph, pos=positions, node_size=2500, node_color="lightgray")
+        self._draw_nodes(graph)
 
-        labels = {node[0]: node[1]["name"] for node in graph.nodes(data=True)}
-        nx.draw_networkx_labels(graph, pos=positions, labels=labels)
+        for edge_type in self._EDGE_TYPES:
+            self._draw_edges(edge_type, graph)
 
-        up_edges = [(u, v) for u, v, d in graph.edges(data=True) if d["name"] == "up"]
-        nx.draw_networkx_edges(graph, positions, edgelist=up_edges, node_size=2500, edge_color="red", width=2,
-                               connectionstyle="arc3,rad=0.15")
+        self._draw_legend()
 
-        down_edges = [(u, v) for u, v, d in graph.edges(data=True) if d["name"] == "down"]
-        nx.draw_networkx_edges(graph, positions, edgelist=down_edges, node_size=2500, edge_color="blue", width=2,
-                               connectionstyle="arc3,rad=0.15")
-
-        right_edges = [(u, v) for u, v, d in graph.edges(data=True) if d["name"] == "right"]
-        nx.draw_networkx_edges(graph, positions, edgelist=right_edges, node_size=2500, edge_color="green", width=2,
-                               connectionstyle="arc3,rad=0.15")
-
-        left_edges = [(u, v) for u, v, d in graph.edges(data=True) if d["name"] == "left"]
-        nx.draw_networkx_edges(graph, positions, edgelist=left_edges, node_size=2500, edge_color="orange", width=2,
-                               connectionstyle="arc3,rad=0.15")
-
-        target_edges = [(u, v) for u, v, d in graph.edges(data=True) if d["name"] == "target"]
-        nx.draw_networkx_edges(graph, positions, edgelist=target_edges, node_size=2500, edge_color="purple", width=2,
-                               connectionstyle="arc3,rad=0.3")
-
-        target_edges = [(u, v) for u, v, d in graph.edges(data=True) if d["name"] == "controlled_by"]
-        nx.draw_networkx_edges(graph, positions, edgelist=target_edges, node_size=2500, edge_color="lightgreen",
-                               width=2, connectionstyle="arc3,rad=0.3")
-
-        legend_handles = [
-            plt.Line2D([0], [0], color="red", lw=2, label="Up"),
-            plt.Line2D([0], [0], color="blue", lw=2, label="Down"),
-            plt.Line2D([0], [0], color="green", lw=2, label="Right"),
-            plt.Line2D([0], [0], color="orange", lw=2, label="Left"),
-            plt.Line2D([0], [0], color="purple", lw=2, label="Target"),
-            plt.Line2D([0], [0], color="lightgreen", lw=2, label="Controlled by"),
-        ]
-
-        plt.legend(handles=legend_handles, loc="upper left")
         plt.tight_layout()
         plt.savefig(file_name)
+
+    def _draw_nodes(self, graph: QuantumGraph):
+        draw_positions = self._find_draw_positions(graph)
+
+        nx.draw_networkx_nodes(graph.network, pos=draw_positions, node_size=self._NODE_SIZE, node_color=self._NODE_COLOR)
+
+        labels = {node.position: str(node) for node in graph.get_gate_nodes()}
+        nx.draw_networkx_labels(graph.network, pos=draw_positions, labels=labels)
+
+
+    @staticmethod
+    def _find_draw_positions(graph) -> dict[Position, Position]:
+        return {position: (position[1], graph.height - position[0] - 1) for position in graph.get_positions()}
+
+
+    def _draw_edges(self, edge_type: EdgeType, graph: QuantumGraph):
+        draw_positions = self._find_draw_positions(graph)
+
+        edges = [(edge.start.position, edge.end.position) for edge in graph.get_edges() if edge.name == edge_type.name]
+        nx.draw_networkx_edges(graph.network, draw_positions, edgelist=edges, node_size=self._NODE_SIZE, edge_color=edge_type.color,
+                               width=self._LINE_WIDTH, connectionstyle=f"arc3,rad={edge_type.angle}")
+
+    def _draw_legend(self):
+        legend_handles = [self._create_legend_handle(edge_type) for edge_type in self._EDGE_TYPES]
+        plt.legend(handles=legend_handles, loc="upper left")
+
+
+    def _create_legend_handle(self, edge_type: EdgeType) -> plt.Line2D:
+        return plt.Line2D([0], [0], color=edge_type.color, lw=self._LINE_WIDTH, label=edge_type.name)

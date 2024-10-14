@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 
 from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid, GraphNode
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid
 
 converter = Converter()
 
