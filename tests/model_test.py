@@ -1,4 +1,4 @@
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode, EdgeName
 
 
 def test_create_node():
@@ -91,29 +91,65 @@ def test_doesnt_have_node_at():
     assert not grid.has_node_at(3, 3)
 
 
-def test_add_gate_node():
+def test_add_node():
     graph = QuantumGraph()
 
-    graph.add_gate_node((0, 0), GraphNode("id", position=(0, 2)))
+    graph.add_node(GraphNode("id", (0, 0)))
 
-    assert graph[0, 0] == GraphNode("id", position=(0, 2))
+    assert graph[0, 0] == GraphNode("id", (0, 0))
 
 
 def test_graph_width():
     graph = QuantumGraph()
 
-    graph.add_gate_node((0, 0), GraphNode("x"))
+    graph.add_node(GraphNode("x", (0, 0)))
     assert graph.width == 1
 
-    graph.add_gate_node((0, 5), GraphNode("x"))
+    graph.add_node(GraphNode("x", (0, 5)))
     assert graph.width == 6
 
 
 def test_graph_height():
     graph = QuantumGraph()
 
-    graph.add_gate_node((0, 0), GraphNode("x"))
+    graph.add_node(GraphNode("x", (0, 0)))
     assert graph.height == 1
 
-    graph.add_gate_node((5, 0), GraphNode("x"))
+    graph.add_node(GraphNode("x", (5, 0)))
     assert graph.height == 6
+
+
+def test_graph_equals():
+    graph1 = QuantumGraph()
+
+    graph1.add_node(GraphNode("x", (0, 0)))
+    graph1.add_node(GraphNode("x", (0, 1)))
+    graph1.add_edge(EdgeName.RIGHT, (0, 0), (0, 1))
+    graph1.add_edge(EdgeName.LEFT, (0, 1), (0, 0))
+
+    graph2 = QuantumGraph()
+
+    graph2.add_node(GraphNode("x", (0, 0)))
+    graph2.add_node(GraphNode("x", (0, 1)))
+    graph2.add_edge(EdgeName.RIGHT, (0, 0), (0, 1))
+    graph2.add_edge(EdgeName.LEFT, (0, 1), (0, 0))
+
+    assert graph1 == graph2
+
+
+def test_graph_not_equals():
+    graph1 = QuantumGraph()
+
+    graph1.add_node(GraphNode("x", (0, 0)))
+    graph1.add_node(GraphNode("x", (0, 1)))
+    graph1.add_edge(EdgeName.RIGHT, (0, 0), (0, 1))
+    graph1.add_edge(EdgeName.LEFT, (0, 1), (0, 0))
+
+    graph2 = QuantumGraph()
+
+    graph2.add_node(GraphNode("x", (0, 0)))
+    graph2.add_node(GraphNode("y", (0, 1)))
+    graph2.add_edge(EdgeName.LEFT, (0, 0), (0, 1))
+    graph2.add_edge(EdgeName.RIGHT, (0, 1), (0, 0))
+
+    assert graph1 != graph2

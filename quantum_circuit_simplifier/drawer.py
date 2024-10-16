@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.model import QuantumGraph, Position
+from quantum_circuit_simplifier.model import QuantumGraph, Position, EdgeName
 from quantum_circuit_simplifier.utils import setup_logger
 
 class EdgeType:
-    def __init__(self, name: str, color: str, angle: float):
+    def __init__(self, name: EdgeName, color: str, angle: float):
         self.name = name
         self.color = color
         self.angle = angle
@@ -16,12 +16,12 @@ class Drawer:
     _NODE_SIZE = 5000
     _LINE_WIDTH = 2
     _EDGE_TYPES = [
-        EdgeType("up", "red", 0.15),
-        EdgeType("down", "blue", 0.15),
-        EdgeType("right", "green", 0.15),
-        EdgeType("left", "orange", 0.15),
-        EdgeType("targets", "purple", 0.3),
-        EdgeType("controlled_by", "lightgreen", 0.3),
+        EdgeType(EdgeName.UP, "red", 0.15),
+        EdgeType(EdgeName.DOWN, "blue", 0.15),
+        EdgeType(EdgeName.RIGHT, "green", 0.15),
+        EdgeType(EdgeName.LEFT, "orange", 0.15),
+        EdgeType(EdgeName.TARGETS, "purple", 0.3),
+        EdgeType(EdgeName.CONTROLLED_BY, "lightgreen", 0.3),
     ]
 
     def __init__(self):
@@ -56,7 +56,7 @@ class Drawer:
 
         nx.draw_networkx_nodes(graph.network, pos=draw_positions, node_size=self._NODE_SIZE, node_color=self._NODE_COLOR)
 
-        labels = {node.position: str(node) for node in graph.get_gate_nodes()}
+        labels = {node.position: str(node) for node in graph.get_nodes()}
         nx.draw_networkx_labels(graph.network, pos=draw_positions, labels=labels)
 
 
@@ -78,4 +78,4 @@ class Drawer:
 
 
     def _create_legend_handle(self, edge_type: EdgeType) -> plt.Line2D:
-        return plt.Line2D([0], [0], color=edge_type.color, lw=self._LINE_WIDTH, label=edge_type.name)
+        return plt.Line2D([0], [0], color=edge_type.color, lw=self._LINE_WIDTH, label=edge_type.name.value)

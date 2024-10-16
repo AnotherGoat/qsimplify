@@ -4,11 +4,31 @@ from qiskit import QuantumCircuit
 
 from quantum_circuit_simplifier.analyzer import analyze
 from quantum_circuit_simplifier.drawer import Drawer
+from quantum_circuit_simplifier.simplifier import Simplifier
 from quantum_circuit_simplifier.utils import set_debug_mode
 from quantum_circuit_simplifier.converter import Converter
 
 
 def _main():
+    circuit = QuantumCircuit(1)
+
+    circuit.h(0)
+    circuit.h(0)
+    circuit.h(0)
+
+    converter = Converter()
+    graph = converter.circuit_to_graph(circuit)
+
+    print(graph)
+
+    simplifier = Simplifier(converter)
+    simplified_circuit = converter.graph_to_circuit(simplifier.simplify_graph(graph))
+
+    print(circuit.draw())
+    print(simplified_circuit.draw())
+
+
+def _demo():
     circuit = QuantumCircuit(2)
 
     circuit.h(0)
@@ -49,4 +69,4 @@ def _parse_debug_options():
 
 if __name__ == "__main__":
     _parse_debug_options()
-    _main()
+    _demo()

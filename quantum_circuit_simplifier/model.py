@@ -1,6 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import TypeAlias, List, Any, Tuple
+from enum import Enum
+from typing import TypeAlias, List, Any, Tuple, Iterator
+
+import networkx
 from networkx.classes import MultiDiGraph
 import textwrap
 
@@ -154,7 +157,7 @@ class QuantumGrid:
 
 
 class GraphNode:
-    def __init__(self, name: str, position: Position | None = None):
+    def __init__(self, name: str, position: Position):
         self.name = name
         self.position = position
 
@@ -172,14 +175,23 @@ class GraphNode:
         return f"{self.name} at {self.position}"
 
 
+class EdgeName(Enum):
+    UP = "up"
+    DOWN = "down"
+    RIGHT = "right"
+    LEFT = "left"
+    TARGETS = "targets"
+    CONTROLLED_BY = "controlled_by"
+
+
 class GraphEdge:
-    def __init__(self, name: str, start: GraphNode, end: GraphNode):
+    def __init__(self, name: EdgeName, start: GraphNode, end: GraphNode):
         self.name = name
         self.start = start
         self.end = end
 
     def __str__(self):
-        return f"[{self.name}] from {self.start} to {self.end}"
+        return f"[{self.name.value}] from {self.start} to {self.end}"
 
 
 class EdgeData:
@@ -236,21 +248,22 @@ class QuantumGraph:
     def height(self) -> int:
         return max(position[0] for position in self.get_positions()) + 1
 
-    def get_positions(self) -> list[Position]:
-        return [position for position in self.network.nodes]
+    def get_positions(self) -> Iterator[Position]:
+        for position in self.network.nodes:
+            yield position
 
-    def add_gate_node(self, position: Position, node: GraphNode):
-        self.network.add_node(position, **node.to_dict())
+    def add_node(self, node: GraphNode):
+        self.network.add_node(node.position, **node.to_dict())
 
     def __getitem__(self, position: Position) -> GraphNode:
         """Get the node at the specified (row, column) position."""
         node = self.network.nodes[position]
         return GraphNode(node["name"], node["position"])
 
-    def get_gate_nodes(self) -> list[GraphNode]:
+    def get_nodes(self) -> list[GraphNode]:
         return [GraphNode(node[1]["name"], node[1]["position"]) for node in self.network.nodes(data=True)]
 
-    def add_edge(self, name: str, start: Position, end: Position):
+    def add_edge(self, name: EdgeName, start: Position, end: Position):
         self.network.add_edge(start, end, name=name)
 
     def get_edges(self) -> list[GraphEdge]:
@@ -269,21 +282,28 @@ class QuantumGraph:
             edge_name = data["name"]
             destination_node = self[destination]
 
-            if edge_name == "targets":
+            if edge_name == EdgeName.TARGETS:
                 edge_data["targets"].append(destination_node)
-            elif edge_name == "controlled_by":
+            elif edge_name == EdgeName.CONTROLLED_BY:
                 edge_data["controlled_by"].append(destination_node)
             else:
-                edge_data[edge_name] = destination_node
+                edge_data[edge_name.value] = destination_node
 
         return EdgeData(origin, **edge_data)
 
     def __str__(self):
         result = ["Nodes:"]
-        result += [str(node) for node in self.get_gate_nodes()]
+        result += [str(node) for node in self.get_nodes()]
         result += ["\nEdges:"]
         result += [str(edge) for edge in self.get_edges()]
         return "\n".join(result)
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, QuantumGraph):
+            return NotImplemented
+
+        return networkx.utils.graphs_equal(self.network, other.network)
+
 
 @dataclass
 class QuantumMetrics:

@@ -243,7 +243,6 @@ def test_control_edges():
     ccx_edges_2 = graph.find_edges(2, 2)
     assert ccx_edges_2.targets[0].name == "ccx"
     assert ccx_edges_2.controlled_by == []
-
     cswap_edges_0 = graph.find_edges(0, 3)
     assert cswap_edges_0.targets[0].name == "cswap"
     assert cswap_edges_0.targets[1].name == "cswap"
@@ -293,9 +292,5 @@ def test_two_qubits_graph_to_circuit():
 
     original_data = circuit.data
     converted_data = converted_circuit.data
-
-    print("\n")
-    print(circuit.draw())
-    print(converted_circuit.draw())
 
     assert original_data == converted_data
