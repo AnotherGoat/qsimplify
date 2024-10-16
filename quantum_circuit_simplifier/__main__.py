@@ -23,7 +23,7 @@ def _main():
     print("\n===== Circuit grid =====")
     print(grid)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.grid_to_graph(grid)
     print("\n===== Circuit graph =====")
     print(graph)
 
@@ -31,9 +31,13 @@ def _main():
     print("\n===== Circuit metrics =====")
     print(metrics)
 
+    converted_circuit = converter.graph_to_circuit(graph)
+    print("\n===== Converted circuit =====")
+    print(converted_circuit.draw())
+
     drawer = Drawer()
     drawer.save_circuit(circuit, "circuit_diagram.png")
-    drawer.save_graph(graph, "circuit_graph.png")
+    drawer.save_graph(graph, "circuit_graph.png", draw_legend=False)
 
 
 def _parse_debug_options():

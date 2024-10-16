@@ -254,3 +254,48 @@ def test_control_edges():
     cswap_edges_2 = graph.find_edges(2, 3)
     assert cswap_edges_2.targets == []
     assert cswap_edges_2.controlled_by[0].name == "cswap"
+
+
+def test_one_qubit_graph_to_circuit():
+    circuit = QuantumCircuit(1)
+
+    circuit.h(0)
+    circuit.x(0)
+    circuit.y(0)
+    circuit.z(0)
+    circuit.x(0)
+    circuit.z(0)
+    circuit.h(0)
+    circuit.y(0)
+
+    graph = converter.circuit_to_graph(circuit)
+    converted_circuit = converter.graph_to_circuit(graph)
+
+    original_data = circuit.data
+    converted_data = converted_circuit.data
+
+    assert original_data == converted_data
+
+
+def test_two_qubits_graph_to_circuit():
+    circuit = QuantumCircuit(2)
+
+    circuit.h(0)
+    circuit.x(1)
+    circuit.cx(0, 1)
+    circuit.ch(1, 0)
+    circuit.cz(0, 1)
+    circuit.y(0)
+    circuit.z(1)
+
+    graph = converter.circuit_to_graph(circuit)
+    converted_circuit = converter.graph_to_circuit(graph)
+
+    original_data = circuit.data
+    converted_data = converted_circuit.data
+
+    print("\n")
+    print(circuit.draw())
+    print(converted_circuit.draw())
+
+    assert original_data == converted_data

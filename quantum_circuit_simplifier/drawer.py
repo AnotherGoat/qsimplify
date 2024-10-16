@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.model import QuantumGraph, Position, GraphNode
+from quantum_circuit_simplifier.model import QuantumGraph, Position
 from quantum_circuit_simplifier.utils import setup_logger
 
 class EdgeType:
@@ -35,7 +35,7 @@ class Drawer:
         figure.savefig(file_name)
 
 
-    def save_graph(self, graph: QuantumGraph, file_name: str):
+    def save_graph(self, graph: QuantumGraph, file_name: str, draw_legend: bool = True):
         self.logger.info("Saving graph to file %s", file_name)
         plt.clf()
         plt.figure(figsize=(3 * graph.width, 2.5 * graph.height))
@@ -45,7 +45,8 @@ class Drawer:
         for edge_type in self._EDGE_TYPES:
             self._draw_edges(edge_type, graph)
 
-        self._draw_legend()
+        if draw_legend:
+            self._draw_legend()
 
         plt.tight_layout()
         plt.savefig(file_name)

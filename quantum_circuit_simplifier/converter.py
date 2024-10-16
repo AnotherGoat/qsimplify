@@ -1,3 +1,4 @@
+from typing import Callable
 from qiskit import QuantumCircuit
 from typing_extensions import NamedTuple
 
@@ -102,6 +103,13 @@ class Converter:
         for control_qubit in control_qubits:
             grid[control_qubit, column] = GridNode(gate_name, targets=[target_qubit])
 
+    def grid_to_graph(self, grid: QuantumGrid) -> QuantumGraph:
+        graph = QuantumGraph()
+        self._add_gate_nodes(grid, graph)
+        self._add_positional_edges(grid, graph)
+        self._add_connection_edges(grid, graph)
+        return graph
+
     @staticmethod
     def _add_gate_nodes(grid: QuantumGrid, graph: QuantumGraph):
         for row_index in range(grid.height):
@@ -109,17 +117,6 @@ class Converter:
                 grid_node = grid[row_index, column_index]
                 node_position = (row_index, column_index)
                 graph.add_gate_node(node_position, GraphNode(grid_node.name, node_position))
-
-
-    @staticmethod
-    def _find_adjacent_positions(column_index, row_index) -> dict[str, Position]:
-        return {
-            "up": (row_index - 1, column_index),
-            "down": (row_index + 1, column_index),
-            "left": (row_index, column_index - 1),
-            "right": (row_index, column_index + 1)
-        }
-
 
     def _add_positional_edges(self, grid: QuantumGrid, graph: QuantumGraph):
         for row_index in range(grid.height):
@@ -131,6 +128,15 @@ class Converter:
                     if grid.has_node_at(adjacent_row, adjacent_column):
                         adjacent_position = (adjacent_row, adjacent_column)
                         graph.add_edge(direction, node_position, adjacent_position)
+
+    @staticmethod
+    def _find_adjacent_positions(column_index, row_index) -> dict[str, Position]:
+        return {
+            "up": (row_index - 1, column_index),
+            "down": (row_index + 1, column_index),
+            "left": (row_index, column_index - 1),
+            "right": (row_index, column_index + 1)
+        }
 
     @staticmethod
     def _add_connection_edges(grid: QuantumGrid, graph: QuantumGraph):
@@ -154,12 +160,69 @@ class Converter:
 
     def circuit_to_graph(self, circuit: QuantumCircuit) -> QuantumGraph:
         grid = self.circuit_to_grid(circuit)
-        graph = QuantumGraph()
-        self._add_gate_nodes(grid, graph)
-        self._add_positional_edges(grid, graph)
-        self._add_connection_edges(grid, graph)
-        return graph
+        return self.grid_to_graph(grid)
 
 
     def graph_to_circuit(self, graph: QuantumGraph) -> QuantumCircuit:
-        pass
+        self.logger.debug("Converting graph to circuit")
+        circuit = QuantumCircuit(graph.height)
+        explored: set[Position] = set()
+
+        for column_index in range(graph.width):
+            for row_index in range(graph.height):
+                position = (row_index, column_index)
+
+                if position in explored:
+                    continue
+
+                explored.add(position)
+                graph_node = graph[row_index, column_index]
+
+                if graph_node is None or graph_node.name == "id":
+                    continue
+
+                match graph_node.name:
+                    case "h":
+                        circuit.h(row_index)
+                    case "x":
+                        circuit.x(row_index)
+                    case "y":
+                        circuit.y(row_index)
+                    case "z":
+                        circuit.z(row_index)
+                    case "swap":
+                        explored.add(self._apply_swap_gate(graph, circuit, position))
+                    case "ch":
+                        for explored_position in self._apply_controlled_gate(graph, position, circuit.ch):
+                            explored.add(explored_position)
+                    case "cx":
+                        for explored_position in self._apply_controlled_gate(graph, position, circuit.cx):
+                            explored.add(explored_position)
+                    case "cz":
+                        for explored_position in self._apply_controlled_gate(graph, position, circuit.cz):
+                            explored.add(explored_position)
+
+        return circuit
+
+    @staticmethod
+    def _apply_swap_gate(graph: QuantumGraph, circuit: QuantumCircuit, start: Position) -> Position:
+        edges = graph.find_edges(start[0], start[1])
+        other_position = edges.targets[0].position
+
+        circuit.swap(start[0], other_position[0])
+        return other_position
+
+    @staticmethod
+    def _apply_controlled_gate(graph: QuantumGraph, start: Position, method: Callable) -> list[Position]:
+        edges = graph.find_edges(start[0], start[1])
+        is_controlled = edges.targets == []
+
+        if is_controlled:
+            controlled_by_position = edges.controlled_by[0].position
+            target_position = start
+        else:
+            controlled_by_position = start
+            target_position = edges.targets[0].position
+
+        method(controlled_by_position[0], target_position[0])
+        return [controlled_by_position, target_position]
