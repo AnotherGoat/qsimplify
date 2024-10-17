@@ -1,6 +1,7 @@
 from qiskit import QuantumCircuit
 from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import QuantumMetrics, QuantumGrid
+from quantum_circuit_simplifier.model import QuantumMetrics, QuantumGrid, GateName
+
 
 def _get_operations(circuit: QuantumCircuit) -> list[str]:
     return [instruction.operation.name for instruction in circuit.data]
@@ -19,7 +20,7 @@ def _calculate_superposition_rate(grid: QuantumGrid) -> float:
             if grid_node == QuantumGrid.FILLER:
                 continue
 
-            if grid_node.name == "h":
+            if grid_node.name == GateName.H:
                 superposition_count += 1
 
             break
@@ -43,11 +44,11 @@ def analyze(circuit: QuantumCircuit, converter: Converter) -> QuantumMetrics:
 
     metrics.gate_count = len(circuit.data)
 
-    metrics.pauli_x_count = _count_operations(circuit, "x")
-    metrics.pauli_y_count = _count_operations(circuit, "y")
-    metrics.pauli_z_count = _count_operations(circuit, "z")
+    metrics.pauli_x_count = _count_operations(circuit, GateName.X.value)
+    metrics.pauli_y_count = _count_operations(circuit, GateName.Y.value)
+    metrics.pauli_z_count = _count_operations(circuit, GateName.Z.value)
     metrics.pauli_count = metrics.pauli_x_count + metrics.pauli_y_count + metrics.pauli_z_count
-    metrics.hadamard_count = _count_operations(circuit, "h")
+    metrics.hadamard_count = _count_operations(circuit, GateName.H.value)
     metrics.initial_superposition_rate = _calculate_superposition_rate(grid)
     metrics.single_gate_count = _count_single_qubit_gates(circuit)
     metrics.other_single_gates_count = metrics.single_gate_count - metrics.pauli_count - metrics.hadamard_count

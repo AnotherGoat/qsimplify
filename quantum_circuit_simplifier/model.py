@@ -7,17 +7,38 @@ import networkx
 from networkx.classes import MultiDiGraph
 import textwrap
 
+class GateName(Enum):
+    ID = "id"
+    H = "h"
+    X = "x"
+    Y = "y"
+    Z = "z"
+    SWAP = "swap"
+    CH = "ch"
+    CX = "cx"
+    CZ = "cz"
+    CSWAP = "cswap"
+    CCX = "ccx"
+
+    @classmethod
+    def from_str(cls, name: str):
+        try:
+            return cls(name.lower())
+        except ValueError:
+            raise ValueError(f"'{name}' is not a valid GateName")
+
+
 class GridNode:
     """
     Represents a node of a QuantumGrid.
 
     Attributes:
-        name (str): The name of quantum gate represented by this node.
+        name (GateName): The name of quantum gate represented by this node.
         targets (list[int]): A list of target node rows.
         controlled_by (list[int]): A list of node rows that control this node.
     """
 
-    def __init__(self, name: str, targets: list[int] = None, controlled_by: list[int] = None):
+    def __init__(self, name: GateName, targets: list[int] = None, controlled_by: list[int] = None):
         self.name = name
         self.targets: list[int] = [] if targets is None else targets
         self.controlled_by: list[int] = [] if controlled_by is None else controlled_by
@@ -36,9 +57,9 @@ class GridNode:
         extra_data = [data for data in extra_data if data]
 
         if len(extra_data) == 0:
-            return self.name
+            return self.name.value
 
-        return f"{self.name}({', '.join(extra_data)})"
+        return f"{self.name.value}({', '.join(extra_data)})"
 
 
 GridData: TypeAlias = List[List[GridNode]]
@@ -60,7 +81,7 @@ class QuantumGrid:
         width (int): The number of columns in the grid.
         height (int): The number of rows (qubits) in the grid.
     """
-    FILLER = GridNode("id")
+    FILLER = GridNode(GateName.ID)
     width: int
     height: int
     _data: GridData
@@ -157,7 +178,10 @@ class QuantumGrid:
 
 
 class GraphNode:
-    def __init__(self, name: str, position: Position):
+    def __init__(self, name: GateName, position: Position):
+        if position[0] < 0 or position[1] < 0:
+            raise ValueError(f"GateNode position '{position}' can't have negative values")
+
         self.name = name
         self.position = position
 
@@ -172,7 +196,7 @@ class GraphNode:
         return self.name == other.name and self.position == other.position
 
     def __str__(self):
-        return f"{self.name} at {self.position}"
+        return f"{self.name.value} at {self.position}"
 
 
 class EdgeName(Enum):

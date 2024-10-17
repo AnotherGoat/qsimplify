@@ -1,58 +1,67 @@
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode, EdgeName
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode, EdgeName, GateName
 
+ID = GateName.ID
+H = GateName.H
+X = GateName.X
+Y = GateName.Y
+Z = GateName.Z
+CX = GateName.CX
 
-def test_create_node():
-    node = GridNode("a")
+class TestGridNode:
+    @staticmethod
+    def test_create_node():
+        node = GridNode(Y)
 
-    assert node.name == "a"
-    assert node.targets == []
-    assert node.controlled_by == []
+        assert node.name == Y
+        assert node.targets == []
+        assert node.controlled_by == []
 
+    @staticmethod
+    def test_create_cx():
+        control_node = GridNode(CX, targets=[1])
+        target_node = GridNode(CX, controlled_by=[0])
 
-def test_create_cx():
-    control_node = GridNode("cx", targets=[1])
-    target_node = GridNode("cx", controlled_by=[0])
+        assert control_node.name == CX
+        assert control_node.targets == [1]
+        assert control_node.controlled_by == []
+        assert target_node.name == CX
+        assert target_node.targets == []
+        assert target_node.controlled_by == [0]
 
-    assert control_node.name == "cx"
-    assert control_node.targets == [1]
-    assert control_node.controlled_by == []
-    assert target_node.name == "cx"
-    assert target_node.targets == []
-    assert target_node.controlled_by == [0]
+class TestQuantumGrid:
+    @staticmethod
+    def test_create_empty_grid():
+        grid = QuantumGrid.create_empty(4, 3)
 
+        for node in grid:
+            assert node == QuantumGrid.FILLER
 
-def test_create_empty_grid():
-    grid = QuantumGrid.create_empty(4, 3)
+        assert grid.width == 4
+        assert grid.height == 3
 
-    for node in grid:
-        assert node == QuantumGrid.FILLER
+    @staticmethod
+    def test_trim_right_side():
+        data = [
+            [GridNode(H), GridNode(X), GridNode(Y), QuantumGrid.FILLER],
+            [GridNode(Z), GridNode(H), GridNode(X), QuantumGrid.FILLER],
+            [GridNode(Y), GridNode(Z), GridNode(H), QuantumGrid.FILLER],
+        ]
+        grid = QuantumGrid(data)
 
-    assert grid.width == 4
-    assert grid.height == 3
+        trimmed_grid = grid.trim_right_side()
 
-
-def test_trim_right_side():
-    data = [
-        [GridNode("h"), GridNode("x"), GridNode("y"), QuantumGrid.FILLER],
-        [GridNode("z"), GridNode("h"), GridNode("x"), QuantumGrid.FILLER],
-        [GridNode("y"), GridNode("z"), GridNode("h"), QuantumGrid.FILLER],
-    ]
-    grid = QuantumGrid(data)
-
-    trimmed_grid = grid.trim_right_side()
-
-    assert trimmed_grid.data == [
-        [GridNode("h"), GridNode("x"), GridNode("y")],
-        [GridNode("z"), GridNode("h"), GridNode("x")],
-        [GridNode("y"), GridNode("z"), GridNode("h")],
-    ]
+        assert trimmed_grid.data == [
+            [GridNode(H), GridNode(X), GridNode(Y)],
+            [GridNode(Z), GridNode(H), GridNode(X)],
+            [GridNode(Y), GridNode(Z), GridNode(H)],
+        ]
 
 
 def test_is_occupied():
     data = [
-        [QuantumGrid.FILLER, GridNode("x"), GridNode("y")],
-        [GridNode("z"), QuantumGrid.FILLER, GridNode("x")],
-        [GridNode("y"), GridNode("z"), QuantumGrid.FILLER],
+        [QuantumGrid.FILLER, GridNode(X), GridNode(Y)],
+        [GridNode(Z), QuantumGrid.FILLER, GridNode(X)],
+        [GridNode(Y), GridNode(Z), QuantumGrid.FILLER],
     ]
     grid = QuantumGrid(data)
 
@@ -94,43 +103,43 @@ def test_doesnt_have_node_at():
 def test_add_node():
     graph = QuantumGraph()
 
-    graph.add_node(GraphNode("id", (0, 0)))
+    graph.add_node(GraphNode(ID, (0, 0)))
 
-    assert graph[0, 0] == GraphNode("id", (0, 0))
+    assert graph[0, 0] == GraphNode(ID, (0, 0))
 
 
 def test_graph_width():
     graph = QuantumGraph()
 
-    graph.add_node(GraphNode("x", (0, 0)))
+    graph.add_node(GraphNode(X, (0, 0)))
     assert graph.width == 1
 
-    graph.add_node(GraphNode("x", (0, 5)))
+    graph.add_node(GraphNode(X, (0, 5)))
     assert graph.width == 6
 
 
 def test_graph_height():
     graph = QuantumGraph()
 
-    graph.add_node(GraphNode("x", (0, 0)))
+    graph.add_node(GraphNode(X, (0, 0)))
     assert graph.height == 1
 
-    graph.add_node(GraphNode("x", (5, 0)))
+    graph.add_node(GraphNode(X, (5, 0)))
     assert graph.height == 6
 
 
 def test_graph_equals():
     graph1 = QuantumGraph()
 
-    graph1.add_node(GraphNode("x", (0, 0)))
-    graph1.add_node(GraphNode("x", (0, 1)))
+    graph1.add_node(GraphNode(X, (0, 0)))
+    graph1.add_node(GraphNode(X, (0, 1)))
     graph1.add_edge(EdgeName.RIGHT, (0, 0), (0, 1))
     graph1.add_edge(EdgeName.LEFT, (0, 1), (0, 0))
 
     graph2 = QuantumGraph()
 
-    graph2.add_node(GraphNode("x", (0, 0)))
-    graph2.add_node(GraphNode("x", (0, 1)))
+    graph2.add_node(GraphNode(X, (0, 0)))
+    graph2.add_node(GraphNode(X, (0, 1)))
     graph2.add_edge(EdgeName.RIGHT, (0, 0), (0, 1))
     graph2.add_edge(EdgeName.LEFT, (0, 1), (0, 0))
 
@@ -140,15 +149,15 @@ def test_graph_equals():
 def test_graph_not_equals():
     graph1 = QuantumGraph()
 
-    graph1.add_node(GraphNode("x", (0, 0)))
-    graph1.add_node(GraphNode("x", (0, 1)))
+    graph1.add_node(GraphNode(X, (0, 0)))
+    graph1.add_node(GraphNode(X, (0, 1)))
     graph1.add_edge(EdgeName.RIGHT, (0, 0), (0, 1))
     graph1.add_edge(EdgeName.LEFT, (0, 1), (0, 0))
 
     graph2 = QuantumGraph()
 
-    graph2.add_node(GraphNode("x", (0, 0)))
-    graph2.add_node(GraphNode("y", (0, 1)))
+    graph2.add_node(GraphNode(X, (0, 0)))
+    graph2.add_node(GraphNode(Y, (0, 1)))
     graph2.add_edge(EdgeName.LEFT, (0, 0), (0, 1))
     graph2.add_edge(EdgeName.RIGHT, (0, 1), (0, 0))
 

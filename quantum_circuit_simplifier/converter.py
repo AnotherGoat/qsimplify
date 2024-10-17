@@ -2,11 +2,12 @@ from typing import Callable
 from qiskit import QuantumCircuit
 from typing_extensions import NamedTuple
 
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode, Position, EdgeName
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid, QuantumGraph, GraphNode, Position, EdgeName, \
+    GateName
 from quantum_circuit_simplifier.utils import get_qubit_indexes, setup_logger
 
 class PlacingData(NamedTuple):
-    gate_name: str
+    gate_name: GateName
     qubits: list[int]
     column: int
 
@@ -24,7 +25,7 @@ class Converter:
             self.logger.debug("This is what the grid looks like now\n%s", grid)
 
             self.logger.debug("Processing instruction %s", instruction)
-            gate_name = instruction.operation.name
+            gate_name = GateName.from_str(instruction.operation.name)
             qubits = get_qubit_indexes(circuit, instruction)
             self.logger.debug("Instruction qubit indexes are %s", qubits)
 
@@ -57,9 +58,9 @@ class Converter:
     def _add_instruction_to_grid(self, grid, data: PlacingData):
         if len(data.qubits) == 1:
             self._place_single_qubit_gate(grid, data)
-        elif data.gate_name == "swap":
+        elif data.gate_name == GateName.SWAP:
             self._place_swap_gate(grid, data)
-        elif data.gate_name == "cswap":
+        elif data.gate_name == GateName.CSWAP:
             self._place_cswap_gate(grid, data)
         else:
             self._place_controlled_gate(grid, data)
@@ -178,27 +179,27 @@ class Converter:
                 explored.add(position)
                 graph_node = graph[row_index, column_index]
 
-                if graph_node is None or graph_node.name == "id":
+                if graph_node is None or graph_node.name == GateName.ID:
                     continue
 
                 match graph_node.name:
-                    case "h":
+                    case GateName.H:
                         circuit.h(row_index)
-                    case "x":
+                    case GateName.X:
                         circuit.x(row_index)
-                    case "y":
+                    case GateName.Y:
                         circuit.y(row_index)
-                    case "z":
+                    case GateName.Z:
                         circuit.z(row_index)
-                    case "swap":
+                    case GateName.SWAP:
                         explored.add(self._apply_swap_gate(graph, circuit, position))
-                    case "ch":
+                    case GateName.CH:
                         for explored_position in self._apply_controlled_gate(graph, position, circuit.ch):
                             explored.add(explored_position)
-                    case "cx":
+                    case GateName.CX:
                         for explored_position in self._apply_controlled_gate(graph, position, circuit.cx):
                             explored.add(explored_position)
-                    case "cz":
+                    case GateName.CZ:
                         for explored_position in self._apply_controlled_gate(graph, position, circuit.cz):
                             explored.add(explored_position)
 

@@ -1,9 +1,20 @@
 from qiskit import QuantumCircuit
 
 from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid
+from quantum_circuit_simplifier.model import GridNode, QuantumGrid, GateName
 
 converter = Converter()
+ID = GateName.ID
+H = GateName.H
+X = GateName.X
+Y = GateName.Y
+Z = GateName.Z
+SWAP = GateName.SWAP
+CH = GateName.CH
+CX = GateName.CX
+CZ = GateName.CZ
+CCX = GateName.CCX
+CSWAP = GateName.CSWAP
 
 def test_empty_circuit_to_grid():
     circuit = QuantumCircuit(2)
@@ -27,14 +38,14 @@ def test_one_qubit_to_grid():
 
     grid = converter.circuit_to_grid(circuit)
 
-    assert grid[0, 0] == GridNode("h")
-    assert grid[0, 1] == GridNode("x")
-    assert grid[0, 2] == GridNode("y")
-    assert grid[0, 3] == GridNode("z")
-    assert grid[0, 4] == GridNode("x")
-    assert grid[0, 5] == GridNode("z")
-    assert grid[0, 6] == GridNode("h")
-    assert grid[0, 7] == GridNode("y")
+    assert grid[0, 0] == GridNode(H)
+    assert grid[0, 1] == GridNode(X)
+    assert grid[0, 2] == GridNode(Y)
+    assert grid[0, 3] == GridNode(Z)
+    assert grid[0, 4] == GridNode(X)
+    assert grid[0, 5] == GridNode(Z)
+    assert grid[0, 6] == GridNode(H)
+    assert grid[0, 7] == GridNode(Y)
 
 
 def test_two_qubits_to_grid():
@@ -49,17 +60,17 @@ def test_two_qubits_to_grid():
 
     grid = converter.circuit_to_grid(circuit)
 
-    assert grid[0, 0] == GridNode("h")
-    assert grid[1, 0] == GridNode("x")
+    assert grid[0, 0] == GridNode(H)
+    assert grid[1, 0] == GridNode(X)
 
-    assert grid[0, 1] == GridNode("cx", targets=[1])
-    assert grid[1, 1] == GridNode("cx", controlled_by=[0])
+    assert grid[0, 1] == GridNode(CX, targets=[1])
+    assert grid[1, 1] == GridNode(CX, controlled_by=[0])
 
-    assert grid[0, 2] == GridNode("ch", controlled_by=[1])
-    assert grid[1, 2] == GridNode("ch", targets=[0])
+    assert grid[0, 2] == GridNode(CH, controlled_by=[1])
+    assert grid[1, 2] == GridNode(CH, targets=[0])
 
-    assert grid[0, 3] == GridNode("h")
-    assert grid[1, 3] == GridNode("y")
+    assert grid[0, 3] == GridNode(H)
+    assert grid[1, 3] == GridNode(Y)
 
 
 def test_entanglement_to_grid():
@@ -70,11 +81,11 @@ def test_entanglement_to_grid():
 
     grid = converter.circuit_to_grid(circuit)
 
-    assert grid[0, 0] == GridNode("h")
+    assert grid[0, 0] == GridNode(H)
     assert grid[1, 0] == QuantumGrid.FILLER
 
-    assert grid[0, 1] == GridNode("cx", targets=[1])
-    assert grid[1, 1] == GridNode("cx", controlled_by=[0])
+    assert grid[0, 1] == GridNode(CX, targets=[1])
+    assert grid[1, 1] == GridNode(CX, controlled_by=[0])
 
 
 def test_three_qubits_to_grid():
@@ -87,21 +98,21 @@ def test_three_qubits_to_grid():
 
     grid = converter.circuit_to_grid(circuit)
 
-    assert grid[0, 0] == GridNode("cx", targets=[1])
-    assert grid[1, 0] == GridNode("cx", controlled_by=[0])
+    assert grid[0, 0] == GridNode(CX, targets=[1])
+    assert grid[1, 0] == GridNode(CX, controlled_by=[0])
     assert grid[2, 0] == QuantumGrid.FILLER
 
     assert grid[0, 1] == QuantumGrid.FILLER
-    assert grid[1, 1] == GridNode("cz", controlled_by=[2])
-    assert grid[2, 1] == GridNode("cz", targets=[1])
+    assert grid[1, 1] == GridNode(CZ, controlled_by=[2])
+    assert grid[2, 1] == GridNode(CZ, targets=[1])
 
-    assert grid[0, 2] == GridNode("ccx", targets=[2])
-    assert grid[1, 2] == GridNode("ccx", targets=[2])
-    assert grid[2, 2] == GridNode("ccx", controlled_by=[0, 1])
+    assert grid[0, 2] == GridNode(CCX, targets=[2])
+    assert grid[1, 2] == GridNode(CCX, targets=[2])
+    assert grid[2, 2] == GridNode(CCX, controlled_by=[0, 1])
 
     assert grid[0, 3] == QuantumGrid.FILLER
     assert grid[1, 3] == QuantumGrid.FILLER
-    assert grid[2, 3] == GridNode("h")
+    assert grid[2, 3] == GridNode(H)
 
 
 def test_qubit_placement():
@@ -123,11 +134,11 @@ def test_qubit_placement():
 
     assert grid.width == 7
 
-    assert grid[0, 1] == GridNode("h")
-    assert grid[0, 2] == GridNode("x")
-    assert grid[1, 1] == GridNode("y")
+    assert grid[0, 1] == GridNode(H)
+    assert grid[0, 2] == GridNode(X)
+    assert grid[1, 1] == GridNode(Y)
     assert grid[1, 2] == QuantumGrid.FILLER
-    assert grid[2, 0] == GridNode("z")
+    assert grid[2, 0] == GridNode(Z)
     assert grid[2, 1] == QuantumGrid.FILLER
     assert grid[2, 2] == QuantumGrid.FILLER
 
@@ -136,9 +147,9 @@ def test_qubit_placement():
     assert grid[1, 4] == QuantumGrid.FILLER
     assert grid[2, 4] == QuantumGrid.FILLER
 
-    assert grid[0, 6] == GridNode("x")
-    assert grid[1, 6] == GridNode("y")
-    assert grid[2, 6] == GridNode("z")
+    assert grid[0, 6] == GridNode(X)
+    assert grid[1, 6] == GridNode(Y)
+    assert grid[2, 6] == GridNode(Z)
 
 
 def test_one_qubit_nodes():
@@ -155,14 +166,14 @@ def test_one_qubit_nodes():
 
     graph = converter.circuit_to_graph(circuit)
 
-    assert graph[0, 0].name == "h"
-    assert graph[0, 1].name == "x"
-    assert graph[0, 2].name == "y"
-    assert graph[0, 3].name == "z"
-    assert graph[0, 4].name == "x"
-    assert graph[0, 5].name == "z"
-    assert graph[0, 6].name == "h"
-    assert graph[0, 7].name == "y"
+    assert graph[0, 0].name == H
+    assert graph[0, 1].name == X
+    assert graph[0, 2].name == Y
+    assert graph[0, 3].name == Z
+    assert graph[0, 4].name == X
+    assert graph[0, 5].name == Z
+    assert graph[0, 6].name == H
+    assert graph[0, 7].name == Y
 
 
 def test_horizontal_edges():
@@ -176,14 +187,14 @@ def test_horizontal_edges():
 
     edge_1 = graph.find_edges(0, 0)
     assert edge_1.left is None
-    assert edge_1.right.name == "x"
+    assert edge_1.right.name == X
 
     edge_2 = graph.find_edges(0, 1)
-    assert edge_2.left.name == "h"
-    assert edge_2.right.name == "z"
+    assert edge_2.left.name == H
+    assert edge_2.right.name == Z
 
     edge_3 = graph.find_edges(0, 2)
-    assert edge_3.left.name == "x"
+    assert edge_3.left.name == X
     assert edge_3.right is None
 
 
@@ -198,14 +209,14 @@ def test_vertical_edges():
 
     h_edges = graph.find_edges(0, 0)
     assert h_edges.up is None
-    assert h_edges.down.name == "x"
+    assert h_edges.down.name == X
 
     x_edges = graph.find_edges(1, 0)
-    assert x_edges.up.name == "h"
-    assert x_edges.down.name == "z"
+    assert x_edges.up.name == H
+    assert x_edges.down.name == Z
 
     z_edges = graph.find_edges(2, 0)
-    assert z_edges.up.name == "x"
+    assert z_edges.up.name == X
     assert z_edges.down is None
 
 
@@ -221,38 +232,38 @@ def test_control_edges():
 
     cz_edges_0 = graph.find_edges(0, 0)
     assert cz_edges_0.targets == []
-    assert cz_edges_0.controlled_by[0].name == "cz"
+    assert cz_edges_0.controlled_by[0].name == CZ
     cz_edges_1 = graph.find_edges(1, 0)
-    assert cz_edges_1.targets[0].name == "cz"
+    assert cz_edges_1.targets[0].name == CZ
     assert cz_edges_1.controlled_by == []
 
     swap_edges_1 = graph.find_edges(1, 1)
-    assert swap_edges_1.targets[0].name == "swap"
+    assert swap_edges_1.targets[0].name == SWAP
     assert swap_edges_1.controlled_by == []
     swap_edges_2 = graph.find_edges(2, 1)
-    assert swap_edges_2.targets[0].name == "swap"
+    assert swap_edges_2.targets[0].name == SWAP
     assert swap_edges_2.controlled_by == []
 
     ccx_edges_0 = graph.find_edges(0, 2)
     assert ccx_edges_0.targets == []
-    assert ccx_edges_0.controlled_by[0].name == "ccx"
-    assert ccx_edges_0.controlled_by[1].name == "ccx"
+    assert ccx_edges_0.controlled_by[0].name == CCX
+    assert ccx_edges_0.controlled_by[1].name == CCX
     ccx_edges_1 = graph.find_edges(1, 2)
-    assert ccx_edges_1.targets[0].name == "ccx"
+    assert ccx_edges_1.targets[0].name == CCX
     assert ccx_edges_1.controlled_by == []
     ccx_edges_2 = graph.find_edges(2, 2)
-    assert ccx_edges_2.targets[0].name == "ccx"
+    assert ccx_edges_2.targets[0].name == CCX
     assert ccx_edges_2.controlled_by == []
     cswap_edges_0 = graph.find_edges(0, 3)
-    assert cswap_edges_0.targets[0].name == "cswap"
-    assert cswap_edges_0.targets[1].name == "cswap"
+    assert cswap_edges_0.targets[0].name == CSWAP
+    assert cswap_edges_0.targets[1].name == CSWAP
     assert cswap_edges_0.controlled_by == []
     cswap_edges_1 = graph.find_edges(1, 3)
     assert cswap_edges_1.targets == []
-    assert cswap_edges_1.controlled_by[0].name == "cswap"
+    assert cswap_edges_1.controlled_by[0].name == CSWAP
     cswap_edges_2 = graph.find_edges(2, 3)
     assert cswap_edges_2.targets == []
-    assert cswap_edges_2.controlled_by[0].name == "cswap"
+    assert cswap_edges_2.controlled_by[0].name == CSWAP
 
 
 def test_one_qubit_graph_to_circuit():

@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 
 from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import QuantumGraph, GraphNode
+from quantum_circuit_simplifier.model import QuantumGraph, GraphNode, GateName
 
 _RULES = {}
 
@@ -34,16 +34,16 @@ class Simplifier:
 
     @staticmethod
     def _remove_duplicate_h(graph: QuantumGraph, node: GraphNode) -> bool:
-        if node.name != "h":
+        if node.name != GateName.H:
             return False
 
         start = node.position
         edges = graph.find_edges(*start)
         right_edge = edges.right
 
-        if right_edge and right_edge.name == "h":
-            graph.add_node(GraphNode("i", start))
-            graph.add_node(GraphNode("i", right_edge.position))
+        if right_edge and right_edge.name == GateName.H:
+            graph.add_node(GraphNode(GateName.ID, start))
+            graph.add_node(GraphNode(GateName.ID, right_edge.position))
             return True
 
         return False

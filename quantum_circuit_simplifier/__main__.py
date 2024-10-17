@@ -32,32 +32,48 @@ def _demo():
     circuit = QuantumCircuit(2)
 
     circuit.h(0)
+    circuit.id(0)
+    circuit.h(0)
+    circuit.h(0)
     circuit.cx(0, 1)
+    circuit.h(0)
+    circuit.id(0)
+    circuit.h(0)
+    circuit.id(0)
+    circuit.h(0)
 
-    print("\n===== Circuit drawing =====")
+    print("\n===== Original circuit =====")
     print(circuit.draw())
 
     converter = Converter()
 
     grid = converter.circuit_to_grid(circuit)
-    print("\n===== Circuit grid =====")
+    print("\n===== Original grid =====")
     print(grid)
 
     graph = converter.grid_to_graph(grid)
-    print("\n===== Circuit graph =====")
+    print("\n===== Original graph =====")
     print(graph)
 
     metrics = analyze(circuit, converter)
-    print("\n===== Circuit metrics =====")
+    print("\n===== Original metrics =====")
     print(metrics)
 
-    converted_circuit = converter.graph_to_circuit(graph)
-    print("\n===== Converted circuit =====")
-    print(converted_circuit.draw())
+    simplifier = Simplifier(converter)
+
+    simplified_circuit = converter.graph_to_circuit(simplifier.simplify_graph(graph))
+    print("\n===== Simplified circuit =====")
+    print(simplified_circuit.draw())
+
+    simplified_metrics = analyze(simplified_circuit, converter)
+    print("\n===== Simplified metrics =====")
+    print(simplified_metrics)
 
     drawer = Drawer()
-    drawer.save_circuit(circuit, "circuit_diagram.png")
-    drawer.save_graph(graph, "circuit_graph.png", draw_legend=False)
+    drawer.save_circuit(circuit, "original_circuit.png")
+    drawer.save_graph(graph, "original_graph.png", draw_legend=False)
+    drawer.save_circuit(simplified_circuit, "simplified_circuit.png")
+    drawer.save_graph(converter.circuit_to_graph(simplified_circuit), "simplified_graph.png", draw_legend=False)
 
 
 def _parse_debug_options():
