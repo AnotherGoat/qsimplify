@@ -47,11 +47,10 @@ def _demo():
 
     converter = Converter()
 
-    grid = converter.circuit_to_grid(circuit)
+    graph = converter.circuit_to_graph(circuit)
     print("\n===== Original grid =====")
-    print(grid)
+    print(graph.draw_grid())
 
-    graph = converter.grid_to_graph(grid)
     print("\n===== Original graph =====")
     print(graph)
 

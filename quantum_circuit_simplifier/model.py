@@ -1,15 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
-from typing import TypeAlias, List, Any, Tuple, Iterator
+from typing import TypeAlias, Tuple, Iterator
 import networkx
 from networkx.classes import MultiDiGraph
 import textwrap
 
 class GateName(Enum):
-    NONE = "-"
-    BARRIER = "barrier"
-    MEASURE = "measure"
     ID = "id"
     H = "h"
     X = "x"
@@ -21,7 +18,9 @@ class GateName(Enum):
     CZ = "cz"
     CSWAP = "cswap"
     CCX = "ccx"
-
+    MEASURE = "measure"
+    BARRIER = "barrier"
+    BLOCKED = "|"
 
     @classmethod
     def from_str(cls, name: str):
@@ -31,156 +30,18 @@ class GateName(Enum):
             raise ValueError(f"'{name}' is not a valid GateName")
 
 
-class GridNode:
-    """
-    Represents a node of a QuantumGrid.
-
-    Attributes:
-        name (GateName): The name of quantum gate represented by this node.
-        targets (list[int]): A list of target node rows.
-        controlled_by (list[int]): A list of node rows that control this node.
-    """
-
-    def __init__(self, name: GateName, targets: list[int] = None, controlled_by: list[int] = None):
-        self.name = name
-        self.targets: list[int] = [] if targets is None else targets
-        self.controlled_by: list[int] = [] if controlled_by is None else controlled_by
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, GridNode):
-            return NotImplemented
-
-        return self.name == other.name and self.targets == other.targets and self.controlled_by == other.controlled_by
-
-    def __str__(self) -> str:
-        extra_data = [
-            f"targets={self.targets}" if self.targets else "",
-            f"controlled_by={self.controlled_by}" if self.controlled_by else ""
-        ]
-        extra_data = [data for data in extra_data if data]
-
-        if len(extra_data) == 0:
-            return self.name.value
-
-        return f"{self.name.value}({', '.join(extra_data)})"
-
-
-GridData: TypeAlias = List[List[GridNode]]
-"""Represents a 2D list of GridNodes, which is commonly used by a QuantumGrid to hold its data."""
-
 Position: TypeAlias = Tuple[int, int]
-"""Represents a (row, column) position in a QuantumGrid."""
-
-class QuantumGrid:
-    """
-    Represents a QuantumCircuit as a 2D list of GridNodes.
-
-    Each qubit is represented by a row in the grid.
-    Single-qubit gates occupy a single GridNode, while multi-qubit gates use multiple related GridNodes (one for each qubit involved).
-    Empty slots are represented by the FILLER node.
-
-    Attributes:
-        FILLER (GridNode): The default node used to represent empty slots in the grid.
-        width (int): The number of columns in the grid.
-        height (int): The number of rows (qubits) in the grid.
-    """
-    FILLER = GridNode(GateName.NONE)
-    width: int
-    height: int
-    _data: GridData
-
-    @property
-    def data(self) -> GridData:
-        """A 2D list representing the grid data, where each element is a GridNode."""
-        return self._data
-
-    @data.setter
-    def data(self, value: GridData):
-        self._data = value
-        self.height = len(self.data)
-        self.width = len(self.data[0])
-
-    @staticmethod
-    def create_empty(width: int, height: int) -> QuantumGrid:
-        """Create an empty QuantumGrid of the specified width and height."""
-        return QuantumGrid([[QuantumGrid.FILLER for _ in range(width)] for _ in range(height)])
-
-    def __init__(self, data: GridData):
-        """Create a QuantumGrid by providing a 2D list."""
-        self.data = data
-
-    def trim_right_side(self) -> QuantumGrid:
-        """Create a copy of this grid with the filler on the right side removed."""
-        columns_to_trim = 0
-
-        for column in range(self.width - 1, -1, -1):
-            if all(row[column] == QuantumGrid.FILLER for row in self.data):
-                columns_to_trim += 1
-            else:
-                break
-
-        return QuantumGrid([row[0:self.width - columns_to_trim] for row in self.data])
-
-    def __str__(self) -> str:
-        columns = zip(*self.data)
-        column_lengths = []
-
-        for column in columns:
-            max_text_length = max(len(str(node)) for node in column)
-            column_lengths.append(max_text_length)
-
-        rows = []
-
-        for row_index, row in enumerate(self.data):
-            formatted_values = [
-                f"{str(value):<{max_text_length}}"
-                for value, max_text_length in zip(row, column_lengths)
-            ]
-
-            row_data = "    ".join(formatted_values)
-            rows.append(f"{row_index}: {row_data}")
-
-        return "\n".join(rows)
-
-    def is_occupied(self, row: int, column: int) -> bool:
-        return self[row, column] != QuantumGrid.FILLER
-
-    def has_node_at(self, row: int, column: int) -> bool:
-        """Check whether the grid has a node at the specified row and column."""
-        return 0 <= row < self.height and 0 <= column < self.width
-
-    def __getitem__(self, position: Position) -> GridNode:
-        """Get the node at the specified (row, column) position."""
-        row, column = position
-        return self._data[row][column]
-
-    def __setitem__(self, position: Position, value: GridNode):
-        """Set the node at the specified (row, column) position."""
-        row, column = position
-        self._data[row][column] = value
-
-    def __iter__(self):
-        """Iterate over the grid node by node."""
-        for row in self.data:
-            for node in row:
-                yield node
-
-    def __len__(self):
-        """Get the total number of nodes in the grid."""
-        return self.height * self.width
-
-    def iter_rows(self):
-        """Iterate over the grid row by row."""
-        for row in self._data:
-            yield row
-
-    def iter_columns(self):
-        """Iterate over the grid column by column."""
-        for col in range(self.width):
-            yield [self._data[row][col] for row in range(self.height)]
+"""Represents a (row, column) position in a QuantumGraph."""
 
 
 class GraphNode:
+    """
+    Represents a node of a QuantumGraph.
+
+    Attributes:
+        name (GateName): The name of quantum gate represented by this node.
+        position (Position): The position of this node in the graph.
+    """
     def __init__(self, name: GateName, position: Position):
         if position[0] < 0 or position[1] < 0:
             raise ValueError(f"GateNode position '{position}' can't have negative values")
@@ -264,21 +125,32 @@ class EdgeData:
 
         return f"{self.origin}({', '.join(extra_data)})"
 
-
 class QuantumGraph:
     """
-    Represents a QuantumCircuit as a NetworkX Graph.
-    Tuples of the form (row, column) are used to index the graph's nodes.
+    Represents a QuantumCircuit as a graph-grid hybrid.
+    Position tuples of the form (row, column) are used to index the graph's nodes.
+    Each qubit is represented by a row in the grid.
+    Single-qubit gates occupy a single GraphNode, while multi-qubit gates use multiple related GraphNodes (one for each qubit involved).
     """
+
     def __init__(self):
+        """Create an empty QuantumGraph."""
         self.network = MultiDiGraph()
 
     @property
     def width(self) -> int:
+        """The number of columns in the graph."""
+        if len(self) == 0:
+            return 0
+
         return max(position[1] for position in self.get_positions()) + 1
 
     @property
     def height(self) -> int:
+        """The number of rows (qubits) in the graph."""
+        if len(self) == 0:
+            return 0
+
         return max(position[0] for position in self.get_positions()) + 1
 
     def get_positions(self) -> Iterator[Position]:
@@ -286,39 +158,53 @@ class QuantumGraph:
             yield position
 
     def add_node(self, node: GraphNode):
+        """Add an existing GraphNode to the graph."""
         self.network.add_node(node.position, name=node.name, position=node.position)
 
     def add_new_node(self, name: GateName, position: Position):
+        """Add a new node to the graph."""
         self.network.add_node(position, name=name, position=position)
 
     def __getitem__(self, position: Position) -> GraphNode:
-        """Get the node at the specified (row, column) position."""
+        """Get the GraphNode at the specified (row, column) Position."""
         node = self.network.nodes[position]
         return GraphNode(node["name"], node["position"])
 
-    def get_nodes(self) -> Iterator[GraphNode]:
+    def __iter__(self) -> Iterator[GraphNode]:
+        """Iterate over the nodes in the graph."""
         for node in self.network.nodes(data=True):
             yield GraphNode(node[1]["name"], node[1]["position"])
 
+    def nodes(self) -> list[GraphNode]:
+        """Retrieve all the nodes in the graph."""
+        return [node for node in self]
+
     def add_edge(self, edge: GraphEdge):
+        """Add an existing GraphEdge to the graph."""
         self.network.add_edge(edge.start.position, edge.end.position, name=edge.name)
 
     def add_new_edge(self, name: EdgeName, start: Position, end: Position):
+        """Add a new edge to the graph."""
         self.network.add_edge(start, end, name=name)
 
-    def get_edges(self) -> Iterator[GraphEdge]:
+    def iter_edges(self) -> Iterator[GraphEdge]:
+        """Iterate over the edges in the graph."""
         for start, end, data in self.network.edges(data=True):
             yield GraphEdge(data["name"], self[start], self[end])
 
+    def edges(self) -> list[GraphEdge]:
+        """Retrieve all the edges in the graph."""
+        return [edge for edge in self.iter_edges()]
+
     def find_edges(self, row: int, column: int) -> EdgeData:
-        position = (row, column)
-        origin = self[position]
+        start = (row, column)
+        origin = self[start]
         edge_data = {
             "targets": [],
             "controlled_by": []
         }
 
-        for _, destination, data in self.network.out_edges(position, data=True):
+        for _, destination, data in self.network.out_edges(start, data=True):
             edge_name = data["name"]
             destination_node = self[destination]
 
@@ -333,10 +219,37 @@ class QuantumGraph:
 
     def __str__(self):
         result = ["Nodes:"]
-        result += [str(node) for node in self.get_nodes()]
+        result += [str(node) for node in self]
         result += ["\nEdges:"]
-        result += [str(edge) for edge in self.get_edges()]
+        result += [str(edge) for edge in self.edges()]
         return "\n".join(result)
+
+    def draw_grid(self):
+        grid = [[GateName.ID.value for _ in range(self.width)] for _ in range(self.height)]
+
+        for position in self.get_positions():
+            row, column = position
+            grid[row][column] = self[position].name.value
+
+        transposed_grid = zip(*grid)
+        column_lengths = []
+
+        for column in transposed_grid:
+            max_text_length = max(len(str(node)) for node in column)
+            column_lengths.append(max_text_length)
+
+        rows = []
+
+        for row_index, row in enumerate(grid):
+            formatted_values = [
+                f"{str(value):<{max_text_length}}"
+                for value, max_text_length in zip(row, column_lengths)
+            ]
+
+            row_data = "   ".join(formatted_values)
+            rows.append(f"{row_index}: {row_data}")
+
+        return "\n".join(rows)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, QuantumGraph):
@@ -344,9 +257,21 @@ class QuantumGraph:
 
         return networkx.utils.graphs_equal(self.network, other.network)
 
+    def is_occupied(self, row: int, column: int) -> bool:
+        """Check whether the graph has a non-filler node at the specified row and column."""
+        return self.has_node_at(row, column) and self[row, column].name != GateName.ID
+
     def has_node_at(self, row: int, column: int) -> bool:
         """Check whether the graph has a node at the specified row and column."""
         return self.network.has_node((row, column))
+
+    def fill_empty_spaces(self):
+        for row_index in range(self.height):
+            for column_index in range(self.width):
+                if self.has_node_at(row_index, column_index):
+                    continue
+
+                self.add_new_node(GateName.ID, (row_index, column_index))
 
     def fill_positional_edges(self):
         self._clear_positional_edges()
@@ -371,7 +296,7 @@ class QuantumGraph:
         }
 
     def _clear_positional_edges(self):
-        non_positional_edges = [edge for edge in self.get_edges() if not edge.name.is_positional()]
+        non_positional_edges = [edge for edge in self.edges() if not edge.name.is_positional()]
 
         self.clear_edges()
 
@@ -379,10 +304,19 @@ class QuantumGraph:
             self.add_edge(edge)
 
     def clear(self):
+        """Remove all the nodes and edges from the graph."""
         self.network.clear()
 
     def clear_edges(self):
+        """Remove all the edges from the graph."""
         self.network.clear_edges()
+
+    def __len__(self):
+        """Get the total number of nodes in the graph."""
+        return len(self.network.nodes)
+
+
+
 
 @dataclass
 class QuantumMetrics:

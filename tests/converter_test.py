@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 
 from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import GridNode, QuantumGrid, GateName
+from quantum_circuit_simplifier.model import GateName
 
 converter = Converter()
 ID = GateName.ID
@@ -18,140 +18,12 @@ CSWAP = GateName.CSWAP
 
 class TestConverter:
     @staticmethod
-    def test_empty_circuit_to_grid():
+    def test_empty_circuit_to_graph():
         circuit = QuantumCircuit(2)
-        grid = converter.circuit_to_grid(circuit)
+        graph = converter.circuit_to_graph(circuit)
 
-        assert grid.width == 0
-        assert grid.height == 2
-
-    @staticmethod
-    def test_one_qubit_to_grid():
-        circuit = QuantumCircuit(1)
-
-        circuit.h(0)
-        circuit.x(0)
-        circuit.y(0)
-        circuit.z(0)
-        circuit.x(0)
-        circuit.z(0)
-        circuit.h(0)
-        circuit.y(0)
-
-        grid = converter.circuit_to_grid(circuit)
-
-        assert grid[0, 0] == GridNode(H)
-        assert grid[0, 1] == GridNode(X)
-        assert grid[0, 2] == GridNode(Y)
-        assert grid[0, 3] == GridNode(Z)
-        assert grid[0, 4] == GridNode(X)
-        assert grid[0, 5] == GridNode(Z)
-        assert grid[0, 6] == GridNode(H)
-        assert grid[0, 7] == GridNode(Y)
-
-    @staticmethod
-    def test_two_qubits_to_grid():
-        circuit = QuantumCircuit(2)
-
-        circuit.h(0)
-        circuit.x(1)
-        circuit.cx(0, 1)
-        circuit.ch(1, 0)
-        circuit.h(0)
-        circuit.y(1)
-
-        grid = converter.circuit_to_grid(circuit)
-
-        assert grid[0, 0] == GridNode(H)
-        assert grid[1, 0] == GridNode(X)
-
-        assert grid[0, 1] == GridNode(CX, targets=[1])
-        assert grid[1, 1] == GridNode(CX, controlled_by=[0])
-
-        assert grid[0, 2] == GridNode(CH, controlled_by=[1])
-        assert grid[1, 2] == GridNode(CH, targets=[0])
-
-        assert grid[0, 3] == GridNode(H)
-        assert grid[1, 3] == GridNode(Y)
-
-    @staticmethod
-    def test_entanglement_to_grid():
-        circuit = QuantumCircuit(2)
-
-        circuit.h(0)
-        circuit.cx(0, 1)
-
-        grid = converter.circuit_to_grid(circuit)
-
-        assert grid[0, 0] == GridNode(H)
-        assert grid[1, 0] == QuantumGrid.FILLER
-
-        assert grid[0, 1] == GridNode(CX, targets=[1])
-        assert grid[1, 1] == GridNode(CX, controlled_by=[0])
-
-    @staticmethod
-    def test_three_qubits_to_grid():
-        circuit = QuantumCircuit(3)
-
-        circuit.cx(0, 1)
-        circuit.cz(2, 1)
-        circuit.ccx(0, 1, 2)
-        circuit.h(2)
-
-        grid = converter.circuit_to_grid(circuit)
-
-        assert grid[0, 0] == GridNode(CX, targets=[1])
-        assert grid[1, 0] == GridNode(CX, controlled_by=[0])
-        assert grid[2, 0] == QuantumGrid.FILLER
-
-        assert grid[0, 1] == QuantumGrid.FILLER
-        assert grid[1, 1] == GridNode(CZ, controlled_by=[2])
-        assert grid[2, 1] == GridNode(CZ, targets=[1])
-
-        assert grid[0, 2] == GridNode(CCX, targets=[2])
-        assert grid[1, 2] == GridNode(CCX, targets=[2])
-        assert grid[2, 2] == GridNode(CCX, controlled_by=[0, 1])
-
-        assert grid[0, 3] == QuantumGrid.FILLER
-        assert grid[1, 3] == QuantumGrid.FILLER
-        assert grid[2, 3] == GridNode(H)
-
-    @staticmethod
-    def test_qubit_placement():
-        circuit = QuantumCircuit(3)
-
-        circuit.cx(0, 1)
-        circuit.h(0)
-        circuit.x(0)
-        circuit.y(1)
-        circuit.z(2)
-        circuit.h(0)
-        circuit.h(0)
-        circuit.ccx(0, 1, 2)
-        circuit.x(0)
-        circuit.y(1)
-        circuit.z(2)
-
-        grid = converter.circuit_to_grid(circuit)
-
-        assert grid.width == 7
-
-        assert grid[0, 1] == GridNode(H)
-        assert grid[0, 2] == GridNode(X)
-        assert grid[1, 1] == GridNode(Y)
-        assert grid[1, 2] == QuantumGrid.FILLER
-        assert grid[2, 0] == GridNode(Z)
-        assert grid[2, 1] == QuantumGrid.FILLER
-        assert grid[2, 2] == QuantumGrid.FILLER
-
-        assert grid[1, 3] == QuantumGrid.FILLER
-        assert grid[2, 3] == QuantumGrid.FILLER
-        assert grid[1, 4] == QuantumGrid.FILLER
-        assert grid[2, 4] == QuantumGrid.FILLER
-
-        assert grid[0, 6] == GridNode(X)
-        assert grid[1, 6] == GridNode(Y)
-        assert grid[2, 6] == GridNode(Z)
+        assert graph.width == 0
+        assert graph.height == 0
 
     @staticmethod
     def test_one_qubit_nodes():
@@ -176,6 +48,68 @@ class TestConverter:
         assert graph[0, 5].name == Z
         assert graph[0, 6].name == H
         assert graph[0, 7].name == Y
+
+    @staticmethod
+    def test_two_qubit_nodes():
+        circuit = QuantumCircuit(2)
+
+        circuit.h(0)
+        circuit.x(1)
+        circuit.cx(0, 1)
+        circuit.ch(1, 0)
+        circuit.h(0)
+        circuit.y(1)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        assert graph[0, 0].name == H
+        assert graph[1, 0].name == X
+
+        assert graph[0, 1].name == CX
+        assert graph[1, 1].name == CX
+
+        assert graph[0, 2].name == CH
+        assert graph[1, 2].name == CH
+
+        assert graph[0, 3].name == H
+        assert graph[1, 3].name == Y
+
+    @staticmethod
+    def test_qubit_placement():
+        circuit = QuantumCircuit(3)
+
+        circuit.cx(0, 1)
+        circuit.h(0)
+        circuit.x(0)
+        circuit.y(1)
+        circuit.z(2)
+        circuit.h(0)
+        circuit.h(0)
+        circuit.ccx(0, 1, 2)
+        circuit.x(0)
+        circuit.y(1)
+        circuit.z(2)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        assert graph.width == 7
+
+        assert graph[0, 1].name == H
+        assert graph[0, 2].name == X
+        assert graph[1, 1].name == Y
+        assert graph[1, 2].name == ID
+        assert graph[2, 0].name == Z
+        assert graph[2, 1].name == ID
+        assert graph[2, 2].name == ID
+
+        assert graph[1, 3].name == ID
+        assert graph[2, 3].name == ID
+        assert graph[1, 4].name == ID
+        assert graph[2, 4].name == ID
+
+        assert graph[0, 6].name == X
+        assert graph[1, 6].name == Y
+        assert graph[2, 6].name == Z
 
     @staticmethod
     def test_horizontal_edges():
@@ -268,7 +202,7 @@ class TestConverter:
         assert cswap_edges_2.controlled_by[0].name == CSWAP
 
     @staticmethod
-    def test_one_qubit_graph_to_circuit():
+    def test_one_qubit_to_circuit():
         circuit = QuantumCircuit(1)
 
         circuit.h(0)
@@ -283,10 +217,10 @@ class TestConverter:
         graph = converter.circuit_to_graph(circuit)
         converted_circuit = converter.graph_to_circuit(graph)
 
-        assert circuit == converted_circuit
+        assert circuit.data == converted_circuit.data
 
     @staticmethod
-    def test_two_qubits_graph_to_circuit():
+    def test_two_qubits_to_circuit():
         circuit = QuantumCircuit(2)
 
         circuit.h(0)
@@ -300,4 +234,18 @@ class TestConverter:
         graph = converter.circuit_to_graph(circuit)
         converted_circuit = converter.graph_to_circuit(graph)
 
-        assert circuit == converted_circuit
+        assert circuit.data == converted_circuit.data
+
+    @staticmethod
+    def test_removed_identities():
+        circuit = QuantumCircuit(5)
+
+        circuit.id(0)
+        circuit.id(1)
+        circuit.id(2)
+
+        graph = converter.circuit_to_graph(circuit)
+        converted_circuit = converter.graph_to_circuit(graph)
+
+        assert circuit.data != converted_circuit.data
+        assert len(converted_circuit.data) == 0

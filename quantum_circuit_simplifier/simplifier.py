@@ -42,8 +42,8 @@ class Simplifier:
         right_edge = edges.right
 
         if right_edge and right_edge.name == GateName.H:
-            graph.add_node(GraphNode(GateName.NONE, start))
-            graph.add_node(GraphNode(GateName.NONE, right_edge.position))
+            graph.add_node(GraphNode(GateName.ID, start))
+            graph.add_node(GraphNode(GateName.ID, right_edge.position))
             return True
 
         return False

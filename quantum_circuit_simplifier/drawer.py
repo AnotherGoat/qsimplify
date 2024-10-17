@@ -56,7 +56,7 @@ class Drawer:
 
         nx.draw_networkx_nodes(graph.network, pos=draw_positions, node_size=self._NODE_SIZE, node_color=self._NODE_COLOR)
 
-        labels = {node.position: str(node) for node in graph.get_nodes()}
+        labels = {node.position: str(node) for node in graph}
         nx.draw_networkx_labels(graph.network, pos=draw_positions, labels=labels)
 
 
@@ -68,7 +68,7 @@ class Drawer:
     def _draw_edges(self, edge_type: EdgeType, graph: QuantumGraph):
         draw_positions = self._find_draw_positions(graph)
 
-        edges = [(edge.start.position, edge.end.position) for edge in graph.get_edges() if edge.name == edge_type.name]
+        edges = [(edge.start.position, edge.end.position) for edge in graph.edges() if edge.name == edge_type.name]
         nx.draw_networkx_edges(graph.network, draw_positions, edgelist=edges, node_size=self._NODE_SIZE, edge_color=edge_type.color,
                                width=self._LINE_WIDTH, connectionstyle=f"arc3,rad={edge_type.angle}")
 

@@ -1,12 +1,10 @@
-from debugpy.server.cli import TARGET
 from qiskit import QuantumCircuit
 from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import QuantumGraph, EdgeName, GateName, GraphEdge, GraphNode
+from quantum_circuit_simplifier.model import QuantumGraph, EdgeName, GateName
 from quantum_circuit_simplifier.simplifier import Simplifier
 
 converter = Converter()
 simplifier = Simplifier(converter)
-NONE = GateName.NONE
 ID = GateName.ID
 H = GateName.H
 CX = GateName.CX
@@ -30,12 +28,12 @@ class TestSimplifier:
     def test_remove_filler_and_identities():
         graph = QuantumGraph()
 
-        graph.add_new_node(NONE, (0, 0))
+        graph.add_new_node(ID, (0, 0))
         graph.add_new_node(ID, (1, 0))
         graph.add_new_node(CX, (0, 1))
         graph.add_new_node(CX, (1, 1))
         graph.add_new_node(ID, (0, 2))
-        graph.add_new_node(NONE, (1, 2))
+        graph.add_new_node(ID, (1, 2))
         graph.fill_positional_edges()
         graph.add_new_edge(TARGETS, (0, 1), (1, 1))
         graph.add_new_edge(CONTROLLED_BY, (1, 1), (0, 1))
@@ -60,8 +58,8 @@ class TestSimplifier:
         simplified_graph = simplifier.simplify_graph(graph)
         expected_graph = QuantumGraph()
 
-        expected_graph.add_new_node(NONE, (0, 0))
-        expected_graph.add_new_node(NONE, (0, 1))
+        expected_graph.add_new_node(ID, (0, 0))
+        expected_graph.add_new_node(ID, (0, 1))
         expected_graph.add_new_node(H, (0, 2))
         expected_graph.fill_positional_edges()
 
