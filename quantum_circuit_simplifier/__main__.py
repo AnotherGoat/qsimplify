@@ -70,10 +70,10 @@ def _demo():
     print(simplified_metrics)
 
     drawer = Drawer()
-    drawer.save_circuit(circuit, "original_circuit.png")
-    drawer.save_graph(graph, "original_graph.png", draw_legend=False)
-    drawer.save_circuit(simplified_circuit, "simplified_circuit.png")
-    drawer.save_graph(converter.circuit_to_graph(simplified_circuit), "simplified_graph.png", draw_legend=False)
+    #drawer.save_circuit(circuit, "original_circuit.png")
+    #drawer.save_graph(graph, "original_graph.png", draw_legend=False)
+    #drawer.save_circuit(simplified_circuit, "simplified_circuit.png")
+    #drawer.save_graph(converter.circuit_to_graph(simplified_circuit), "simplified_graph.png", draw_legend=False)
 
 
 def _parse_debug_options():

@@ -123,15 +123,15 @@ class Converter:
         for row_index in range(grid.height):
             for column_index in range(grid.width):
                 node_position = (row_index, column_index)
-                adjacent_positions = self._find_adjacent_positions(column_index, row_index)
+                adjacent_positions = self._find_adjacent_positions(row_index, column_index)
 
                 for direction, (adjacent_row, adjacent_column) in adjacent_positions.items():
                     if grid.has_node_at(adjacent_row, adjacent_column):
                         adjacent_position = (adjacent_row, adjacent_column)
-                        graph.add_edge(direction, node_position, adjacent_position)
+                        graph.add_new_edge(direction, node_position, adjacent_position)
 
     @staticmethod
-    def _find_adjacent_positions(column_index, row_index) -> dict[EdgeName, Position]:
+    def _find_adjacent_positions(row_index: int, column_index: int) -> dict[EdgeName, Position]:
         return {
             EdgeName.UP: (row_index - 1, column_index),
             EdgeName.DOWN: (row_index + 1, column_index),
@@ -152,11 +152,11 @@ class Converter:
 
                 for target in grid_node.targets:
                     target_position = (target, column_index)
-                    graph.add_edge(EdgeName.TARGETS, node_position, target_position)
+                    graph.add_new_edge(EdgeName.TARGETS, node_position, target_position)
 
                 for controller in grid_node.controlled_by:
                     controller_position = (controller, column_index)
-                    graph.add_edge(EdgeName.CONTROLLED_BY, node_position, controller_position)
+                    graph.add_new_edge(EdgeName.CONTROLLED_BY, node_position, controller_position)
 
 
     def circuit_to_graph(self, circuit: QuantumCircuit) -> QuantumGraph:
@@ -179,7 +179,7 @@ class Converter:
                 explored.add(position)
                 graph_node = graph[row_index, column_index]
 
-                if graph_node is None or graph_node.name == GateName.ID:
+                if graph_node is None or graph_node.name in (GateName.NONE, GateName.ID):
                     continue
 
                 match graph_node.name:

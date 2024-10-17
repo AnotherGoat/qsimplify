@@ -2,12 +2,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from typing import TypeAlias, List, Any, Tuple, Iterator
-
 import networkx
 from networkx.classes import MultiDiGraph
 import textwrap
 
 class GateName(Enum):
+    NONE = "-"
+    BARRIER = "barrier"
+    MEASURE = "measure"
     ID = "id"
     H = "h"
     X = "x"
@@ -19,6 +21,7 @@ class GateName(Enum):
     CZ = "cz"
     CSWAP = "cswap"
     CCX = "ccx"
+
 
     @classmethod
     def from_str(cls, name: str):
@@ -81,7 +84,7 @@ class QuantumGrid:
         width (int): The number of columns in the grid.
         height (int): The number of rows (qubits) in the grid.
     """
-    FILLER = GridNode(GateName.ID)
+    FILLER = GridNode(GateName.NONE)
     width: int
     height: int
     _data: GridData
@@ -185,10 +188,6 @@ class GraphNode:
         self.name = name
         self.position = position
 
-    def to_dict(self) -> dict[str, Any]:
-        """Return a dictionary representation of this class' attributes."""
-        return {"name": self.name, "position": self.position}
-
     def __eq__(self, other) -> bool:
         if not isinstance(other, GraphNode):
             return NotImplemented
@@ -207,12 +206,22 @@ class EdgeName(Enum):
     TARGETS = "targets"
     CONTROLLED_BY = "controlled_by"
 
+    def is_positional(self):
+        return self in (EdgeName.UP, EdgeName.DOWN, EdgeName.RIGHT, EdgeName.LEFT)
+
 
 class GraphEdge:
     def __init__(self, name: EdgeName, start: GraphNode, end: GraphNode):
         self.name = name
         self.start = start
         self.end = end
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, GraphEdge):
+            return NotImplemented
+
+        return self.name == other.name and self.start == other.start and self.end == other.end
+
 
     def __str__(self):
         return f"[{self.name.value}] from {self.start} to {self.end}"
@@ -277,32 +286,39 @@ class QuantumGraph:
             yield position
 
     def add_node(self, node: GraphNode):
-        self.network.add_node(node.position, **node.to_dict())
+        self.network.add_node(node.position, name=node.name, position=node.position)
+
+    def add_new_node(self, name: GateName, position: Position):
+        self.network.add_node(position, name=name, position=position)
 
     def __getitem__(self, position: Position) -> GraphNode:
         """Get the node at the specified (row, column) position."""
         node = self.network.nodes[position]
         return GraphNode(node["name"], node["position"])
 
-    def get_nodes(self) -> list[GraphNode]:
-        return [GraphNode(node[1]["name"], node[1]["position"]) for node in self.network.nodes(data=True)]
+    def get_nodes(self) -> Iterator[GraphNode]:
+        for node in self.network.nodes(data=True):
+            yield GraphNode(node[1]["name"], node[1]["position"])
 
-    def add_edge(self, name: EdgeName, start: Position, end: Position):
+    def add_edge(self, edge: GraphEdge):
+        self.network.add_edge(edge.start.position, edge.end.position, name=edge.name)
+
+    def add_new_edge(self, name: EdgeName, start: Position, end: Position):
         self.network.add_edge(start, end, name=name)
 
-    def get_edges(self) -> list[GraphEdge]:
-        return [GraphEdge(data["name"], self[start], self[end]) for start, end, data in self.network.edges(data=True)]
+    def get_edges(self) -> Iterator[GraphEdge]:
+        for start, end, data in self.network.edges(data=True):
+            yield GraphEdge(data["name"], self[start], self[end])
 
     def find_edges(self, row: int, column: int) -> EdgeData:
         position = (row, column)
         origin = self[position]
-        edges = self.network.out_edges(position, data=True)
         edge_data = {
             "targets": [],
             "controlled_by": []
         }
 
-        for _, destination, data in edges:
+        for _, destination, data in self.network.out_edges(position, data=True):
             edge_name = data["name"]
             destination_node = self[destination]
 
@@ -328,6 +344,45 @@ class QuantumGraph:
 
         return networkx.utils.graphs_equal(self.network, other.network)
 
+    def has_node_at(self, row: int, column: int) -> bool:
+        """Check whether the graph has a node at the specified row and column."""
+        return self.network.has_node((row, column))
+
+    def fill_positional_edges(self):
+        self._clear_positional_edges()
+
+        for row_index in range(self.height):
+            for column_index in range(self.width):
+                node_position = (row_index, column_index)
+                adjacent_positions = self._find_adjacent_positions(row_index, column_index)
+
+                for direction, (adjacent_row, adjacent_column) in adjacent_positions.items():
+                    if self.has_node_at(adjacent_row, adjacent_column):
+                        adjacent_position = (adjacent_row, adjacent_column)
+                        self.add_new_edge(direction, node_position, adjacent_position)
+
+    @staticmethod
+    def _find_adjacent_positions(row_index: int, column_index: int) -> dict[EdgeName, Position]:
+        return {
+            EdgeName.UP: (row_index - 1, column_index),
+            EdgeName.DOWN: (row_index + 1, column_index),
+            EdgeName.LEFT: (row_index, column_index - 1),
+            EdgeName.RIGHT: (row_index, column_index + 1)
+        }
+
+    def _clear_positional_edges(self):
+        non_positional_edges = [edge for edge in self.get_edges() if not edge.name.is_positional()]
+
+        self.clear_edges()
+
+        for edge in non_positional_edges:
+            self.add_edge(edge)
+
+    def clear(self):
+        self.network.clear()
+
+    def clear_edges(self):
+        self.network.clear_edges()
 
 @dataclass
 class QuantumMetrics:
