@@ -64,8 +64,10 @@ class EdgeName(Enum):
     DOWN = "down"
     RIGHT = "right"
     LEFT = "left"
+    SWAPS_WITH = "swaps_with"
     TARGETS = "targets"
     CONTROLLED_BY = "controlled_by"
+    WORKS_WITH = "works_with"
 
     def is_positional(self):
         return self in (EdgeName.UP, EdgeName.DOWN, EdgeName.RIGHT, EdgeName.LEFT)
@@ -96,16 +98,20 @@ class EdgeData:
         down: GraphNode = None,
         left: GraphNode = None,
         right: GraphNode = None,
+        swaps_with: GraphNode = None,
         targets: list[GraphNode] = None,
-        controlled_by: list[GraphNode] = None
+        controlled_by: list[GraphNode] = None,
+        works_with: GraphNode = None,
     ):
         self.origin = origin
         self.up = up
         self.down = down
         self.left = left
         self.right = right
+        self.swaps_with = swaps_with
         self.targets = targets if targets is not None else []
         self.controlled_by = controlled_by if controlled_by is not None else []
+        self.works_with = works_with
 
     def __str__(self) -> str:
         target_names = [str(target) for target in self.targets]
@@ -117,6 +123,8 @@ class EdgeData:
             f"right={self.right}" if self.right else "",
             f"targets={target_names}" if target_names else "",
             f"controlled_by={controller_names}" if controller_names else ""
+            f"works_with={self.works_with}" if self.works_with else "",
+            f"swaps_with={self.swaps_with}" if self.swaps_with else "",
         ]
         extra_data = [data for data in extra_data if data]
 
@@ -314,8 +322,6 @@ class QuantumGraph:
     def __len__(self):
         """Get the total number of nodes in the graph."""
         return len(self.network.nodes)
-
-
 
 
 @dataclass

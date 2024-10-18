@@ -60,9 +60,12 @@ def _demo():
 
     simplifier = Simplifier(converter)
 
-    simplified_circuit = converter.graph_to_circuit(simplifier.simplify_graph(graph))
+    simplified_circuit, build_steps = converter.graph_to_circuit(simplifier.simplify_graph(graph))
     print("\n===== Simplified circuit =====")
     print(simplified_circuit.draw())
+
+    print("\n===== Simplified build steps =====")
+    print("\n".join(build_steps))
 
     simplified_metrics = analyze(simplified_circuit, converter)
     print("\n===== Simplified metrics =====")
