@@ -3,9 +3,9 @@ from typing import Callable
 from qiskit import QuantumCircuit
 from typing_extensions import NamedTuple
 
-from quantum_circuit_simplifier.model import QuantumGraph, Position, EdgeName, \
+from qsimplify.model import QuantumGraph, Position, EdgeName, \
     GateName
-from quantum_circuit_simplifier.utils import get_qubit_indexes, setup_logger
+from qsimplify.utils import get_qubit_indexes, setup_logger
 
 class GraphPlacingData(NamedTuple):
     gate_name: GateName

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "quantum-circuit-simplifier"
+name = "qsimplify"
 version = "0.1.0"
 description = ""
 authors = ["Víctor Mardones <vmardones.dev@gmail.com>"]

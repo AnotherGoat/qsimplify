@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
-from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import QuantumGraph, EdgeName, GateName
-from quantum_circuit_simplifier.simplifier import Simplifier
+from qsimplify.converter import Converter
+from qsimplify.model import QuantumGraph, EdgeName, GateName
+from qsimplify.simplifier import Simplifier
 
 converter = Converter()
 simplifier = Simplifier(converter)

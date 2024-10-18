@@ -1,6 +1,6 @@
 from qiskit import QuantumCircuit
-from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import QuantumMetrics, GateName, QuantumGraph
+from qsimplify.converter import Converter
+from qsimplify.model import QuantumMetrics, GateName, QuantumGraph
 
 
 def _get_operations(circuit: QuantumCircuit) -> list[str]:

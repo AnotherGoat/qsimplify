@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.converter import Converter
-from quantum_circuit_simplifier.model import QuantumGraph, GraphNode, GateName
+from qsimplify.converter import Converter
+from qsimplify.model import QuantumGraph, GraphNode, GateName
 
 _RULES = {}
 

@@ -17,13 +17,13 @@ poetry run pytest
 Run demo
 
 ```shell
-poetry run python -m quantum_circuit_simplifier
+poetry run python -m qsimplify
 ```
 
 Run demo in debug mode
 
 ```shell
-poetry run python -m quantum_circuit_simplifier --debug
+poetry run python -m qsimplify --debug
 ```
 
 ## Supported gates

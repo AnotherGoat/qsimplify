@@ -1,4 +1,4 @@
-from quantum_circuit_simplifier.model import QuantumGraph, GraphNode, EdgeName, GateName, \
+from qsimplify.model import QuantumGraph, GraphNode, EdgeName, GateName, \
     GraphEdge
 
 ID = GateName.ID

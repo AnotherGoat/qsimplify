@@ -2,11 +2,11 @@ import argparse
 
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.analyzer import analyze
-from quantum_circuit_simplifier.drawer import Drawer
-from quantum_circuit_simplifier.simplifier import Simplifier
-from quantum_circuit_simplifier.utils import set_debug_mode
-from quantum_circuit_simplifier.converter import Converter
+from qsimplify.analyzer import analyze
+from qsimplify.drawer import Drawer
+from qsimplify.simplifier import Simplifier
+from qsimplify.utils import set_debug_mode
+from qsimplify.converter import Converter
 
 
 def _main():

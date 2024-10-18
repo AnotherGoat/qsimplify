@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from qiskit import QuantumCircuit
 
-from quantum_circuit_simplifier.model import QuantumGraph, Position, EdgeName
-from quantum_circuit_simplifier.utils import setup_logger
+from qsimplify.model import QuantumGraph, Position, EdgeName
+from qsimplify.utils import setup_logger
 
 class EdgeType:
     def __init__(self, name: EdgeName, color: str, angle: float):
