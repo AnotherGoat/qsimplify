@@ -101,7 +101,7 @@ class EdgeData:
         swaps_with: GraphNode = None,
         targets: list[GraphNode] = None,
         controlled_by: list[GraphNode] = None,
-        works_with: GraphNode = None,
+        works_with: list[GraphNode] = None,
     ):
         self.origin = origin
         self.up = up
@@ -111,20 +111,21 @@ class EdgeData:
         self.swaps_with = swaps_with
         self.targets = targets if targets is not None else []
         self.controlled_by = controlled_by if controlled_by is not None else []
-        self.works_with = works_with
+        self.works_with = works_with if works_with is not None else []
 
     def __str__(self) -> str:
         target_names = [str(target) for target in self.targets]
         controller_names = [str(controller) for controller in self.controlled_by]
+        works_with_names = [str(controller) for controller in self.works_with]
         extra_data = [
             f"up={self.up}" if self.up else "",
             f"down={self.down}" if self.down else "",
             f"left={self.left}" if self.left else "",
             f"right={self.right}" if self.right else "",
+            f"swaps_with={self.swaps_with}" if self.swaps_with else "",
             f"targets={target_names}" if target_names else "",
             f"controlled_by={controller_names}" if controller_names else ""
-            f"works_with={self.works_with}" if self.works_with else "",
-            f"swaps_with={self.swaps_with}" if self.swaps_with else "",
+            f"works_with={works_with_names}" if works_with_names else "",
         ]
         extra_data = [data for data in extra_data if data]
 
@@ -140,6 +141,9 @@ class QuantumGraph:
     Each qubit is represented by a row in the grid.
     Single-qubit gates occupy a single GraphNode, while multi-qubit gates use multiple related GraphNodes (one for each qubit involved).
     """
+    _TARGETS = EdgeName.TARGETS
+    _CONTROLLED_BY = EdgeName.CONTROLLED_BY
+    _WORKS_WITH = EdgeName.WORKS_WITH
 
     def __init__(self):
         """Create an empty QuantumGraph."""
@@ -208,18 +212,17 @@ class QuantumGraph:
         start = (row, column)
         origin = self[start]
         edge_data = {
-            "targets": [],
-            "controlled_by": []
+            self._TARGETS.value: [],
+            self._CONTROLLED_BY.value: [],
+            self._WORKS_WITH.value: []
         }
 
         for _, destination, data in self.network.out_edges(start, data=True):
             edge_name = data["name"]
             destination_node = self[destination]
 
-            if edge_name == EdgeName.TARGETS:
-                edge_data["targets"].append(destination_node)
-            elif edge_name == EdgeName.CONTROLLED_BY:
-                edge_data["controlled_by"].append(destination_node)
+            if edge_name in [self._TARGETS, self._CONTROLLED_BY, self._WORKS_WITH]:
+                edge_data[edge_name.value].append(destination_node)
             else:
                 edge_data[edge_name.value] = destination_node
 

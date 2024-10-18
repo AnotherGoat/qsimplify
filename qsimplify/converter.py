@@ -1,5 +1,5 @@
 from itertools import product
-from typing import Callable
+from typing import Callable, Tuple
 from qiskit import QuantumCircuit
 from typing_extensions import NamedTuple
 
@@ -132,16 +132,21 @@ class Converter:
                 graph.add_new_edge(EdgeName.WORKS_WITH, control_position, other_control_position)
 
 
-    def graph_to_circuit(self, graph: QuantumGraph) -> (QuantumCircuit, list[str]):
+    def graph_to_circuit(self, graph: QuantumGraph, add_build_steps=False) -> QuantumCircuit | Tuple[QuantumCircuit, list[str]]:
         self.logger.debug("Converting graph to circuit")
         circuit = QuantumCircuit(graph.height)
         build_steps = [f"circuit = QuantumCircuit({graph.height})"]
         explored: set[Position] = set()
 
-        for position in product(range(graph.height), range(graph.width)):
-            self._add_to_circuit(graph, circuit, build_steps, explored, position)
+        for column_index in range(graph.width):
+            for row_index in range(graph.height):
+                position = (row_index, column_index)
+                self._add_to_circuit(graph, circuit, build_steps, explored, position)
 
-        return circuit, build_steps
+        if add_build_steps:
+            return circuit, build_steps
+
+        return circuit
 
     def _add_to_circuit(self, graph: QuantumGraph, circuit: QuantumCircuit, build_steps: list[str], explored: set[Position], position: Position):
         if position in explored:
@@ -152,6 +157,9 @@ class Converter:
 
         if graph_node is None or graph_node.name == GateName.ID:
             return
+
+        print(graph_node.name)
+        print(position)
 
         match graph_node.name:
             case GateName.H:

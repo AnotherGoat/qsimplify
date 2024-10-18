@@ -160,46 +160,64 @@ class TestConverter:
         circuit = QuantumCircuit(3)
 
         circuit.cz(1, 0)
-        circuit.swap(1, 2)
         circuit.ccx(1, 2, 0)
-        circuit.cswap(0, 1, 2)
 
         graph = converter.circuit_to_graph(circuit)
 
         cz_edges_0 = graph.find_edges(0, 0)
         assert cz_edges_0.targets == []
         assert cz_edges_0.controlled_by[0].name == CZ
+        assert cz_edges_0.works_with == []
         cz_edges_1 = graph.find_edges(1, 0)
         assert cz_edges_1.targets[0].name == CZ
         assert cz_edges_1.controlled_by == []
+        assert cz_edges_1.works_with == []
 
-        swap_edges_1 = graph.find_edges(1, 1)
-        assert swap_edges_1.targets[0].name == SWAP
-        assert swap_edges_1.controlled_by == []
-        swap_edges_2 = graph.find_edges(2, 1)
-        assert swap_edges_2.targets[0].name == SWAP
-        assert swap_edges_2.controlled_by == []
-
-        ccx_edges_0 = graph.find_edges(0, 2)
+        ccx_edges_0 = graph.find_edges(0, 1)
         assert ccx_edges_0.targets == []
         assert ccx_edges_0.controlled_by[0].name == CCX
         assert ccx_edges_0.controlled_by[1].name == CCX
-        ccx_edges_1 = graph.find_edges(1, 2)
+        assert ccx_edges_0.works_with == []
+        ccx_edges_1 = graph.find_edges(1, 1)
         assert ccx_edges_1.targets[0].name == CCX
         assert ccx_edges_1.controlled_by == []
-        ccx_edges_2 = graph.find_edges(2, 2)
+        assert ccx_edges_1.works_with[0].name == CCX
+        ccx_edges_2 = graph.find_edges(2, 1)
         assert ccx_edges_2.targets[0].name == CCX
         assert ccx_edges_2.controlled_by == []
-        cswap_edges_0 = graph.find_edges(0, 3)
+        assert ccx_edges_2.works_with[0].name == CCX
+
+
+    @staticmethod
+    def test_swap_edges():
+        circuit = QuantumCircuit(3)
+
+        circuit.swap(1, 2)
+        circuit.cswap(0, 1, 2)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        swap_edges_1 = graph.find_edges(1, 0)
+        assert swap_edges_1.targets == []
+        assert swap_edges_1.controlled_by == []
+        assert swap_edges_1.swaps_with.name == SWAP
+        swap_edges_2 = graph.find_edges(2, 0)
+        assert swap_edges_2.targets == []
+        assert swap_edges_2.controlled_by == []
+        assert swap_edges_2.swaps_with.name == SWAP
+
+        cswap_edges_0 = graph.find_edges(0, 1)
         assert cswap_edges_0.targets[0].name == CSWAP
         assert cswap_edges_0.targets[1].name == CSWAP
         assert cswap_edges_0.controlled_by == []
-        cswap_edges_1 = graph.find_edges(1, 3)
+        cswap_edges_1 = graph.find_edges(1, 1)
         assert cswap_edges_1.targets == []
         assert cswap_edges_1.controlled_by[0].name == CSWAP
-        cswap_edges_2 = graph.find_edges(2, 3)
+        assert cswap_edges_1.swaps_with.name == CSWAP
+        cswap_edges_2 = graph.find_edges(2, 1)
         assert cswap_edges_2.targets == []
         assert cswap_edges_2.controlled_by[0].name == CSWAP
+        assert cswap_edges_2.swaps_with.name == CSWAP
 
     @staticmethod
     def test_one_qubit_to_circuit():

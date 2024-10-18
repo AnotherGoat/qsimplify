@@ -60,7 +60,8 @@ def _demo():
 
     simplifier = Simplifier(converter)
 
-    simplified_circuit, build_steps = converter.graph_to_circuit(simplifier.simplify_graph(graph))
+    simplified_graph = simplifier.simplify_graph(graph)
+    simplified_circuit, build_steps = converter.graph_to_circuit(simplified_graph, add_build_steps=True)
     print("\n===== Simplified circuit =====")
     print(simplified_circuit.draw())
 
