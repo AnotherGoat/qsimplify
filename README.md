@@ -25,17 +25,3 @@ Run demo in debug mode
 ```shell
 poetry run python -m qsimplify --debug
 ```
-
-## Supported gates
-
-- id
-- h
-- x
-- y
-- z
-- swap
-- ch
-- cx
-- cz
-- cswap
-- ccx

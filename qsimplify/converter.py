@@ -1,19 +1,25 @@
-from itertools import product
 from typing import Callable, Tuple
 from qiskit import QuantumCircuit
 from typing_extensions import NamedTuple
 
 from qsimplify.model import QuantumGraph, Position, EdgeName, \
-    GateName
-from qsimplify.utils import get_qubit_indexes, setup_logger
+    GateName, GraphNode
+from qsimplify.utils import find_qubit_indexes, setup_logger, find_bit_indexes
 
 class GraphPlacingData(NamedTuple):
+    graph: QuantumGraph
     gate_name: GateName
     qubits: list[int]
+    bits: list[int]
+    params: list
     column: int
 
 class CircuitPlacingData(NamedTuple):
-    pass
+    graph: QuantumGraph
+    graph_node: GraphNode
+    build_steps: list[str]
+    explored: set[Position]
+    start: Position
 
 class Converter:
     def __init__(self):
@@ -30,7 +36,11 @@ class Converter:
 
             self.logger.debug("Processing instruction %s", instruction)
             gate_name = GateName.from_str(instruction.operation.name)
-            qubits = get_qubit_indexes(circuit, instruction)
+
+            if gate_name in (GateName.ID, GateName.BARRIER):
+                continue
+
+            qubits = find_qubit_indexes(circuit, instruction)
             self.logger.debug("Instruction qubit indexes are %s", qubits)
 
             columns = [last_columns[qubit] for qubit in qubits]
@@ -50,7 +60,10 @@ class Converter:
 
                 self.logger.debug("Last columns updated to %s", last_columns)
 
-            self._add_instruction_to_graph(graph, GraphPlacingData(gate_name, qubits, target_column))
+            bits = find_bit_indexes(circuit, instruction)
+            params = instruction.operation.params
+            placing_data = GraphPlacingData(graph, gate_name, qubits, bits, params, target_column)
+            self._add_instruction_to_graph(placing_data)
 
         self.logger.debug("This is the graph before filling empty spaces\n%s", graph)
         graph.fill_empty_spaces()
@@ -61,28 +74,52 @@ class Converter:
         return graph
 
 
-    def _add_instruction_to_graph(self, graph: QuantumGraph, data: GraphPlacingData):
+    def _add_instruction_to_graph(self, data: GraphPlacingData):
+        if data.gate_name == GateName.MEASURE:
+            self._add_measure_gate_to_graph(data)
+            return
+
+        if data.gate_name in [GateName.RX, GateName.RY, GateName.RZ]:
+            self._add_rotation_gate_to_graph(data)
+            return
+
         if len(data.qubits) == 1:
-            self._add_single_qubit_gate_to_graph(graph, data)
+            self._add_single_qubit_gate_to_graph(data)
             return
 
         match data.gate_name:
             case GateName.SWAP:
-                self._add_swap_gate_to_graph(graph, data)
+                self._add_swap_gate_to_graph(data)
             case GateName.CSWAP:
-                self._add_cswap_gate_to_graph(graph, data)
+                self._add_cswap_gate_to_graph(data)
             case _:
-                self._add_controlled_gate_to_graph(graph, data)
+                self._add_controlled_gate_to_graph(data)
 
-    def _add_single_qubit_gate_to_graph(self, graph: QuantumGraph, data: GraphPlacingData):
-        gate_name, qubits, column = data
+    def _add_measure_gate_to_graph(self, data: GraphPlacingData):
+        graph, gate_name, qubits, bits, _, column = data
+        qubit = qubits[0]
+        bit = bits[0]
+
+        self.logger.debug("Placing measure gate on qubit %s to bit %s on column %s", qubit, bit, column)
+        graph.add_new_node(gate_name, (qubit, column), measure_to=bit)
+
+    def _add_rotation_gate_to_graph(self, data: GraphPlacingData):
+        graph, gate_name, qubits, _, params, column = data
+        qubit = qubits[0]
+        angle = params[0]
+
+        self.logger.debug("Placing rotation gate with angle %s on qubit %s on column %s", angle, qubit, column)
+        graph.add_new_node(gate_name, (qubit, column), rotation=angle)
+
+    def _add_single_qubit_gate_to_graph(self, data: GraphPlacingData):
+        graph, gate_name, qubits, _, _, column = data
         qubit = qubits[0]
 
         self.logger.debug("Placing single-qubit gate on qubit %s on column %s", qubit, column)
         graph.add_new_node(gate_name, (qubit, column))
 
-    def _add_swap_gate_to_graph(self, graph: QuantumGraph, data: GraphPlacingData):
-        gate_name, qubits, column = data
+    def _add_swap_gate_to_graph(self, data: GraphPlacingData):
+        graph, gate_name, qubits, _, _, column = data
         first_position = (qubits[0], column)
         second_position = (qubits[1], column)
 
@@ -93,8 +130,8 @@ class Converter:
         graph.add_new_node(gate_name, second_position)
         graph.add_new_edge(EdgeName.SWAPS_WITH, second_position, first_position)
 
-    def _add_cswap_gate_to_graph(self, graph: QuantumGraph, data: GraphPlacingData):
-        gate_name, qubits, column = data
+    def _add_cswap_gate_to_graph(self, data: GraphPlacingData):
+        graph, gate_name, qubits, _, _, column = data
         control_position = (qubits[0], column)
         first_position = (qubits[1], column)
         second_position = (qubits[2], column)
@@ -112,8 +149,8 @@ class Converter:
         graph.add_new_edge(EdgeName.SWAPS_WITH, second_position, first_position)
         graph.add_new_edge(EdgeName.CONTROLLED_BY, second_position, control_position)
 
-    def _add_controlled_gate_to_graph(self, graph: QuantumGraph, data: GraphPlacingData):
-        gate_name, qubits, column = data
+    def _add_controlled_gate_to_graph(self, data: GraphPlacingData):
+        graph, gate_name, qubits, _, _, column = data
         target_position = (qubits.pop(), column)
         control_positions = [(qubit, column) for qubit in qubits]
 
@@ -158,99 +195,115 @@ class Converter:
         if graph_node is None or graph_node.name == GateName.ID:
             return
 
-        print(graph_node.name)
-        print(position)
+        placing_data = CircuitPlacingData(graph, graph_node, build_steps, explored, position)
+        add_instructions = {
+            GateName.H: (self._add_single_qubit_gate_to_circuit, circuit.h),
+            GateName.X: (self._add_single_qubit_gate_to_circuit, circuit.x),
+            GateName.Y: (self._add_single_qubit_gate_to_circuit, circuit.y),
+            GateName.Z: (self._add_single_qubit_gate_to_circuit, circuit.z),
+            GateName.RX: (self._add_rotation_gate_to_circuit, circuit.rx),
+            GateName.RY: (self._add_rotation_gate_to_circuit, circuit.ry),
+            GateName.RZ: (self._add_rotation_gate_to_circuit, circuit.rz),
+            GateName.SWAP: (self._add_swap_gate_to_circuit, circuit.swap),
+            GateName.CH: (self._add_controlled_gate_to_circuit, circuit.ch),
+            GateName.CX: (self._add_controlled_gate_to_circuit, circuit.cx),
+            GateName.CZ: (self._add_controlled_gate_to_circuit, circuit.cz),
+            GateName.CCX: (self._add_ccx_gate_to_circuit, circuit.ccx),
+            GateName.CSWAP: (self._add_cswap_gate_to_circuit, circuit.cswap),
+            GateName.MEASURE: (self._add_measure_gate_to_circuit, circuit.measure),
+        }
 
-        match graph_node.name:
-            case GateName.H:
-                circuit.h(position[0])
-                build_steps.append(f"circuit.h({position[0]})")
-            case GateName.X:
-                circuit.x(position[0])
-                build_steps.append(f"circuit.x({position[0]})")
-            case GateName.Y:
-                circuit.y(position[0])
-                build_steps.append(f"circuit.y({position[0]})")
-            case GateName.Z:
-                circuit.z(position[0])
-                build_steps.append(f"circuit.z({position[0]})")
-            case GateName.SWAP:
-                explored.add(self._add_swap_gate_to_circuit(graph, circuit, build_steps, position))
-            case GateName.CH:
-                for explored_position in self._add_controlled_gate_to_circuit(graph, build_steps, position, circuit.ch):
-                    explored.add(explored_position)
-            case GateName.CX:
-                for explored_position in self._add_controlled_gate_to_circuit(graph, build_steps, position, circuit.cx):
-                    explored.add(explored_position)
-            case GateName.CZ:
-                for explored_position in self._add_controlled_gate_to_circuit(graph, build_steps, position, circuit.cz):
-                    explored.add(explored_position)
-            case GateName.CCX:
-                for explored_position in self._add_controlled_gate_to_circuit(graph, build_steps, position, circuit.ccx):
-                    explored.add(explored_position)
-            case GateName.CSWAP:
-                for explored_position in self._add_cswap_gate_to_circuit(graph, build_steps, circuit, position):
-                    explored.add(explored_position)
+        add_instruction, method = add_instructions.get(graph_node.name, (None, None))
+
+        if add_instruction and method:
+            add_instruction(placing_data, method)
 
     @staticmethod
-    def _add_swap_gate_to_circuit(graph: QuantumGraph, circuit: QuantumCircuit, build_steps: list[str], start: Position) -> Position:
-        edges = graph.find_edges(*start)
+    def _add_single_qubit_gate_to_circuit(data: CircuitPlacingData, method: Callable):
+        qubit = data.start[0]
+
+        method(qubit)
+        data.build_steps.append(f"circuit.{method.__name__}({qubit})")
+
+    @staticmethod
+    def _add_rotation_gate_to_circuit(data: CircuitPlacingData, method: Callable):
+        qubit = data.start[0]
+        angle = data.graph_node.rotation
+
+        method(angle, qubit)
+        data.build_steps.append(f"circuit.{method.__name__}({angle}, {qubit})")
+
+    @staticmethod
+    def _add_swap_gate_to_circuit(data: CircuitPlacingData, method: Callable):
+        edges = data.graph.find_edges(*data.start)
+        first_qubit = data.start[0]
         other_position = edges.swaps_with.position
 
-        circuit.swap(start[0], other_position[0])
-        build_steps.append(f"circuit.swap({start[0]}, {other_position[0]})")
-        return other_position
+        method(first_qubit, other_position[0])
+        data.build_steps.append(f"circuit.{method.__name__}({first_qubit}, {other_position[0]})")
+        data.explored.add(other_position)
 
     @staticmethod
-    def _add_controlled_gate_to_circuit(graph: QuantumGraph, build_steps: list[str], start: Position, method: Callable) -> list[Position]:
-        edges = graph.find_edges(*start)
+    def _add_controlled_gate_to_circuit(data: CircuitPlacingData, method: Callable):
+        edges = data.graph.find_edges(*data.start)
         is_target = edges.targets == []
 
         if is_target:
             controller_position = edges.controlled_by[0].position
-            target_position = start
+            target_position = data.start
         else:
-            controller_position = start
+            controller_position = data.start
             target_position = edges.targets[0].position
 
         method(controller_position[0], target_position[0])
-        build_steps.append(f"circuit.{method.__name__}({controller_position[0]}, {target_position[0]})")
-        return [controller_position, target_position]
-
+        data.build_steps.append(f"circuit.{method.__name__}({controller_position[0]}, {target_position[0]})")
+        data.explored.add(controller_position)
+        data.explored.add(target_position)
 
     @staticmethod
-    def _add_cswap_gate_to_circuit(graph: QuantumGraph, build_steps: list[str], circuit: QuantumCircuit, start: Position) -> list[Position]:
-        edges = graph.find_edges(*start)
+    def _add_cswap_gate_to_circuit(data: CircuitPlacingData, method: Callable):
+        edges = data.graph.find_edges(*data.start)
         is_target = edges.targets == []
 
         if is_target:
             controller_position = edges.controlled_by[0].position
-            first_position = start
+            first_position = data.start
             second_position = edges.swaps_with.position
         else:
-            controller_position = start
+            controller_position = data.start
             first_position = edges.targets[0].position
             second_position = edges.targets[1].position
 
-        circuit.cswap(controller_position[0], first_position[0], second_position[0])
-        build_steps.append(f"circuit.cswap({controller_position[0]}, {first_position[0]}, {second_position[0]})")
-        return [controller_position, first_position, second_position]
-
+        method(controller_position[0], first_position[0], second_position[0])
+        data.build_steps.append(f"circuit.{method.__name__}({controller_position[0]}, {first_position[0]}, {second_position[0]})")
+        data.explored.add(controller_position)
+        data.explored.add(first_position)
+        data.explored.add(second_position)
 
     @staticmethod
-    def _add_ccx_gate_to_circuit(graph: QuantumGraph, build_steps: list[str], circuit: QuantumCircuit, start: Position) -> list[Position]:
-        edges = graph.find_edges(*start)
+    def _add_ccx_gate_to_circuit(data: CircuitPlacingData, method: Callable):
+        edges = data.graph.find_edges(*data.start)
         is_target = edges.targets == []
 
         if is_target:
             first_controller_position = edges.controlled_by[0].position
             second_controller_position = edges.controlled_by[1].position
-            target_position = start
+            target_position = data.start
         else:
-            first_controller_position = start
+            first_controller_position = data.start
             second_controller_position = edges.works_with[0].position
             target_position = edges.targets[0].position
 
-        circuit.ccx(first_controller_position[0], second_controller_position[0], target_position[0])
-        build_steps.append(f"circuit.ccx({first_controller_position[0]}, {second_controller_position[0]}, {target_position[0]})")
-        return [first_controller_position, second_controller_position, target_position]
+        method(first_controller_position[0], second_controller_position[0], target_position[0])
+        data.build_steps.append(f"circuit.{method.__name__}({first_controller_position[0]}, {second_controller_position[0]}, {target_position[0]})")
+        data.explored.add(first_controller_position)
+        data.explored.add(second_controller_position)
+        data.explored.add(target_position)
+
+    @staticmethod
+    def _add_measure_gate_to_circuit(data: CircuitPlacingData, method: Callable):
+        qubit = data.start[0]
+        bit = data.graph_node.measure_to
+
+        method(qubit, bit)
+        data.build_steps.append(f"circuit.{method.__name__}({qubit}, {bit})")

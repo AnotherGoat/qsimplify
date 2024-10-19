@@ -9,12 +9,17 @@ H = GateName.H
 X = GateName.X
 Y = GateName.Y
 Z = GateName.Z
+RX = GateName.RX
+RY = GateName.RY
+RZ = GateName.RZ
 SWAP = GateName.SWAP
 CH = GateName.CH
 CX = GateName.CX
 CZ = GateName.CZ
-CCX = GateName.CCX
 CSWAP = GateName.CSWAP
+CCX = GateName.CCX
+MEASURE = GateName.MEASURE
+BLOCKED = GateName.BLOCKED
 
 class TestConverter:
     @staticmethod
@@ -55,8 +60,10 @@ class TestConverter:
 
         circuit.h(0)
         circuit.x(1)
-        circuit.cx(0, 1)
-        circuit.ch(1, 0)
+        circuit.y(0)
+        circuit.z(1)
+        circuit.x(0)
+        circuit.z(1)
         circuit.h(0)
         circuit.y(1)
 
@@ -65,14 +72,92 @@ class TestConverter:
         assert graph[0, 0].name == H
         assert graph[1, 0].name == X
 
-        assert graph[0, 1].name == CX
-        assert graph[1, 1].name == CX
+        assert graph[0, 1].name == Y
+        assert graph[1, 1].name == Z
 
-        assert graph[0, 2].name == CH
-        assert graph[1, 2].name == CH
+        assert graph[0, 2].name == X
+        assert graph[1, 2].name == Z
 
         assert graph[0, 3].name == H
         assert graph[1, 3].name == Y
+
+    @staticmethod
+    def test_skip_identity_nodes():
+        circuit = QuantumCircuit(1)
+
+        circuit.h(0)
+        circuit.id(0)
+        circuit.y(0)
+        circuit.z(0)
+        circuit.id(0)
+        circuit.id(0)
+        circuit.x(0)
+        circuit.id(0)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        assert graph.width == 4
+
+        assert graph[0, 0].name == H
+        assert graph[0, 1].name == Y
+        assert graph[0, 2].name == Z
+        assert graph[0, 3].name == X
+
+    @staticmethod
+    def test_skip_barriers():
+        circuit = QuantumCircuit(3)
+
+        circuit.x(2)
+        circuit.barrier()
+        circuit.z(0)
+        circuit.barrier()
+        circuit.y(1)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        assert graph.width == 1
+
+        assert graph[0, 0].name == Z
+        assert graph[1, 0].name == Y
+        assert graph[2, 0].name == X
+
+    @staticmethod
+    def test_measurement_nodes():
+        circuit = QuantumCircuit(3, 3)
+
+        circuit.h(0)
+        circuit.measure(0, 2)
+        circuit.h(1)
+        circuit.h(1)
+        circuit.measure(1, 1)
+        circuit.h(2)
+        circuit.measure(2, 0)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        assert graph[0, 1].name == MEASURE
+        assert graph[0, 1].measure_to == 2
+        assert graph[1, 2].name == MEASURE
+        assert graph[1, 2].measure_to == 1
+        assert graph[2, 1].name == MEASURE
+        assert graph[2, 1].measure_to == 0
+
+    @staticmethod
+    def test_rotation_nodes():
+        circuit = QuantumCircuit(1)
+
+        circuit.rx(0.75, 0)
+        circuit.ry(0.5, 0)
+        circuit.rz(0.25, 0)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        assert graph[0, 0].name == RX
+        assert graph[0, 0].rotation == 0.75
+        assert graph[0, 1].name == RY
+        assert graph[0, 1].rotation == 0.5
+        assert graph[0, 2].name == RZ
+        assert graph[0, 2].rotation == 0.25
 
     @staticmethod
     def test_qubit_placement():
@@ -132,6 +217,7 @@ class TestConverter:
         edge_3 = graph.find_edges(0, 2)
         assert edge_3.left.name == X
         assert edge_3.right is None
+
 
     @staticmethod
     def test_vertical_edges():

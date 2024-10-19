@@ -1,10 +1,13 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
-from typing import TypeAlias, Tuple, Iterator
+from typing import TypeAlias, Tuple, Iterator, Callable
 import networkx
 from networkx.classes import MultiDiGraph
 import textwrap
+
+from qiskit import QuantumCircuit
+
 
 class GateName(Enum):
     ID = "id"
@@ -12,6 +15,9 @@ class GateName(Enum):
     X = "x"
     Y = "y"
     Z = "z"
+    RX = "rx"
+    RY = "ry"
+    RZ = "rz"
     SWAP = "swap"
     CH = "ch"
     CX = "cx"
@@ -42,12 +48,14 @@ class GraphNode:
         name (GateName): The name of quantum gate represented by this node.
         position (Position): The position of this node in the graph.
     """
-    def __init__(self, name: GateName, position: Position):
+    def __init__(self, name: GateName, position: Position, measure_to: int = None, rotation: float = None):
         if position[0] < 0 or position[1] < 0:
             raise ValueError(f"GateNode position '{position}' can't have negative values")
 
         self.name = name
         self.position = position
+        self.measure_to = measure_to
+        self.rotation = rotation
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, GraphNode):
@@ -56,7 +64,9 @@ class GraphNode:
         return self.name == other.name and self.position == other.position
 
     def __str__(self):
-        return f"{self.name.value} at {self.position}"
+        measure_to_data = f" (measure_to={self.measure_to})" if self.measure_to else ""
+        rotation_data = f" (rotation={self.rotation})" if self.rotation else ""
+        return f"{self.name.value} at {self.position}{measure_to_data}{rotation_data}"
 
 
 class EdgeName(Enum):
@@ -171,21 +181,21 @@ class QuantumGraph:
 
     def add_node(self, node: GraphNode):
         """Add an existing GraphNode to the graph."""
-        self.network.add_node(node.position, name=node.name, position=node.position)
+        self.network.add_node(node.position, name=node.name, position=node.position, measure_to=node.measure_to, rotation=node.rotation)
 
-    def add_new_node(self, name: GateName, position: Position):
+    def add_new_node(self, name: GateName, position: Position, measure_to: int = None, rotation: float = None):
         """Add a new node to the graph."""
-        self.network.add_node(position, name=name, position=position)
+        self.network.add_node(position, name=name, position=position, measure_to=measure_to, rotation=rotation)
 
     def __getitem__(self, position: Position) -> GraphNode:
         """Get the GraphNode at the specified (row, column) Position."""
         node = self.network.nodes[position]
-        return GraphNode(node["name"], node["position"])
+        return GraphNode(node["name"], node["position"], measure_to=node["measure_to"], rotation=node["rotation"])
 
     def __iter__(self) -> Iterator[GraphNode]:
         """Iterate over the nodes in the graph."""
-        for node in self.network.nodes(data=True):
-            yield GraphNode(node[1]["name"], node[1]["position"])
+        for _, data in self.network.nodes(data=True):
+            yield GraphNode(data["name"], data["position"], measure_to=data["measure_to"], rotation=data["rotation"])
 
     def nodes(self) -> list[GraphNode]:
         """Retrieve all the nodes in the graph."""

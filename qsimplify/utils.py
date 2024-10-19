@@ -24,12 +24,24 @@ def setup_logger(name: str):
     return logger
 
 
-def get_qubit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+def find_qubit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
     qubits = []
 
     for qubit in instruction.qubits:
         bit_locations: BitLocations = circuit.find_bit(qubit)
-        (_, qubit_index) = bit_locations.registers[0]
-        qubits.append(qubit_index)
+
+        for (_, qubit_index) in bit_locations.registers:
+            qubits.append(qubit_index)
 
     return qubits
+
+def find_bit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+    bits = []
+
+    for bit in instruction.clbits:
+        bit_locations: BitLocations = circuit.find_bit(bit)
+
+        for (_, bit_index) in bit_locations.registers:
+            bits.append(bit_index)
+
+    return bits
