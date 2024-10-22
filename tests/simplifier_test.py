@@ -295,7 +295,6 @@ class TestSimplifier:
         pattern.fill_positional_edges()
 
         mappings = simplifier.find_pattern(graph, pattern)
-        print(mappings)
 
         expected_mappings = {(0, 0): (0, 0), (0, 1): (0, 1)}
 

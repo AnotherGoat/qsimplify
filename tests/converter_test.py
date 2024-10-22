@@ -181,7 +181,7 @@ class TestConverter:
         assert graph[2, 6].name == Z
 
     @staticmethod
-    def test_horizontal_edge_data():
+    def test_positional_edge_data():
         circuit = QuantumCircuit(1)
 
         circuit.h(0)
@@ -202,28 +202,6 @@ class TestConverter:
         assert edge_3.left.name == X
         assert edge_3.right is None
 
-
-    @staticmethod
-    def test_vertical_edge_data():
-        circuit = QuantumCircuit(3)
-
-        circuit.h(0)
-        circuit.x(1)
-        circuit.z(2)
-
-        graph = converter.circuit_to_graph(circuit)
-
-        h_edges = graph.node_edge_data(0, 0)
-        assert h_edges.up is None
-        assert h_edges.down.name == X
-
-        x_edges = graph.node_edge_data(1, 0)
-        assert x_edges.up.name == H
-        assert x_edges.down.name == Z
-
-        z_edges = graph.node_edge_data(2, 0)
-        assert z_edges.up.name == X
-        assert z_edges.down is None
 
     @staticmethod
     def test_control_edge_data():

@@ -90,15 +90,11 @@ class TestQuantumGraph:
         graph.fill_positional_edges()
         edges = graph.edges()
 
-        assert len(edges) == 8
+        assert len(edges) == 4
         assert GraphEdge(RIGHT, nodes[0], nodes[1]) in edges
-        assert GraphEdge(DOWN, nodes[0], nodes[2]) in edges
         assert GraphEdge(LEFT, nodes[1], nodes[0]) in edges
-        assert GraphEdge(DOWN, nodes[1], nodes[3]) in edges
         assert GraphEdge(RIGHT, nodes[2], nodes[3]) in edges
-        assert GraphEdge(UP, nodes[2], nodes[0]) in edges
         assert GraphEdge(LEFT, nodes[3], nodes[2]) in edges
-        assert GraphEdge(UP, nodes[3], nodes[1]) in edges
 
     @staticmethod
     def test_is_occupied():

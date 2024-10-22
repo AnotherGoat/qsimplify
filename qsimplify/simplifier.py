@@ -181,7 +181,8 @@ class Simplifier:
         return mappings
 
 
-    def _find_next_right_node(self, graph: QuantumGraph, starting_row: int, starting_column: int) -> GraphNode | None:
+    @staticmethod
+    def _find_next_right_node(graph: QuantumGraph, starting_row: int, starting_column: int) -> GraphNode | None:
         edge_data = graph.node_edge_data(starting_row, starting_column)
 
         if edge_data is None:

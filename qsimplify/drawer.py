@@ -16,12 +16,10 @@ class Drawer:
     _NODE_SIZE = 5000
     _LINE_WIDTH = 2
     _EDGE_TYPES = [
-        EdgeType(EdgeName.UP, "red", 0.15),
-        EdgeType(EdgeName.DOWN, "blue", 0.15),
-        EdgeType(EdgeName.RIGHT, "green", 0.15),
-        EdgeType(EdgeName.LEFT, "orange", 0.15),
-        EdgeType(EdgeName.TARGETS, "purple", 0.3),
-        EdgeType(EdgeName.CONTROLLED_BY, "lightgreen", 0.3),
+        EdgeType(EdgeName.LEFT, "red", 0.15),
+        EdgeType(EdgeName.RIGHT, "blue", 0.15),
+        EdgeType(EdgeName.TARGETS, "green", 0.3),
+        EdgeType(EdgeName.CONTROLLED_BY, "purple", 0.3),
     ]
 
     def __init__(self):

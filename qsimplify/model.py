@@ -67,17 +67,15 @@ class GraphNode:
 
 
 class EdgeName(Enum):
-    UP = "up"
-    DOWN = "down"
-    RIGHT = "right"
     LEFT = "left"
+    RIGHT = "right"
     SWAPS_WITH = "swaps_with"
     TARGETS = "targets"
     CONTROLLED_BY = "controlled_by"
     WORKS_WITH = "works_with"
 
     def is_positional(self):
-        return self in (EdgeName.UP, EdgeName.DOWN, EdgeName.RIGHT, EdgeName.LEFT)
+        return self in (EdgeName.LEFT, EdgeName.RIGHT)
 
 
 class GraphEdge:
@@ -101,8 +99,6 @@ class EdgeData:
     def __init__(
         self,
         origin: GraphNode,
-        up: GraphNode = None,
-        down: GraphNode = None,
         left: GraphNode = None,
         right: GraphNode = None,
         swaps_with: GraphNode = None,
@@ -111,8 +107,6 @@ class EdgeData:
         works_with: list[GraphNode] = None,
     ):
         self.origin = origin
-        self.up = up
-        self.down = down
         self.left = left
         self.right = right
         self.swaps_with = swaps_with
@@ -125,8 +119,6 @@ class EdgeData:
         controller_names = [str(controller) for controller in self.controlled_by]
         works_with_names = [str(controller) for controller in self.works_with]
         extra_data = [
-            f"up={self.up}" if self.up else "",
-            f"down={self.down}" if self.down else "",
             f"left={self.left}" if self.left else "",
             f"right={self.right}" if self.right else "",
             f"swaps_with={self.swaps_with}" if self.swaps_with else "",
@@ -330,8 +322,6 @@ class QuantumGraph:
     @staticmethod
     def _find_adjacent_positions(row_index: int, column_index: int) -> dict[EdgeName, Position]:
         return {
-            EdgeName.UP: (row_index - 1, column_index),
-            EdgeName.DOWN: (row_index + 1, column_index),
             EdgeName.LEFT: (row_index, column_index - 1),
             EdgeName.RIGHT: (row_index, column_index + 1)
         }
