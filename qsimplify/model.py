@@ -1,13 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
-from typing import TypeAlias, Tuple, Iterator, Callable
+from typing import TypeAlias, Tuple, Iterator
 import networkx
 from networkx.classes import MultiDiGraph
 import textwrap
-
-from qiskit import QuantumCircuit
-
 
 class GateName(Enum):
     ID = "id"
@@ -61,7 +58,7 @@ class GraphNode:
         if not isinstance(other, GraphNode):
             return NotImplemented
 
-        return self.name == other.name and self.position == other.position
+        return self.name == other.name and self.position == other.position and self.measure_to == other.measure_to and self.rotation == other.rotation
 
     def __str__(self):
         measure_to_data = f" (measure_to={self.measure_to})" if self.measure_to else ""
@@ -144,6 +141,7 @@ class EdgeData:
 
         return f"{self.origin}({', '.join(extra_data)})"
 
+
 class QuantumGraph:
     """
     Represents a QuantumCircuit as a graph-grid hybrid.
@@ -187,8 +185,14 @@ class QuantumGraph:
         """Add a new node to the graph."""
         self.network.add_node(position, name=name, position=position, measure_to=measure_to, rotation=rotation)
 
-    def __getitem__(self, position: Position) -> GraphNode:
+    def remove_node(self, position: Position):
+        self.network.remove_node(position)
+
+    def __getitem__(self, position: Position) -> GraphNode | None:
         """Get the GraphNode at the specified (row, column) Position."""
+        if not self.network.has_node(position):
+            return None
+
         node = self.network.nodes[position]
         return GraphNode(node["name"], node["position"], measure_to=node["measure_to"], rotation=node["rotation"])
 
@@ -218,18 +222,31 @@ class QuantumGraph:
         """Retrieve all the edges in the graph."""
         return [edge for edge in self.iter_edges()]
 
-    def find_edges(self, row: int, column: int) -> EdgeData:
+    def iter_node_edges(self, row: int, column: int) -> Iterator[GraphEdge]:
+        start = (row, column)
+
+        for _, end, data in self.network.out_edges(start, data=True):
+            yield GraphEdge(data["name"], self[start], self[end])
+
+    def node_edges(self, row: int, column: int) -> list[GraphEdge]:
+        return [edge for edge in self.iter_node_edges(row, column)]
+
+    def node_edge_data(self, row: int, column: int) -> EdgeData | None:
         start = (row, column)
         origin = self[start]
+
+        if origin is None:
+            return None
+
         edge_data = {
             self._TARGETS.value: [],
             self._CONTROLLED_BY.value: [],
             self._WORKS_WITH.value: []
         }
 
-        for _, destination, data in self.network.out_edges(start, data=True):
+        for _, end, data in self.network.out_edges(start, data=True):
             edge_name = data["name"]
-            destination_node = self[destination]
+            destination_node = self[end]
 
             if edge_name in [self._TARGETS, self._CONTROLLED_BY, self._WORKS_WITH]:
                 edge_data[edge_name.value].append(destination_node)
@@ -271,6 +288,9 @@ class QuantumGraph:
             rows.append(f"{row_index}: {row_data}")
 
         return "\n".join(rows)
+
+    def __contains__(self, node: GraphNode) -> bool:
+        return node.position in self.network
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, QuantumGraph):
@@ -335,6 +355,11 @@ class QuantumGraph:
     def __len__(self):
         """Get the total number of nodes in the graph."""
         return len(self.network.nodes)
+
+    def copy(self) -> QuantumGraph:
+        copy = QuantumGraph()
+        copy.network = self.network.copy()
+        return copy
 
 
 @dataclass

@@ -2,8 +2,7 @@ from typing import Callable, Tuple
 from qiskit import QuantumCircuit
 from typing_extensions import NamedTuple
 
-from qsimplify.model import QuantumGraph, Position, EdgeName, \
-    GateName, GraphNode
+from qsimplify.model import QuantumGraph, Position, EdgeName, GateName, GraphNode
 from qsimplify.utils import find_qubit_indexes, setup_logger, find_bit_indexes
 
 class GraphPlacingData(NamedTuple):
@@ -235,7 +234,7 @@ class Converter:
 
     @staticmethod
     def _add_swap_gate_to_circuit(data: CircuitPlacingData, method: Callable):
-        edges = data.graph.find_edges(*data.start)
+        edges = data.graph.node_edge_data(*data.start)
         first_qubit = data.start[0]
         other_position = edges.swaps_with.position
 
@@ -245,7 +244,7 @@ class Converter:
 
     @staticmethod
     def _add_controlled_gate_to_circuit(data: CircuitPlacingData, method: Callable):
-        edges = data.graph.find_edges(*data.start)
+        edges = data.graph.node_edge_data(*data.start)
         is_target = edges.targets == []
 
         if is_target:
@@ -262,7 +261,7 @@ class Converter:
 
     @staticmethod
     def _add_cswap_gate_to_circuit(data: CircuitPlacingData, method: Callable):
-        edges = data.graph.find_edges(*data.start)
+        edges = data.graph.node_edge_data(*data.start)
         is_target = edges.targets == []
 
         if is_target:
@@ -282,7 +281,7 @@ class Converter:
 
     @staticmethod
     def _add_ccx_gate_to_circuit(data: CircuitPlacingData, method: Callable):
-        edges = data.graph.find_edges(*data.start)
+        edges = data.graph.node_edge_data(*data.start)
         is_target = edges.targets == []
 
         if is_target:

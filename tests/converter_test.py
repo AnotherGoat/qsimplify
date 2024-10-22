@@ -1,25 +1,9 @@
 from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
-from qsimplify.model import GateName
+from tests import *
 
 converter = Converter()
-ID = GateName.ID
-H = GateName.H
-X = GateName.X
-Y = GateName.Y
-Z = GateName.Z
-RX = GateName.RX
-RY = GateName.RY
-RZ = GateName.RZ
-SWAP = GateName.SWAP
-CH = GateName.CH
-CX = GateName.CX
-CZ = GateName.CZ
-CSWAP = GateName.CSWAP
-CCX = GateName.CCX
-MEASURE = GateName.MEASURE
-BLOCKED = GateName.BLOCKED
 
 class TestConverter:
     @staticmethod
@@ -197,7 +181,7 @@ class TestConverter:
         assert graph[2, 6].name == Z
 
     @staticmethod
-    def test_horizontal_edges():
+    def test_horizontal_edge_data():
         circuit = QuantumCircuit(1)
 
         circuit.h(0)
@@ -206,21 +190,21 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        edge_1 = graph.find_edges(0, 0)
+        edge_1 = graph.node_edge_data(0, 0)
         assert edge_1.left is None
         assert edge_1.right.name == X
 
-        edge_2 = graph.find_edges(0, 1)
+        edge_2 = graph.node_edge_data(0, 1)
         assert edge_2.left.name == H
         assert edge_2.right.name == Z
 
-        edge_3 = graph.find_edges(0, 2)
+        edge_3 = graph.node_edge_data(0, 2)
         assert edge_3.left.name == X
         assert edge_3.right is None
 
 
     @staticmethod
-    def test_vertical_edges():
+    def test_vertical_edge_data():
         circuit = QuantumCircuit(3)
 
         circuit.h(0)
@@ -229,20 +213,20 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        h_edges = graph.find_edges(0, 0)
+        h_edges = graph.node_edge_data(0, 0)
         assert h_edges.up is None
         assert h_edges.down.name == X
 
-        x_edges = graph.find_edges(1, 0)
+        x_edges = graph.node_edge_data(1, 0)
         assert x_edges.up.name == H
         assert x_edges.down.name == Z
 
-        z_edges = graph.find_edges(2, 0)
+        z_edges = graph.node_edge_data(2, 0)
         assert z_edges.up.name == X
         assert z_edges.down is None
 
     @staticmethod
-    def test_control_edges():
+    def test_control_edge_data():
         circuit = QuantumCircuit(3)
 
         circuit.cz(1, 0)
@@ -250,32 +234,32 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        cz_edges_0 = graph.find_edges(0, 0)
+        cz_edges_0 = graph.node_edge_data(0, 0)
         assert cz_edges_0.targets == []
         assert cz_edges_0.controlled_by[0].name == CZ
         assert cz_edges_0.works_with == []
-        cz_edges_1 = graph.find_edges(1, 0)
+        cz_edges_1 = graph.node_edge_data(1, 0)
         assert cz_edges_1.targets[0].name == CZ
         assert cz_edges_1.controlled_by == []
         assert cz_edges_1.works_with == []
 
-        ccx_edges_0 = graph.find_edges(0, 1)
+        ccx_edges_0 = graph.node_edge_data(0, 1)
         assert ccx_edges_0.targets == []
         assert ccx_edges_0.controlled_by[0].name == CCX
         assert ccx_edges_0.controlled_by[1].name == CCX
         assert ccx_edges_0.works_with == []
-        ccx_edges_1 = graph.find_edges(1, 1)
+        ccx_edges_1 = graph.node_edge_data(1, 1)
         assert ccx_edges_1.targets[0].name == CCX
         assert ccx_edges_1.controlled_by == []
         assert ccx_edges_1.works_with[0].name == CCX
-        ccx_edges_2 = graph.find_edges(2, 1)
+        ccx_edges_2 = graph.node_edge_data(2, 1)
         assert ccx_edges_2.targets[0].name == CCX
         assert ccx_edges_2.controlled_by == []
         assert ccx_edges_2.works_with[0].name == CCX
 
 
     @staticmethod
-    def test_swap_edges():
+    def test_swap_edge_data():
         circuit = QuantumCircuit(3)
 
         circuit.swap(1, 2)
@@ -283,24 +267,24 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        swap_edges_1 = graph.find_edges(1, 0)
+        swap_edges_1 = graph.node_edge_data(1, 0)
         assert swap_edges_1.targets == []
         assert swap_edges_1.controlled_by == []
         assert swap_edges_1.swaps_with.name == SWAP
-        swap_edges_2 = graph.find_edges(2, 0)
+        swap_edges_2 = graph.node_edge_data(2, 0)
         assert swap_edges_2.targets == []
         assert swap_edges_2.controlled_by == []
         assert swap_edges_2.swaps_with.name == SWAP
 
-        cswap_edges_0 = graph.find_edges(0, 1)
+        cswap_edges_0 = graph.node_edge_data(0, 1)
         assert cswap_edges_0.targets[0].name == CSWAP
         assert cswap_edges_0.targets[1].name == CSWAP
         assert cswap_edges_0.controlled_by == []
-        cswap_edges_1 = graph.find_edges(1, 1)
+        cswap_edges_1 = graph.node_edge_data(1, 1)
         assert cswap_edges_1.targets == []
         assert cswap_edges_1.controlled_by[0].name == CSWAP
         assert cswap_edges_1.swaps_with.name == CSWAP
-        cswap_edges_2 = graph.find_edges(2, 1)
+        cswap_edges_2 = graph.node_edge_data(2, 1)
         assert cswap_edges_2.targets == []
         assert cswap_edges_2.controlled_by[0].name == CSWAP
         assert cswap_edges_2.swaps_with.name == CSWAP

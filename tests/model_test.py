@@ -1,16 +1,5 @@
-from qsimplify.model import QuantumGraph, GraphNode, EdgeName, GateName, \
-    GraphEdge
-
-ID = GateName.ID
-H = GateName.H
-X = GateName.X
-Y = GateName.Y
-Z = GateName.Z
-CX = GateName.CX
-UP = EdgeName.UP
-DOWN = EdgeName.DOWN
-RIGHT = EdgeName.RIGHT
-LEFT = EdgeName.LEFT
+from qsimplify.model import QuantumGraph, GraphNode, GraphEdge
+from tests import *
 
 class TestQuantumGraph:
     @staticmethod

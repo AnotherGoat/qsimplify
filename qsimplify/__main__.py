@@ -8,25 +8,28 @@ from qsimplify.simplifier import Simplifier
 from qsimplify.utils import set_debug_mode
 from qsimplify.converter import Converter
 
-
 def _main():
-    circuit = QuantumCircuit(1)
+    circuit = QuantumCircuit(3)
+    circuit.h(0)
+    circuit.id(0)
+    circuit.h(0)
+    circuit.h(0)
+    circuit.cx(0, 1)
+    circuit.h(0)
+    circuit.id(0)
+    circuit.h(0)
+    circuit.id(0)
+    circuit.h(0)
 
-    circuit.h(0)
-    circuit.h(0)
-    circuit.h(0)
+    print("\n===== Original circuit =====")
+    print(circuit.draw())
 
     converter = Converter()
-    graph = converter.circuit_to_graph(circuit)
-
-    print(graph)
-
     simplifier = Simplifier(converter)
-    simplified_circuit = converter.graph_to_circuit(simplifier.simplify_graph(graph))
+    simplified_circuit = simplifier.simplify_circuit(circuit)
 
-    print(circuit.draw())
+    print("\n===== Simplified circuit =====")
     print(simplified_circuit.draw())
-
 
 def _demo():
     circuit = QuantumCircuit(2)
@@ -88,4 +91,4 @@ def _parse_debug_options():
 
 if __name__ == "__main__":
     _parse_debug_options()
-    _demo()
+    _main()
