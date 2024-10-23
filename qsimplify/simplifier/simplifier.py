@@ -1,24 +1,18 @@
 import itertools
-from typing import TypeAlias
 
 from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
-from qsimplify.model import QuantumGraph, GraphNode, GateName, Position, GraphBuilder
+from qsimplify.model import QuantumGraph, GraphNode, GateName, GraphBuilder
+from qsimplify.simplifier.simplification_rule import SimplificationRule
+from qsimplify.simplifier.graph_mappings import GraphMappings
 from qsimplify.utils import setup_logger
-
-class SimplificationRule:
-    def __init__(self, pattern: QuantumGraph, replacement: QuantumGraph):
-        self.pattern = pattern
-        self.replacement = replacement
 
 _RULES: list[SimplificationRule] = []
 
-pattern = GraphBuilder().add_h(0 ,0).add_h(0, 1).build()
-replacement = GraphBuilder().add_id(0, 0).add_id(0, 1).build()
-_RULES.append(SimplificationRule(pattern, replacement))
-
-Mappings: TypeAlias = dict[Position, Position]
+_pattern = GraphBuilder().add_h(0 ,0).add_h(0, 1).build()
+_replacement = GraphBuilder().add_id(0, 0).add_id(0, 1).build()
+_RULES.append(SimplificationRule(_pattern, _replacement))
 
 class Simplifier:
     def __init__(self, converter: Converter):
@@ -48,7 +42,7 @@ class Simplifier:
             mappings = self.find_pattern(graph, rule.pattern)
 
 
-    def find_pattern(self, graph: QuantumGraph, pattern: QuantumGraph) -> Mappings | None:
+    def find_pattern(self, graph: QuantumGraph, pattern: QuantumGraph) -> GraphMappings | None:
         pattern_start = self._find_start(pattern)
         self.logger.debug("Pattern start found at %s", pattern_start.position)
 
@@ -88,7 +82,7 @@ class Simplifier:
         return start.name == end.name and start.rotation == end.rotation and start.measure_to == end.measure_to
 
 
-    def _match_pattern(self, graph: QuantumGraph, pattern: QuantumGraph, start: GraphNode, pattern_start: GraphNode) -> Mappings | None:
+    def _match_pattern(self, graph: QuantumGraph, pattern: QuantumGraph, start: GraphNode, pattern_start: GraphNode) -> GraphMappings | None:
         for row_permutation in self._calculate_row_permutations(graph, pattern, start, pattern_start):
             self.logger.debug("Trying row permutation %s on start %s", row_permutation, start)
             subgraph, mappings = self.extract_subgraph(graph, row_permutation, start.position[1], pattern.width)
@@ -118,7 +112,7 @@ class Simplifier:
         return permutations
 
 
-    def extract_subgraph(self, graph: QuantumGraph, rows: list[int], starting_column: int, width: int) -> tuple[QuantumGraph | None, Mappings | None]:
+    def extract_subgraph(self, graph: QuantumGraph, rows: list[int], starting_column: int, width: int) -> tuple[QuantumGraph | None, GraphMappings | None]:
         if len(rows) == 0 or width <= 0 or len(graph) == 0:
             raise ValueError("The graph, rows or width are invalid")
 
@@ -143,8 +137,8 @@ class Simplifier:
         subgraph.fill_positional_edges()
         return subgraph, mappings
 
-    def _extract_subgraph_mappings(self, graph: QuantumGraph, rows: list[int], starting_column: int, width: int) -> Mappings | None:
-        mappings: Mappings = {}
+    def _extract_subgraph_mappings(self, graph: QuantumGraph, rows: list[int], starting_column: int, width: int) -> GraphMappings | None:
+        mappings: GraphMappings = {}
 
         for (new_row, old_row) in enumerate(rows):
             new_column = 0
@@ -193,7 +187,7 @@ class Simplifier:
 
 
     @staticmethod
-    def replace_pattern(graph: QuantumGraph, replacement: QuantumGraph, mappings: Mappings):
+    def replace_pattern(graph: QuantumGraph, replacement: QuantumGraph, mappings: GraphMappings):
         for node in mappings.keys():
             graph.remove_node(node)
 

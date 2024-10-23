@@ -2,7 +2,7 @@ import argparse
 
 from qiskit import QuantumCircuit
 
-from qsimplify.analyzer import analyze
+from qsimplify.analyzer import Analyzer
 from qsimplify.drawer import Drawer
 from qsimplify.simplifier import Simplifier
 from qsimplify.utils import set_debug_mode
@@ -57,7 +57,9 @@ def _demo():
     print("\n===== Original graph =====")
     print(graph)
 
-    metrics = analyze(circuit, converter)
+    analyzer = Analyzer()
+
+    metrics = analyzer.calculate_metrics(circuit, converter)
     print("\n===== Original metrics =====")
     print(metrics)
 
@@ -71,7 +73,7 @@ def _demo():
     print("\n===== Simplified build steps =====")
     print("\n".join(build_steps))
 
-    simplified_metrics = analyze(simplified_circuit, converter)
+    simplified_metrics = analyzer.calculate_metrics(simplified_circuit, converter)
     print("\n===== Simplified metrics =====")
     print(simplified_metrics)
 

@@ -1,0 +1,119 @@
+from __future__ import annotations
+from qsimplify.model.quantum_graph import QuantumGraph
+from qsimplify.model.gate_name import GateName
+from qsimplify.model.edge_name import EdgeName
+
+_SWAPS_WITH = EdgeName.SWAPS_WITH
+_TARGETS = EdgeName.TARGETS
+_CONTROLLED_BY = EdgeName.CONTROLLED_BY
+_WORKS_WITH = EdgeName.WORKS_WITH
+
+class GraphBuilder:
+    def __init__(self):
+        self._graph = QuantumGraph()
+
+    def add_id(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.ID, qubit, column)
+
+    def add_h(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.H, qubit, column)
+
+    def add_x(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.X, qubit, column)
+
+    def add_y(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.Y, qubit, column)
+
+    def add_z(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.Z, qubit, column)
+
+    def _add_single(self, name: GateName, qubit: int, column: int) -> GraphBuilder:
+        self._graph.add_new_node(name, (qubit, column))
+        return self
+
+    def add_rx(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self._add_rotation(GateName.RX, theta, qubit, column)
+
+    def add_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self._add_rotation(GateName.RY, theta, qubit, column)
+
+    def add_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self._add_rotation(GateName.RZ, theta, qubit, column)
+
+    def _add_rotation(self, name: GateName, theta: float, qubit: int, column: int) -> GraphBuilder:
+        self._graph.add_new_node(name, (qubit, column), rotation=theta)
+        return self
+
+    def add_measure(self, qubit: int, cbit: int, column: int) -> GraphBuilder:
+        self._graph.add_new_node(GateName.MEASURE, (qubit, column), measure_to=cbit)
+        return self
+
+    def add_swap(self, qubit1: int, qubit2: int, column: int) -> GraphBuilder:
+        first = (qubit1, column)
+        second = (qubit2, column)
+
+        self._graph.add_new_node(GateName.SWAP, first)
+        self._graph.add_new_node(GateName.SWAP, second)
+
+        self._graph.add_new_edge(_SWAPS_WITH, first, second)
+        self._graph.add_new_edge(_SWAPS_WITH, second, first)
+        return self
+
+    def add_ch(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self._add_control(GateName.CH, control_qubit, target_qubit, column)
+
+    def add_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self._add_control(GateName.CX, control_qubit, target_qubit, column)
+
+    def add_cz(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self._add_control(GateName.CZ, control_qubit, target_qubit, column)
+
+    def _add_control(self, name: GateName, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        control = (control_qubit, column)
+        target = (target_qubit, column)
+
+        self._graph.add_new_node(name, control)
+        self._graph.add_new_node(name, target)
+
+        self._graph.add_new_edge(_TARGETS, control, target)
+        self._graph.add_new_edge(_CONTROLLED_BY, target, control)
+        return self
+
+    def add_cswap(self, control_qubit: int, target_qubit1: int, target_qubit2: int, column: int) -> GraphBuilder:
+        control = (control_qubit, column)
+        target1 = (target_qubit1, column)
+        target2 = (target_qubit2, column)
+
+        self._graph.add_new_node(GateName.CSWAP, control)
+        self._graph.add_new_node(GateName.CSWAP, target1)
+        self._graph.add_new_node(GateName.CSWAP, target2)
+
+        self._graph.add_new_edge(_TARGETS, control, target1)
+        self._graph.add_new_edge(_TARGETS, control, target2)
+        self._graph.add_new_edge(_CONTROLLED_BY, target1, control)
+        self._graph.add_new_edge(_SWAPS_WITH, target1, target2)
+        self._graph.add_new_edge(_CONTROLLED_BY, target2, control)
+        self._graph.add_new_edge(_SWAPS_WITH, target2, target1)
+        return self
+
+    def add_ccx(self, control_qubit1: int, control_qubit2: int, target_qubit: int, column: int) -> GraphBuilder:
+        control1 = (control_qubit1, column)
+        control2 = (control_qubit2, column)
+        target = (target_qubit, column)
+
+        self._graph.add_new_node(GateName.CCX, control1)
+        self._graph.add_new_node(GateName.CCX, control2)
+        self._graph.add_new_node(GateName.CCX, target)
+
+        self._graph.add_new_edge(_TARGETS, control1, target)
+        self._graph.add_new_edge(_WORKS_WITH, control1, control2)
+        self._graph.add_new_edge(_TARGETS, control2, target)
+        self._graph.add_new_edge(_WORKS_WITH, control2, control1)
+        self._graph.add_new_edge(_CONTROLLED_BY, target, control1)
+        self._graph.add_new_edge(_CONTROLLED_BY, target, control2)
+        return self
+
+    def build(self) -> QuantumGraph:
+        self._graph.fill_empty_spaces()
+        self._graph.fill_positional_edges()
+        return self._graph

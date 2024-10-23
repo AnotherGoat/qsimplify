@@ -2,7 +2,6 @@ from qiskit import QuantumCircuit
 from qsimplify.converter import Converter
 from qsimplify.model import GraphBuilder
 from qsimplify.simplifier import Simplifier
-from tests import *
 
 converter = Converter()
 simplifier = Simplifier(converter)
