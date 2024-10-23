@@ -1,7 +1,6 @@
 from qiskit import QuantumCircuit
-
 from qsimplify.converter import Converter
-from tests import *
+from qsimplify.model import GraphBuilder
 
 converter = Converter()
 
@@ -29,14 +28,18 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        assert graph[0, 0].name == H
-        assert graph[0, 1].name == X
-        assert graph[0, 2].name == Y
-        assert graph[0, 3].name == Z
-        assert graph[0, 4].name == X
-        assert graph[0, 5].name == Z
-        assert graph[0, 6].name == H
-        assert graph[0, 7].name == Y
+        expected = (GraphBuilder()
+                          .add_h(0, 0)
+                          .add_x(0, 1)
+                          .add_y(0, 2)
+                          .add_z(0, 3)
+                          .add_x(0, 4)
+                          .add_z(0, 5)
+                          .add_h(0, 6)
+                          .add_y(0, 7)
+                          .build())
+
+        assert graph == expected
 
     @staticmethod
     def test_two_qubit_nodes():
@@ -53,17 +56,21 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        assert graph[0, 0].name == H
-        assert graph[1, 0].name == X
+        expected = (GraphBuilder()
+                          .add_h(0, 0)
+                          .add_x(1, 0)
+                          .add_y(0, 1)
+                          .add_z(1, 1)
+                          .add_x(0, 2)
+                          .add_z(1, 2)
+                          .add_h(0, 3)
+                          .add_y(1, 3)
+                          .build())
 
-        assert graph[0, 1].name == Y
-        assert graph[1, 1].name == Z
+        print(graph)
+        print(expected)
 
-        assert graph[0, 2].name == X
-        assert graph[1, 2].name == Z
-
-        assert graph[0, 3].name == H
-        assert graph[1, 3].name == Y
+        assert graph == expected
 
     @staticmethod
     def test_skip_identity_nodes():
@@ -80,12 +87,14 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        assert graph.width == 4
+        expected = (GraphBuilder()
+                          .add_h(0, 0)
+                          .add_y(0, 1)
+                          .add_z(0, 2)
+                          .add_x(0, 3)
+                          .build())
 
-        assert graph[0, 0].name == H
-        assert graph[0, 1].name == Y
-        assert graph[0, 2].name == Z
-        assert graph[0, 3].name == X
+        assert graph == expected
 
     @staticmethod
     def test_skip_barriers():
@@ -99,11 +108,31 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        assert graph.width == 1
+        expected = (GraphBuilder()
+                          .add_z(0, 0)
+                          .add_y(1, 0)
+                          .add_x(2, 0)
+                          .build())
 
-        assert graph[0, 0].name == Z
-        assert graph[1, 0].name == Y
-        assert graph[2, 0].name == X
+        assert graph == expected
+
+    @staticmethod
+    def test_rotation_nodes():
+        circuit = QuantumCircuit(1)
+
+        circuit.rx(0.75, 0)
+        circuit.ry(0.5, 0)
+        circuit.rz(0.25, 0)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        expected = (GraphBuilder()
+                          .add_rx(0.75, 0, 0)
+                          .add_ry(0.5, 0, 1)
+                          .add_rz(0.25, 0, 2)
+                          .build())
+
+        assert graph == expected
 
     @staticmethod
     def test_measurement_nodes():
@@ -119,29 +148,51 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        assert graph[0, 1].name == MEASURE
-        assert graph[0, 1].measure_to == 2
-        assert graph[1, 2].name == MEASURE
-        assert graph[1, 2].measure_to == 1
-        assert graph[2, 1].name == MEASURE
-        assert graph[2, 1].measure_to == 0
+        expected = (GraphBuilder()
+                          .add_h(0, 0)
+                          .add_measure(0, 2, 1)
+                          .add_h(1, 0)
+                          .add_h(1, 1)
+                          .add_measure(1, 1, 2)
+                          .add_h(2, 0)
+                          .add_measure(2, 0, 1)
+                          .build())
+
+        assert graph == expected
+
 
     @staticmethod
-    def test_rotation_nodes():
-        circuit = QuantumCircuit(1)
+    def test_control_edge_data():
+        circuit = QuantumCircuit(3)
 
-        circuit.rx(0.75, 0)
-        circuit.ry(0.5, 0)
-        circuit.rz(0.25, 0)
+        circuit.cz(1, 0)
+        circuit.ccx(1, 2, 0)
 
         graph = converter.circuit_to_graph(circuit)
 
-        assert graph[0, 0].name == RX
-        assert graph[0, 0].rotation == 0.75
-        assert graph[0, 1].name == RY
-        assert graph[0, 1].rotation == 0.5
-        assert graph[0, 2].name == RZ
-        assert graph[0, 2].rotation == 0.25
+        expected = (GraphBuilder()
+                          .add_cz(1, 0, 0)
+                          .add_ccx(1, 2, 0, 1)
+                          .build())
+
+        assert graph == expected
+
+
+    @staticmethod
+    def test_swap_edge_data():
+        circuit = QuantumCircuit(3)
+
+        circuit.swap(1, 2)
+        circuit.cswap(0, 1, 2)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        expected = (GraphBuilder()
+                          .add_swap(1, 2, 0)
+                          .add_cswap(0, 1, 2, 1)
+                          .build())
+
+        assert graph == expected
 
     @staticmethod
     def test_qubit_placement():
@@ -161,111 +212,21 @@ class TestConverter:
 
         graph = converter.circuit_to_graph(circuit)
 
-        assert graph.width == 7
+        expected = (GraphBuilder()
+                          .add_cx(0, 1, 0)
+                          .add_h(0, 1)
+                          .add_x(0, 2)
+                          .add_y(1, 1)
+                          .add_z(2, 0)
+                          .add_h(0, 3)
+                          .add_h(0, 4)
+                          .add_ccx(0, 1, 2, 5)
+                          .add_x(0, 6)
+                          .add_y(1, 6)
+                          .add_z(2, 6)
+                          .build())
 
-        assert graph[0, 1].name == H
-        assert graph[0, 2].name == X
-        assert graph[1, 1].name == Y
-        assert graph[1, 2].name == ID
-        assert graph[2, 0].name == Z
-        assert graph[2, 1].name == ID
-        assert graph[2, 2].name == ID
-
-        assert graph[1, 3].name == ID
-        assert graph[2, 3].name == ID
-        assert graph[1, 4].name == ID
-        assert graph[2, 4].name == ID
-
-        assert graph[0, 6].name == X
-        assert graph[1, 6].name == Y
-        assert graph[2, 6].name == Z
-
-    @staticmethod
-    def test_positional_edge_data():
-        circuit = QuantumCircuit(1)
-
-        circuit.h(0)
-        circuit.x(0)
-        circuit.z(0)
-
-        graph = converter.circuit_to_graph(circuit)
-
-        edge_1 = graph.node_edge_data(0, 0)
-        assert edge_1.left is None
-        assert edge_1.right.name == X
-
-        edge_2 = graph.node_edge_data(0, 1)
-        assert edge_2.left.name == H
-        assert edge_2.right.name == Z
-
-        edge_3 = graph.node_edge_data(0, 2)
-        assert edge_3.left.name == X
-        assert edge_3.right is None
-
-
-    @staticmethod
-    def test_control_edge_data():
-        circuit = QuantumCircuit(3)
-
-        circuit.cz(1, 0)
-        circuit.ccx(1, 2, 0)
-
-        graph = converter.circuit_to_graph(circuit)
-
-        cz_edges_0 = graph.node_edge_data(0, 0)
-        assert cz_edges_0.targets == []
-        assert cz_edges_0.controlled_by[0].name == CZ
-        assert cz_edges_0.works_with == []
-        cz_edges_1 = graph.node_edge_data(1, 0)
-        assert cz_edges_1.targets[0].name == CZ
-        assert cz_edges_1.controlled_by == []
-        assert cz_edges_1.works_with == []
-
-        ccx_edges_0 = graph.node_edge_data(0, 1)
-        assert ccx_edges_0.targets == []
-        assert ccx_edges_0.controlled_by[0].name == CCX
-        assert ccx_edges_0.controlled_by[1].name == CCX
-        assert ccx_edges_0.works_with == []
-        ccx_edges_1 = graph.node_edge_data(1, 1)
-        assert ccx_edges_1.targets[0].name == CCX
-        assert ccx_edges_1.controlled_by == []
-        assert ccx_edges_1.works_with[0].name == CCX
-        ccx_edges_2 = graph.node_edge_data(2, 1)
-        assert ccx_edges_2.targets[0].name == CCX
-        assert ccx_edges_2.controlled_by == []
-        assert ccx_edges_2.works_with[0].name == CCX
-
-
-    @staticmethod
-    def test_swap_edge_data():
-        circuit = QuantumCircuit(3)
-
-        circuit.swap(1, 2)
-        circuit.cswap(0, 1, 2)
-
-        graph = converter.circuit_to_graph(circuit)
-
-        swap_edges_1 = graph.node_edge_data(1, 0)
-        assert swap_edges_1.targets == []
-        assert swap_edges_1.controlled_by == []
-        assert swap_edges_1.swaps_with.name == SWAP
-        swap_edges_2 = graph.node_edge_data(2, 0)
-        assert swap_edges_2.targets == []
-        assert swap_edges_2.controlled_by == []
-        assert swap_edges_2.swaps_with.name == SWAP
-
-        cswap_edges_0 = graph.node_edge_data(0, 1)
-        assert cswap_edges_0.targets[0].name == CSWAP
-        assert cswap_edges_0.targets[1].name == CSWAP
-        assert cswap_edges_0.controlled_by == []
-        cswap_edges_1 = graph.node_edge_data(1, 1)
-        assert cswap_edges_1.targets == []
-        assert cswap_edges_1.controlled_by[0].name == CSWAP
-        assert cswap_edges_1.swaps_with.name == CSWAP
-        cswap_edges_2 = graph.node_edge_data(2, 1)
-        assert cswap_edges_2.targets == []
-        assert cswap_edges_2.controlled_by[0].name == CSWAP
-        assert cswap_edges_2.swaps_with.name == CSWAP
+        assert graph == expected
 
     @staticmethod
     def test_one_qubit_to_circuit():

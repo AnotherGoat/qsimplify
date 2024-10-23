@@ -15,13 +15,13 @@ class GateName(Enum):
     RX = "rx"
     RY = "ry"
     RZ = "rz"
+    MEASURE = "measure"
     SWAP = "swap"
     CH = "ch"
     CX = "cx"
     CZ = "cz"
     CSWAP = "cswap"
     CCX = "ccx"
-    MEASURE = "measure"
     BARRIER = "barrier"
     BLOCKED = "|"
 
@@ -45,25 +45,25 @@ class GraphNode:
         name (GateName): The name of quantum gate represented by this node.
         position (Position): The position of this node in the graph.
     """
-    def __init__(self, name: GateName, position: Position, measure_to: int = None, rotation: float = None):
+    def __init__(self, name: GateName, position: Position, rotation: float = None, measure_to: int = None):
         if position[0] < 0 or position[1] < 0:
             raise ValueError(f"GateNode position '{position}' can't have negative values")
 
         self.name = name
         self.position = position
-        self.measure_to = measure_to
         self.rotation = rotation
+        self.measure_to = measure_to
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, GraphNode):
             return NotImplemented
 
-        return self.name == other.name and self.position == other.position and self.measure_to == other.measure_to and self.rotation == other.rotation
+        return self.name == other.name and self.position == other.position and self.rotation == other.rotation and self.measure_to == other.measure_to
 
     def __str__(self):
-        measure_to_data = f" (measure_to={self.measure_to})" if self.measure_to else ""
         rotation_data = f" (rotation={self.rotation})" if self.rotation else ""
-        return f"{self.name.value} at {self.position}{measure_to_data}{rotation_data}"
+        measure_to_data = f" (measure_to={self.measure_to})" if self.measure_to else ""
+        return f"{self.name.value} at {self.position}{rotation_data}{measure_to_data}"
 
 
 class EdgeName(Enum):
@@ -171,11 +171,11 @@ class QuantumGraph:
 
     def add_node(self, node: GraphNode):
         """Add an existing GraphNode to the graph."""
-        self.network.add_node(node.position, name=node.name, position=node.position, measure_to=node.measure_to, rotation=node.rotation)
+        self.network.add_node(node.position, name=node.name, position=node.position, rotation=node.rotation, measure_to=node.measure_to)
 
-    def add_new_node(self, name: GateName, position: Position, measure_to: int = None, rotation: float = None):
+    def add_new_node(self, name: GateName, position: Position, rotation: float = None, measure_to: int = None):
         """Add a new node to the graph."""
-        self.network.add_node(position, name=name, position=position, measure_to=measure_to, rotation=rotation)
+        self.network.add_node(position, name=name, position=position, rotation=rotation, measure_to=measure_to)
 
     def remove_node(self, position: Position):
         self.network.remove_node(position)
@@ -186,12 +186,12 @@ class QuantumGraph:
             return None
 
         node = self.network.nodes[position]
-        return GraphNode(node["name"], node["position"], measure_to=node["measure_to"], rotation=node["rotation"])
+        return GraphNode(node["name"], node["position"], rotation=node["rotation"], measure_to=node["measure_to"])
 
     def __iter__(self) -> Iterator[GraphNode]:
         """Iterate over the nodes in the graph."""
         for _, data in self.network.nodes(data=True):
-            yield GraphNode(data["name"], data["position"], measure_to=data["measure_to"], rotation=data["rotation"])
+            yield GraphNode(data["name"], data["position"], rotation=data["rotation"], measure_to=data["measure_to"])
 
     def nodes(self) -> list[GraphNode]:
         """Retrieve all the nodes in the graph."""
@@ -350,6 +350,117 @@ class QuantumGraph:
         copy = QuantumGraph()
         copy.network = self.network.copy()
         return copy
+
+
+class GraphBuilder:
+    def __init__(self):
+        self._graph = QuantumGraph()
+
+    def add_id(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.ID, qubit, column)
+
+    def add_h(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.H, qubit, column)
+
+    def add_x(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.X, qubit, column)
+
+    def add_y(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.Y, qubit, column)
+
+    def add_z(self, qubit: int, column: int) -> GraphBuilder:
+        return self._add_single(GateName.Z, qubit, column)
+
+    def _add_single(self, name: GateName, qubit: int, column: int) -> GraphBuilder:
+        self._graph.add_new_node(name, (qubit, column))
+        return self
+
+    def add_rx(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self._add_rotation(GateName.RX, theta, qubit, column)
+
+    def add_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self._add_rotation(GateName.RY, theta, qubit, column)
+
+    def add_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self._add_rotation(GateName.RZ, theta, qubit, column)
+
+    def _add_rotation(self, name: GateName, theta: float, qubit: int, column: int) -> GraphBuilder:
+        self._graph.add_new_node(name, (qubit, column), rotation=theta)
+        return self
+
+    def add_measure(self, qubit: int, cbit: int, column: int) -> GraphBuilder:
+        self._graph.add_new_node(GateName.MEASURE, (qubit, column), measure_to=cbit)
+        return self
+
+    def add_swap(self, qubit1: int, qubit2: int, column: int) -> GraphBuilder:
+        first = (qubit1, column)
+        second = (qubit2, column)
+
+        self._graph.add_new_node(GateName.SWAP, first)
+        self._graph.add_new_node(GateName.SWAP, second)
+
+        self._graph.add_new_edge(EdgeName.SWAPS_WITH, first, second)
+        self._graph.add_new_edge(EdgeName.SWAPS_WITH, second, first)
+        return self
+
+    def add_ch(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self._add_control(GateName.CH, control_qubit, target_qubit, column)
+
+    def add_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self._add_control(GateName.CX, control_qubit, target_qubit, column)
+
+    def add_cz(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self._add_control(GateName.CZ, control_qubit, target_qubit, column)
+
+    def _add_control(self, name: GateName, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        control = (control_qubit, column)
+        target = (target_qubit, column)
+
+        self._graph.add_new_node(name, control)
+        self._graph.add_new_node(name, target)
+
+        self._graph.add_new_edge(EdgeName.TARGETS, control, target)
+        self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target, control)
+        return self
+
+    def add_cswap(self, control_qubit: int, target_qubit1: int, target_qubit2: int, column: int) -> GraphBuilder:
+        control = (control_qubit, column)
+        target1 = (target_qubit1, column)
+        target2 = (target_qubit2, column)
+
+        self._graph.add_new_node(GateName.CSWAP, control)
+        self._graph.add_new_node(GateName.CSWAP, target1)
+        self._graph.add_new_node(GateName.CSWAP, target2)
+
+        self._graph.add_new_edge(EdgeName.TARGETS, control, target1)
+        self._graph.add_new_edge(EdgeName.TARGETS, control, target2)
+        self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target1, control)
+        self._graph.add_new_edge(EdgeName.SWAPS_WITH, target1, target2)
+        self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target2, control)
+        self._graph.add_new_edge(EdgeName.SWAPS_WITH, target2, target1)
+        return self
+
+    def add_ccx(self, control_qubit1: int, control_qubit2: int, target_qubit: int, column: int) -> GraphBuilder:
+        control1 = (control_qubit1, column)
+        control2 = (control_qubit2, column)
+        target = (target_qubit, column)
+
+        self._graph.add_new_node(GateName.CCX, control1)
+        self._graph.add_new_node(GateName.CCX, control2)
+        self._graph.add_new_node(GateName.CCX, target)
+
+        self._graph.add_new_edge(EdgeName.TARGETS, control1, target)
+        self._graph.add_new_edge(EdgeName.WORKS_WITH, control1, control2)
+        self._graph.add_new_edge(EdgeName.TARGETS, control2, target)
+        self._graph.add_new_edge(EdgeName.WORKS_WITH, control2, control1)
+        self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target, control1)
+        self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target, control2)
+        return self
+
+    def build(self) -> QuantumGraph:
+        self._graph.fill_empty_spaces()
+        self._graph.fill_positional_edges()
+        return self._graph
 
 
 @dataclass

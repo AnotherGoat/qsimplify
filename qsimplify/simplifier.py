@@ -4,7 +4,7 @@ from typing import TypeAlias
 from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
-from qsimplify.model import QuantumGraph, GraphNode, GateName, Position
+from qsimplify.model import QuantumGraph, GraphNode, GateName, Position, GraphBuilder
 from qsimplify.utils import setup_logger
 
 class SimplificationRule:
@@ -14,16 +14,8 @@ class SimplificationRule:
 
 _RULES: list[SimplificationRule] = []
 
-pattern = QuantumGraph()
-pattern.add_new_node(GateName.H, (0, 0))
-pattern.add_new_node(GateName.H, (0, 1))
-pattern.fill_positional_edges()
-
-replacement = QuantumGraph()
-replacement.add_new_node(GateName.ID, (0, 0))
-replacement.add_new_node(GateName.ID, (0, 1))
-replacement.fill_positional_edges()
-
+pattern = GraphBuilder().add_h(0 ,0).add_h(0, 1).build()
+replacement = GraphBuilder().add_id(0, 0).add_id(0, 1).build()
 _RULES.append(SimplificationRule(pattern, replacement))
 
 Mappings: TypeAlias = dict[Position, Position]
@@ -41,10 +33,9 @@ class Simplifier:
 
     def simplify_graph(self, graph: QuantumGraph) -> QuantumGraph:
         result = graph.copy()
-        rules_to_check = _RULES.copy()
 
-        while len(rules_to_check) != 0:
-            self.apply_simplify_rule(result, rules_to_check.pop(0))
+        for rule in _RULES:
+            self.apply_simplify_rule(result, rule)
 
         return result
 
@@ -94,7 +85,7 @@ class Simplifier:
 
     @staticmethod
     def _are_nodes_similar(start: GraphNode, end: GraphNode) -> bool:
-        return start.name == end.name and start.measure_to == end.measure_to or start.rotation == end.rotation
+        return start.name == end.name and start.rotation == end.rotation and start.measure_to == end.measure_to
 
 
     def _match_pattern(self, graph: QuantumGraph, pattern: QuantumGraph, start: GraphNode, pattern_start: GraphNode) -> Mappings | None:
@@ -110,7 +101,8 @@ class Simplifier:
         return None
 
 
-    def _calculate_row_permutations(self, graph: QuantumGraph, pattern: QuantumGraph, start: GraphNode, pattern_start: GraphNode) -> list[list[int]]:
+    @staticmethod
+    def _calculate_row_permutations(graph: QuantumGraph, pattern: QuantumGraph, start: GraphNode, pattern_start: GraphNode) -> list[list[int]]:
         pattern_height = pattern.height
         row, column = start.position
 
@@ -140,7 +132,7 @@ class Simplifier:
 
         for old_position, new_position in mappings.items():
             node = graph[old_position]
-            subgraph.add_new_node(node.name, new_position, measure_to=node.measure_to, rotation=node.rotation)
+            subgraph.add_new_node(node.name, new_position, rotation=node.rotation, measure_to=node.measure_to)
 
             edges = [edge for edge in graph.node_edges(*old_position) if not edge.name.is_positional()]
             for edge in edges:
@@ -209,7 +201,7 @@ class Simplifier:
 
         for original, match in mappings.items():
             node = replacement[match]
-            graph.add_new_node(node.name, original, measure_to=node.measure_to, rotation=node.rotation)
+            graph.add_new_node(node.name, original, rotation=node.rotation, measure_to=node.measure_to)
 
             for edge in replacement.node_edges(*match):
                 if edge.name.is_positional():
