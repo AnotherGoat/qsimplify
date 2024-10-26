@@ -19,10 +19,10 @@ class Simplifier:
         self.logger = setup_logger("Simplifier")
         self.converter = converter
 
-    def simplify_circuit(self, circuit: QuantumCircuit) -> QuantumCircuit:
+    def simplify_circuit(self, circuit: QuantumCircuit, add_build_steps: bool = False, circuit_name: str = "circuit") -> QuantumCircuit | tuple[QuantumCircuit, str]:
         graph = self.converter.circuit_to_graph(circuit)
         simplified_graph = self.simplify_graph(graph)
-        return self.converter.graph_to_circuit(simplified_graph)
+        return self.converter.graph_to_circuit(simplified_graph, add_build_steps=add_build_steps, circuit_name=circuit_name)
 
 
     def simplify_graph(self, graph: QuantumGraph) -> QuantumGraph:

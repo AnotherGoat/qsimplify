@@ -26,10 +26,13 @@ def _main():
 
     converter = Converter()
     simplifier = Simplifier(converter)
-    simplified_circuit = simplifier.simplify_circuit(circuit)
+    simplified_circuit, build_steps = simplifier.simplify_circuit(circuit, add_build_steps=True)
 
     print("\n===== Simplified circuit =====")
     print(simplified_circuit.draw())
+
+    print("\n===== Simplified build steps =====")
+    print(build_steps)
 
 def _demo():
     circuit = QuantumCircuit(2)
@@ -57,9 +60,9 @@ def _demo():
     print("\n===== Original graph =====")
     print(graph)
 
-    analyzer = Analyzer()
+    analyzer = Analyzer(converter)
 
-    metrics = analyzer.calculate_metrics(circuit, converter)
+    metrics = analyzer.calculate_metrics(circuit)
     print("\n===== Original metrics =====")
     print(metrics)
 
@@ -73,7 +76,7 @@ def _demo():
     print("\n===== Simplified build steps =====")
     print("\n".join(build_steps))
 
-    simplified_metrics = analyzer.calculate_metrics(simplified_circuit, converter)
+    simplified_metrics = analyzer.calculate_metrics(simplified_circuit)
     print("\n===== Simplified metrics =====")
     print(simplified_metrics)
 

@@ -39,6 +39,9 @@ class TestConverter:
                           .add_y(0, 7)
                           .build())
 
+        print(graph)
+        print(expected)
+
         assert graph == expected
 
     @staticmethod
@@ -165,18 +168,32 @@ class TestConverter:
     def test_control_edge_data():
         circuit = QuantumCircuit(3)
 
-        circuit.cz(1, 0)
+        circuit.cx(1, 0)
         circuit.ccx(1, 2, 0)
 
         graph = converter.circuit_to_graph(circuit)
 
         expected = (GraphBuilder()
-                          .add_cz(1, 0, 0)
+                          .add_cx(1, 0, 0)
                           .add_ccx(1, 2, 0, 1)
                           .build())
 
+        print(graph)
+        print(expected)
+
         assert graph == expected
 
+    @staticmethod
+    def test_cz_edge_data():
+        circuit = QuantumCircuit(3)
+
+        circuit.cz(1, 0)
+
+        graph = converter.circuit_to_graph(circuit)
+
+        expected = GraphBuilder().add_cz(1, 0, 0).build()
+
+        assert graph == expected
 
     @staticmethod
     def test_swap_edge_data():

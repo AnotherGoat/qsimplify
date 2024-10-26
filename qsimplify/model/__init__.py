@@ -1,3 +1,4 @@
+from qsimplify.model.circuit_builder import *
 from qsimplify.model.edge_data import *
 from qsimplify.model.edge_name import *
 from qsimplify.model.gate_name import *

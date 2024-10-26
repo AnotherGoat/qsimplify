@@ -24,7 +24,7 @@ class Analyzer:
         metrics.pauli_count = metrics.pauli_x_count + metrics.pauli_y_count + metrics.pauli_z_count
         metrics.hadamard_count = self._count_operations(circuit, GateName.H.value)
         metrics.initial_superposition_rate = self._calculate_superposition_rate(graph)
-        metrics.single_gate_count = self._count_single_qubit_gates(circuit)
+        metrics.single_gate_count = self._count_single_gates(circuit)
         metrics.other_single_gates_count = metrics.single_gate_count - metrics.pauli_count - metrics.hadamard_count
 
         metrics.single_gate_rate = metrics.single_gate_count / metrics.gate_count
@@ -55,6 +55,6 @@ class Analyzer:
         return superposition_count / graph.height
 
     @staticmethod
-    def _count_single_qubit_gates(circuit: QuantumCircuit) -> int:
+    def _count_single_gates(circuit: QuantumCircuit) -> int:
         qubit_counts = [instruction.operation.num_qubits for instruction in circuit.data ]
         return len([qubit_count for qubit_count in qubit_counts if qubit_count == 1])
