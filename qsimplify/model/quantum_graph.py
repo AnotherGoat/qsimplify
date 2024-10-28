@@ -24,7 +24,7 @@ class QuantumGraph:
 
     def __init__(self):
         """Create an empty QuantumGraph."""
-        self.network = MultiDiGraph()
+        self._network = MultiDiGraph()
 
     @property
     def width(self) -> int:
@@ -43,31 +43,31 @@ class QuantumGraph:
         return max(position[0] for position in self.get_positions()) + 1
 
     def get_positions(self) -> Iterator[Position]:
-        for position in self.network.nodes:
+        for position in self._network.nodes:
             yield position
 
     def add_node(self, node: GraphNode):
         """Add an existing GraphNode to the graph."""
-        self.network.add_node(node.position, name=node.name, position=node.position, rotation=node.rotation, measure_to=node.measure_to)
+        self._network.add_node(node.position, name=node.name, position=node.position, rotation=node.rotation, measure_to=node.measure_to)
 
     def add_new_node(self, name: GateName, position: Position, rotation: float = None, measure_to: int = None):
         """Add a new node to the graph."""
-        self.network.add_node(position, name=name, position=position, rotation=rotation, measure_to=measure_to)
+        self._network.add_node(position, name=name, position=position, rotation=rotation, measure_to=measure_to)
 
     def remove_node(self, position: Position):
-        self.network.remove_node(position)
+        self._network.remove_node(position)
 
     def __getitem__(self, position: Position) -> GraphNode | None:
         """Get the GraphNode at the specified (row, column) Position."""
-        if not self.network.has_node(position):
+        if not self._network.has_node(position):
             return None
 
-        node = self.network.nodes[position]
+        node = self._network.nodes[position]
         return GraphNode(node["name"], node["position"], rotation=node["rotation"], measure_to=node["measure_to"])
 
     def __iter__(self) -> Iterator[GraphNode]:
         """Iterate over the nodes in the graph."""
-        for _, data in self.network.nodes(data=True):
+        for _, data in self._network.nodes(data=True):
             yield GraphNode(data["name"], data["position"], rotation=data["rotation"], measure_to=data["measure_to"])
 
     def nodes(self) -> list[GraphNode]:
@@ -76,15 +76,15 @@ class QuantumGraph:
 
     def add_edge(self, edge: GraphEdge):
         """Add an existing GraphEdge to the graph."""
-        self.network.add_edge(edge.start.position, edge.end.position, name=edge.name)
+        self._network.add_edge(edge.start.position, edge.end.position, name=edge.name)
 
     def add_new_edge(self, name: EdgeName, start: Position, end: Position):
         """Add a new edge to the graph."""
-        self.network.add_edge(start, end, name=name)
+        self._network.add_edge(start, end, name=name)
 
     def iter_edges(self) -> Iterator[GraphEdge]:
         """Iterate over the edges in the graph."""
-        for start, end, data in self.network.edges(data=True):
+        for start, end, data in self._network.edges(data=True):
             yield GraphEdge(data["name"], self[start], self[end])
 
     def edges(self) -> list[GraphEdge]:
@@ -94,7 +94,7 @@ class QuantumGraph:
     def iter_node_edges(self, row: int, column: int) -> Iterator[GraphEdge]:
         start = (row, column)
 
-        for _, end, data in self.network.out_edges(start, data=True):
+        for _, end, data in self._network.out_edges(start, data=True):
             yield GraphEdge(data["name"], self[start], self[end])
 
     def node_edges(self, row: int, column: int) -> list[GraphEdge]:
@@ -113,7 +113,7 @@ class QuantumGraph:
             _WORKS_WITH.value: []
         }
 
-        for _, end, data in self.network.out_edges(start, data=True):
+        for _, end, data in self._network.out_edges(start, data=True):
             edge_name = data["name"]
             destination_node = self[end]
 
@@ -159,13 +159,13 @@ class QuantumGraph:
         return "\n".join(rows)
 
     def __contains__(self, node: GraphNode) -> bool:
-        return node.position in self.network
+        return node.position in self._network
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, QuantumGraph):
             return NotImplemented
 
-        return networkx.utils.graphs_equal(self.network, other.network)
+        return networkx.utils.graphs_equal(self._network, other._network)
 
     def is_occupied(self, row: int, column: int) -> bool:
         """Check whether the graph has a non-filler node at the specified row and column."""
@@ -173,7 +173,7 @@ class QuantumGraph:
 
     def has_node_at(self, row: int, column: int) -> bool:
         """Check whether the graph has a node at the specified row and column."""
-        return self.network.has_node((row, column))
+        return self._network.has_node((row, column))
 
     def fill_empty_spaces(self):
         for row_index in range(self.height):
@@ -213,17 +213,17 @@ class QuantumGraph:
 
     def clear(self):
         """Remove all the nodes and edges from the graph."""
-        self.network.clear()
+        self._network.clear()
 
     def clear_edges(self):
         """Remove all the edges from the graph."""
-        self.network.clear_edges()
+        self._network.clear_edges()
 
     def __len__(self):
         """Get the total number of nodes in the graph."""
-        return len(self.network.nodes)
+        return len(self._network.nodes)
 
     def copy(self) -> QuantumGraph:
         copy = QuantumGraph()
-        copy.network = self.network.copy()
+        copy._network = self._network.copy()
         return copy

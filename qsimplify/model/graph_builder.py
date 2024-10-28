@@ -41,8 +41,8 @@ class GraphBuilder:
         self._graph.add_new_node(name, (qubit, column))
         return self
 
-    def add_rx(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        return self.add_rotation(GateName.RX, theta, qubit, column)
+    def add_rx(self, phi: float, qubit: int, column: int) -> GraphBuilder:
+        return self.add_rotation(GateName.RX, phi, qubit, column)
 
     def add_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
         return self.add_rotation(GateName.RY, theta, qubit, column)
@@ -50,11 +50,12 @@ class GraphBuilder:
     def add_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
         return self.add_rotation(GateName.RZ, theta, qubit, column)
 
-    def add_rotation(self, name: GateName, theta: float, qubit: int, column: int) -> GraphBuilder:
+    def add_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
         if name not in (GateName.RX, GateName.RY, GateName.RZ):
             raise ValueError(f"{name} is not a rotation gate")
 
-        self._graph.add_new_node(name, (qubit, column), rotation=theta)
+        print(angle)
+        self._graph.add_new_node(name, (qubit, column), rotation=angle)
         return self
 
     def add_measure(self, qubit: int, bit: int, column: int) -> GraphBuilder:

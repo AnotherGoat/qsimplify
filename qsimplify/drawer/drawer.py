@@ -1,79 +1,118 @@
-import matplotlib.pyplot as plt
-import networkx as nx
+from graphviz import Digraph
 from qiskit import QuantumCircuit
 
-from qsimplify.model import QuantumGraph, Position, EdgeName
+from qsimplify.model import QuantumGraph, Position, EdgeName, GraphNode, GateName, GraphEdge
 from qsimplify.utils import setup_logger
+import graphviz
 
-class EdgeType:
-    def __init__(self, name: EdgeName, color: str, angle: float):
-        self.name = name
-        self.color = color
-        self.angle = angle
+_RED = "#EF9A9A"
+_DARK_RED = "#B71C1C"
+_GREEN = "#A5D6A7"
+_BLUE = "#90CAF9"
+_DARK_BLUE = "#0D47A1"
+_ORANGE = "#FFCC80"
+_PURPLE = "#CE93D8"
+_GRAY = "#EEEEEE"
+_DARK_GRAY = "#424242"
 
 class Drawer:
-    _NODE_COLOR = "lightgray"
-    _NODE_SIZE = 5000
-    _LINE_WIDTH = 2
-    _EDGE_TYPES = [
-        EdgeType(EdgeName.LEFT, "red", 0.15),
-        EdgeType(EdgeName.RIGHT, "blue", 0.15),
-        EdgeType(EdgeName.TARGETS, "green", 0.3),
-        EdgeType(EdgeName.CONTROLLED_BY, "purple", 0.3),
-    ]
-
     def __init__(self):
         self.logger = setup_logger("Drawer")
 
-    def save_circuit(self, circuit: QuantumCircuit, file_name: str):
-        self.logger.info("Saving circuit to file %s", file_name)
+    def save_circuit_png(self, circuit: QuantumCircuit, file_name: str):
+        self.logger.info("Saving circuit to file %s.png", file_name)
 
-        plt.clf()
         figure = circuit.draw("mpl")
-        figure.savefig(file_name)
+        figure.savefig(f"{file_name}.png")
 
+    def save_graph_png(self, graph: QuantumGraph, file_name: str):
+        self.logger.info("Saving graph to file %s.png", file_name)
+        self._save_graph(graph, file_name, "png", dpi=str(150))
 
-    def save_graph(self, graph: QuantumGraph, file_name: str, draw_legend: bool = True):
-        self.logger.info("Saving graph to file %s", file_name)
-        plt.clf()
-        plt.figure(figsize=(3 * graph.width, 2.5 * graph.height))
+    def save_graph_svg(self, graph: QuantumGraph, file_name: str):
+        self.logger.info("Saving graph to file %s.svg", file_name)
+        self._save_graph(graph, file_name, "svg")
 
-        self._draw_nodes(graph)
+    def _save_graph(self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str):
+        image = graphviz.Digraph(format=extension)
+        image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", **kwargs)
 
-        for edge_type in self._EDGE_TYPES:
-            self._draw_edges(edge_type, graph)
+        self._draw_nodes(graph, image)
+        self._draw_edges(graph, image)
 
-        if draw_legend:
-            self._draw_legend()
+        image.render(f"{file_name}.gv", outfile=f"{file_name}.{extension}", engine="neato", view=True)
 
-        plt.tight_layout()
-        plt.savefig(file_name)
+    def _draw_nodes(self, graph: QuantumGraph, image: Digraph):
+        for node in graph:
+            x, y = self._find_draw_position(graph, node)
 
-    def _draw_nodes(self, graph: QuantumGraph):
-        draw_positions = self._find_draw_positions(graph)
+            settings = {
+                "label": self._find_node_label(node),
+                "fillcolor": self._find_node_color(node),
+                "style": "filled",
+                "shape": "circle",
+                "width": str(1.5),
+                "pos": f"{x},{y}!",
+            }
 
-        nx.draw_networkx_nodes(graph.network, pos=draw_positions, node_size=self._NODE_SIZE, node_color=self._NODE_COLOR)
-
-        labels = {node.position: str(node) for node in graph}
-        nx.draw_networkx_labels(graph.network, pos=draw_positions, labels=labels)
+            image.node(str(node.position), **settings)
 
 
     @staticmethod
-    def _find_draw_positions(graph) -> dict[Position, Position]:
-        return {position: (position[1], graph.height - position[0] - 1) for position in graph.get_positions()}
+    def _find_draw_position(graph: QuantumGraph, node: GraphNode) -> Position:
+        return node.position[1], graph.height - node.position[0] - 1
 
+    @staticmethod
+    def _find_node_label(node: GraphNode) -> str:
+        match node.name:
+            case GateName.RX | GateName.RY | GateName.RZ:
+                top_label = f"{node.name.name}({node.rotation})"
+            case GateName.MEASURE:
+                top_label = f"M({node.measure_to})"
+            case _:
+                top_label = f"{node.name.name}"
 
-    def _draw_edges(self, edge_type: EdgeType, graph: QuantumGraph):
-        draw_positions = self._find_draw_positions(graph)
+        return f"{top_label}\n{node.position}"
 
-        edges = [(edge.start.position, edge.end.position) for edge in graph.edges() if edge.name == edge_type.name]
-        nx.draw_networkx_edges(graph.network, draw_positions, edgelist=edges, node_size=self._NODE_SIZE, edge_color=edge_type.color,
-                               width=self._LINE_WIDTH, connectionstyle=f"arc3,rad={edge_type.angle}")
+    @staticmethod
+    def _find_node_color(node: GraphNode) -> str:
+        match node.name:
+            case GateName.ID:
+                return "white"
+            case GateName.H | GateName.CH:
+                return _RED
+            case GateName.X | GateName.RX | GateName.CX | GateName.CCX:
+                return _BLUE
+            case GateName.Y | GateName.RY:
+                return _ORANGE
+            case GateName.Z | GateName.RZ | GateName.CZ:
+                return _GREEN
+            case GateName.SWAP | GateName.CSWAP:
+                return _PURPLE
+            case _:
+                return _GRAY
 
-    def _draw_legend(self):
-        legend_handles = [self._create_legend_handle(edge_type) for edge_type in self._EDGE_TYPES]
-        plt.legend(handles=legend_handles, loc="upper left")
+    def _draw_edges(self, graph: QuantumGraph, image: Digraph):
+        for edge in graph.iter_edges():
+            if edge.name == EdgeName.WORKS_WITH:
+                continue
 
+            settings = {
+                "taillabel": edge.name.value.replace("_", " "),
+                "fontcolor": self._find_edge_color(edge),
+                "labeldistance": str(2.0),
+                "style": "dashed",
+                "color": self._find_edge_color(edge),
+            }
 
-    def _create_legend_handle(self, edge_type: EdgeType) -> plt.Line2D:
-        return plt.Line2D([0], [0], color=edge_type.color, lw=self._LINE_WIDTH, label=edge_type.name.value)
+            image.edge(str(edge.start.position), str(edge.end.position), **settings)
+
+    @staticmethod
+    def _find_edge_color(edge: GraphEdge) -> str:
+        match edge.name:
+            case EdgeName.LEFT | EdgeName.RIGHT:
+                return _DARK_GRAY
+            case EdgeName.SWAPS_WITH:
+                return _DARK_RED
+            case EdgeName.TARGETS | EdgeName.CONTROLLED_BY:
+                return _DARK_BLUE

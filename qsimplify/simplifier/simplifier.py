@@ -63,8 +63,8 @@ class Simplifier:
 
         return None
 
-
-    def _find_start(self, pattern: QuantumGraph) -> GraphNode:
+    @staticmethod
+    def _find_start(pattern: QuantumGraph) -> GraphNode:
         if pattern.height == 0:
             raise ValueError("Invalid pattern")
 
