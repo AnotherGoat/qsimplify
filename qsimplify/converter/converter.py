@@ -1,9 +1,12 @@
 from typing import Callable
 from qiskit import QuantumCircuit
+from qiskit.circuit import CircuitInstruction
+from qiskit.circuit.quantumcircuit import BitLocations
 from typing_extensions import NamedTuple
 
 from qsimplify.model import QuantumGraph, Position, GateName, GraphNode, GraphBuilder, CircuitBuilder
-from qsimplify.utils import find_qubit_indexes, setup_logger, find_bit_indexes
+from qsimplify.utils import setup_logger
+
 
 class GraphPlacingData(NamedTuple):
     builder: GraphBuilder
@@ -72,7 +75,7 @@ class Converter:
                 self.logger.debug("Skipping empty instruction")
                 continue
 
-            qubits = find_qubit_indexes(circuit, instruction)
+            qubits = self._find_qubit_indexes(circuit, instruction)
             self.logger.debug("Instruction qubit indexes are %s", qubits)
 
             columns = [last_columns[qubit] for qubit in qubits]
@@ -92,7 +95,7 @@ class Converter:
 
                 self.logger.debug("Last columns updated to %s", last_columns)
 
-            bits = find_bit_indexes(circuit, instruction)
+            bits = self._find_bit_indexes(circuit, instruction)
             params = instruction.operation.params
             placing_data = GraphPlacingData(builder, gate_name, qubits, bits, params, target_column)
             self._add_instruction_to_graph(placing_data)
@@ -101,6 +104,30 @@ class Converter:
         self.logger.debug("After building the graph, this is the result\n%s", graph)
         self.logger.debug("For comparison, this is the original circuit\n%s", circuit.draw())
         return graph
+
+    @staticmethod
+    def _find_qubit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+        qubits = []
+
+        for qubit in instruction.qubits:
+            bit_locations: BitLocations = circuit.find_bit(qubit)
+
+            for (_, qubit_index) in bit_locations.registers:
+                qubits.append(qubit_index)
+
+        return qubits
+
+    @staticmethod
+    def _find_bit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+        bits = []
+
+        for bit in instruction.clbits:
+            bit_locations: BitLocations = circuit.find_bit(bit)
+
+            for (_, bit_index) in bit_locations.registers:
+                bits.append(bit_index)
+
+        return bits
 
     def _add_instruction_to_graph(self, data: GraphPlacingData):
         self._circuit_to_graph_handlers[data.gate_name](data)

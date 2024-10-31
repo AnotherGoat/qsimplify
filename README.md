@@ -1,5 +1,16 @@
 # Quantum Circuit Simplifier
 
+## Project dependencies
+
+### Required
+
+- Poetry is used to manage dependencies. You can check installation instructions [here](https://python-poetry.org/docs/#installation).
+
+### Optional
+
+- Graphviz is used to draw graphs. You can check installation instructions [here](https://graphviz.org/download/).
+- 
+
 ## Running the program
 
 Install dependencies
@@ -12,6 +23,24 @@ Run unit tests
 
 ```shell
 poetry run pytest
+```
+
+Run unit tests with coverage
+
+```shell
+poetry run pytest --cov=qsimplify --cov-report=html:coverage
+```
+
+Lint code
+
+```shell
+poetry run pylint
+```
+
+Check types
+
+```shell
+poetry run pyright
 ```
 
 Run demo

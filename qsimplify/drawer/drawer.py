@@ -1,7 +1,7 @@
 from graphviz import Digraph
 from qiskit import QuantumCircuit
 
-from qsimplify.model import QuantumGraph, Position, EdgeName, GraphNode, GateName, GraphEdge
+from qsimplify.model import QuantumGraph, EdgeName, GraphNode, GateName, GraphEdge
 from qsimplify.utils import setup_logger
 import graphviz
 
@@ -59,7 +59,7 @@ class Drawer:
 
 
     @staticmethod
-    def _find_draw_position(graph: QuantumGraph, node: GraphNode) -> Position:
+    def _find_draw_position(graph: QuantumGraph, node: GraphNode) -> tuple[int, int]:
         return node.position[1], graph.height - node.position[0] - 1
 
     @staticmethod

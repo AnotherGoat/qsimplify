@@ -4,12 +4,12 @@ class EdgeData:
     def __init__(
         self,
         origin: GraphNode,
-        left: GraphNode = None,
-        right: GraphNode = None,
-        swaps_with: GraphNode = None,
-        targets: list[GraphNode] = None,
-        controlled_by: list[GraphNode] = None,
-        works_with: list[GraphNode] = None,
+        left: GraphNode | None = None,
+        right: GraphNode | None = None,
+        swaps_with: GraphNode | None = None,
+        targets: list[GraphNode] | None = None,
+        controlled_by: list[GraphNode] | None = None,
+        works_with: list[GraphNode] | None = None,
     ):
         self.origin = origin
         self.left = left
@@ -28,7 +28,7 @@ class EdgeData:
             f"right={self.right}" if self.right else "",
             f"swaps_with={self.swaps_with}" if self.swaps_with else "",
             f"targets={target_names}" if target_names else "",
-            f"controlled_by={controller_names}" if controller_names else ""
+            f"controlled_by={controller_names}" if controller_names else "",
             f"works_with={works_with_names}" if works_with_names else "",
         ]
         extra_data = [data for data in extra_data if data]

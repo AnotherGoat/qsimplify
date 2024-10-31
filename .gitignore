@@ -3,3 +3,5 @@
 *.gv
 *.png
 *.svg
+.coverage
+coverage/

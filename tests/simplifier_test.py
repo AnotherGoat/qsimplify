@@ -86,32 +86,32 @@ class TestSimplifier:
                  .add_z(0, 2)
                  .build())
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 3)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 3)
         assert subgraph == graph
 
         first = GraphBuilder().add_x(0, 0).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 1)
         assert subgraph == first
 
         second = GraphBuilder().add_h(0, 0).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 1, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 1, 1)
         assert subgraph == second
 
         third = GraphBuilder().add_z(0, 0).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 2, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 2, 1)
         assert subgraph == third
 
         start = GraphBuilder().add_x(0, 0).add_h(0, 1).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
         assert subgraph == start
 
         end = GraphBuilder().add_h(0, 0).add_z(0, 1).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 1, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 1, 2)
         assert subgraph == end
 
     @staticmethod
@@ -123,27 +123,27 @@ class TestSimplifier:
                  .add_h(1, 1)
                  .build())
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0, 1], 0, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0, 1], 0, 2)
         assert subgraph == graph
 
         first_row = GraphBuilder().add_x(0, 0).add_y(0, 1).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
         assert subgraph == first_row
 
         second_row = GraphBuilder().add_z(0, 0).add_h(0, 1).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [1], 0, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [1], 0, 2)
         assert subgraph == second_row
 
         first_column = GraphBuilder().add_x(0, 0).add_z(1, 0).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0, 1], 0, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0, 1], 0, 1)
         assert subgraph == first_column
 
         second_column = GraphBuilder().add_y(0, 0).add_h(1, 0).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0, 1], 1, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0, 1], 1, 1)
         assert subgraph == second_column
 
     @staticmethod
@@ -155,7 +155,7 @@ class TestSimplifier:
                  .add_measure(0, 3, 3)
                  .build())
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 4)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 4)
         assert subgraph == graph
 
     @staticmethod
@@ -165,7 +165,7 @@ class TestSimplifier:
                  .add_ccx(1, 2, 0, 1)
                  .build())
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0, 1, 2], 0, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0, 1, 2], 0, 2)
         assert subgraph == graph
 
     @staticmethod
@@ -176,7 +176,7 @@ class TestSimplifier:
                  .add_cx(2, 3, 0)
                  .build())
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [2, 1, 3, 0], 0, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [2, 1, 3, 0], 0, 1)
 
         expected = (GraphBuilder()
                     .add_cx(0, 2, 0)
@@ -190,7 +190,7 @@ class TestSimplifier:
     def test_extract_subgraph_skips_identities():
         graph = GraphBuilder().add_x(0, 1).add_y(0, 5).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
 
         expected = GraphBuilder().add_x(0, 0).add_y(0, 1).build()
 
@@ -200,17 +200,17 @@ class TestSimplifier:
     def test_extract_subgraph_fails_outside():
         graph = GraphBuilder().add_y(0, 5).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 2)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
         assert subgraph is None
 
     @staticmethod
     def test_extract_subgraph_doesnt_break_edges():
         graph = GraphBuilder().add_cx(0, 1, 0).build()
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [0], 0, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 1)
         assert subgraph is None
 
-        subgraph, mappings = simplifier.extract_subgraph(graph, [1], 0, 1)
+        subgraph, _ = simplifier.extract_subgraph(graph, [1], 0, 1)
         assert subgraph is None
 
     @staticmethod

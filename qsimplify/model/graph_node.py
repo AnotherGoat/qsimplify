@@ -1,4 +1,3 @@
-from qsimplify.model.position import Position
 from qsimplify.model.gate_name import GateName
 
 
@@ -10,12 +9,12 @@ class GraphNode:
         name (GateName): The name of quantum gate represented by this node.
         position (Position): The position of this node in the graph.
     """
-    def __init__(self, name: GateName, position: Position, rotation: float = None, measure_to: int = None):
-        if position[0] < 0 or position[1] < 0:
-            raise ValueError(f"GateNode position '{position}' can't have negative values")
+    def __init__(self, name: GateName, row: int, column: int, rotation: float | None = None, measure_to: int | None = None):
+        if row < 0 or column < 0:
+            raise ValueError(f"GateNode position '({row}, {column})' can't have negative values")
 
         self.name = name
-        self.position = position
+        self.position = (row, column)
         self.rotation = rotation
         self.measure_to = measure_to
 

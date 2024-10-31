@@ -13,10 +13,13 @@ pytest = "^8.3.3"
 matplotlib = {extras = ["collections"], version = "^3.9.2"}
 graphviz = "^0.20.3"
 
-
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.3"
+pytest-cov = "^6.0.0"
 
+[tool.poetry.group.dev.dependencies]
+pylint = "^3.3.1"
+pyright = "^1.1.386"
 
 [build-system]
 requires = ["poetry-core"]

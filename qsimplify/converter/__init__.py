@@ -1,1 +1,1 @@
-from qsimplify.converter.converter import Converter
+from .converter import Converter

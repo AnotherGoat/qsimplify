@@ -4,8 +4,8 @@ from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
 from qsimplify.model import QuantumGraph, GraphNode, GateName, GraphBuilder
-from qsimplify.simplifier.simplification_rule import SimplificationRule
 from qsimplify.simplifier.graph_mappings import GraphMappings
+from qsimplify.simplifier.simplification_rule import SimplificationRule
 from qsimplify.utils import setup_logger
 
 _RULES: list[SimplificationRule] = []
@@ -98,7 +98,7 @@ class Simplifier:
     @staticmethod
     def _calculate_row_permutations(graph: QuantumGraph, pattern: QuantumGraph, start: GraphNode, pattern_start: GraphNode) -> list[list[int]]:
         pattern_height = pattern.height
-        row, column = start.position
+        row = start.position[0]
 
         if pattern_height == 1:
             return [[row]]
@@ -126,11 +126,11 @@ class Simplifier:
 
         for old_position, new_position in mappings.items():
             node = graph[old_position]
-            subgraph.add_new_node(node.name, new_position, rotation=node.rotation, measure_to=node.measure_to)
+            subgraph.add_new_node(node.name, *new_position, rotation=node.rotation, measure_to=node.measure_to)
 
             edges = [edge for edge in graph.node_edges(*old_position) if not edge.name.is_positional()]
             for edge in edges:
-                subgraph.add_new_edge(edge.name, mappings[edge.start.position], mappings[edge.end.position])
+                subgraph.add_new_edge(edge.name, *mappings[edge.start.position], *mappings[edge.end.position])
 
         self.logger.debug("Mappings are valid, filling the subgraph")
         subgraph.fill_empty_spaces()
@@ -195,12 +195,12 @@ class Simplifier:
 
         for original, match in mappings.items():
             node = replacement[match]
-            graph.add_new_node(node.name, original, rotation=node.rotation, measure_to=node.measure_to)
+            graph.add_new_node(node.name, *original, rotation=node.rotation, measure_to=node.measure_to)
 
             for edge in replacement.node_edges(*match):
                 if edge.name.is_positional():
                     continue
 
-                graph.add_new_edge(edge.name, original, reverse_mappings[edge.end.position])
+                graph.add_new_edge(edge.name, *original, *reverse_mappings[edge.end.position])
 
         graph.fill_positional_edges()
