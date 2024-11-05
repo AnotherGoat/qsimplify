@@ -12,8 +12,11 @@ class GraphEdge:
         if not isinstance(other, GraphEdge):
             return NotImplemented
 
-        return self.name == other.name and self.start == other.start and self.end == other.end
-
+        return (
+            self.name == other.name
+            and self.start == other.start
+            and self.end == other.end
+        )
 
     def __str__(self):
         return f"[{self.name.value}] from {self.start} to {self.end}"

@@ -9,9 +9,19 @@ class GraphNode:
         name (GateName): The name of quantum gate represented by this node.
         position (Position): The position of this node in the graph.
     """
-    def __init__(self, name: GateName, row: int, column: int, rotation: float | None = None, measure_to: int | None = None):
+
+    def __init__(
+        self,
+        name: GateName,
+        row: int,
+        column: int,
+        rotation: float | None = None,
+        measure_to: int | None = None,
+    ):
         if row < 0 or column < 0:
-            raise ValueError(f"GateNode position '({row}, {column})' can't have negative values")
+            raise ValueError(
+                f"GateNode position '({row}, {column})' can't have negative values"
+            )
 
         self.name = name
         self.position = (row, column)
@@ -22,7 +32,12 @@ class GraphNode:
         if not isinstance(other, GraphNode):
             return NotImplemented
 
-        return self.name == other.name and self.position == other.position and self.rotation == other.rotation and self.measure_to == other.measure_to
+        return (
+            self.name == other.name
+            and self.position == other.position
+            and self.rotation == other.rotation
+            and self.measure_to == other.measure_to
+        )
 
     def __str__(self):
         rotation_data = f" (rotation={self.rotation})" if self.rotation else ""

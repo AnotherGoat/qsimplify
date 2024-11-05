@@ -1,4 +1,4 @@
-from qsimplify.model import GateName, EdgeName
+from qsimplify.model import EdgeName, GateName
 
 ID = GateName.ID
 H = GateName.H

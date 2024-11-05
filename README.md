@@ -9,47 +9,52 @@
 ### Optional
 
 - Graphviz is used to draw graphs. You can check installation instructions [here](https://graphviz.org/download/).
-- 
 
 ## Running the program
 
-Install dependencies
+- Install dependencies
 
 ```shell
 poetry install
 ```
 
-Run unit tests
+- Run unit tests
 
 ```shell
 poetry run pytest
 ```
 
-Run unit tests with coverage
+- Run unit tests with coverage
 
 ```shell
 poetry run pytest --cov=qsimplify --cov-report=html:coverage
 ```
 
-Lint code
+- Lint code
 
 ```shell
 poetry run pylint
 ```
 
-Check types
+- Format code
+
+```shell
+poetry run black .
+```
+
+- Check types
 
 ```shell
 poetry run pyright
 ```
 
-Run demo
+- Run demo
 
 ```shell
 poetry run python -m qsimplify
 ```
 
-Run demo in debug mode
+- Run demo in debug mode
 
 ```shell
 poetry run python -m qsimplify --debug

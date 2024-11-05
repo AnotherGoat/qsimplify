@@ -9,6 +9,7 @@ _TARGETS = EdgeName.TARGETS
 _CONTROLLED_BY = EdgeName.CONTROLLED_BY
 _WORKS_WITH = EdgeName.WORKS_WITH
 
+
 class GraphBuilder:
     def __init__(self):
         self._graph = QuantumGraph()
@@ -50,7 +51,9 @@ class GraphBuilder:
     def add_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
         return self.add_rotation(GateName.RZ, theta, qubit, column)
 
-    def add_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
+    def add_rotation(
+        self, name: GateName, angle: float, qubit: int, column: int
+    ) -> GraphBuilder:
         if name not in (GateName.RX, GateName.RY, GateName.RZ):
             raise ValueError(f"{name} is not a rotation gate")
 
@@ -72,13 +75,19 @@ class GraphBuilder:
         self._graph.add_new_edge(_SWAPS_WITH, *second, *first)
         return self
 
-    def add_ch(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+    def add_ch(
+        self, control_qubit: int, target_qubit: int, column: int
+    ) -> GraphBuilder:
         return self.add_control(GateName.CH, control_qubit, target_qubit, column)
 
-    def add_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+    def add_cx(
+        self, control_qubit: int, target_qubit: int, column: int
+    ) -> GraphBuilder:
         return self.add_control(GateName.CX, control_qubit, target_qubit, column)
 
-    def add_control(self, name: GateName, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+    def add_control(
+        self, name: GateName, control_qubit: int, target_qubit: int, column: int
+    ) -> GraphBuilder:
         if name not in (GateName.CH, GateName.CX):
             raise ValueError(f"{name} is not an asymmetrical two-qubit controlled gate")
 
@@ -103,7 +112,9 @@ class GraphBuilder:
         self._graph.add_new_edge(_WORKS_WITH, *second, *first)
         return self
 
-    def add_cswap(self, control_qubit: int, target_qubit1: int, target_qubit2: int, column: int) -> GraphBuilder:
+    def add_cswap(
+        self, control_qubit: int, target_qubit1: int, target_qubit2: int, column: int
+    ) -> GraphBuilder:
         control = (control_qubit, column)
         target1 = (target_qubit1, column)
         target2 = (target_qubit2, column)
@@ -120,7 +131,9 @@ class GraphBuilder:
         self._graph.add_new_edge(_SWAPS_WITH, *target2, *target1)
         return self
 
-    def add_ccx(self, control_qubit1: int, control_qubit2: int, target_qubit: int, column: int) -> GraphBuilder:
+    def add_ccx(
+        self, control_qubit1: int, control_qubit2: int, target_qubit: int, column: int
+    ) -> GraphBuilder:
         control1 = (control_qubit1, column)
         control2 = (control_qubit2, column)
         target = (target_qubit, column)

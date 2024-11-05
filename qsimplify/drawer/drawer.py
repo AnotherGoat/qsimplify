@@ -1,9 +1,9 @@
+import graphviz
 from graphviz import Digraph
 from qiskit import QuantumCircuit
 
-from qsimplify.model import QuantumGraph, EdgeName, GraphNode, GateName, GraphEdge
+from qsimplify.model import EdgeName, GateName, GraphEdge, GraphNode, QuantumGraph
 from qsimplify.utils import setup_logger
-import graphviz
 
 _RED = "#EF9A9A"
 _DARK_RED = "#B71C1C"
@@ -14,6 +14,7 @@ _ORANGE = "#FFCC80"
 _PURPLE = "#CE93D8"
 _GRAY = "#EEEEEE"
 _DARK_GRAY = "#424242"
+
 
 class Drawer:
     def __init__(self):
@@ -33,14 +34,21 @@ class Drawer:
         self._logger.info("Saving graph to file %s.svg", file_name)
         self._save_graph(graph, file_name, "svg")
 
-    def _save_graph(self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str):
+    def _save_graph(
+        self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str
+    ):
         image = graphviz.Digraph(format=extension)
         image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", **kwargs)
 
         self._draw_nodes(graph, image)
         self._draw_edges(graph, image)
 
-        image.render(f"{file_name}.gv", outfile=f"{file_name}.{extension}", engine="neato", view=True)
+        image.render(
+            f"{file_name}.gv",
+            outfile=f"{file_name}.{extension}",
+            engine="neato",
+            view=True,
+        )
 
     def _draw_nodes(self, graph: QuantumGraph, image: Digraph):
         for node in graph:
@@ -56,7 +64,6 @@ class Drawer:
             }
 
             image.node(str(node.position), **settings)
-
 
     @staticmethod
     def _find_draw_position(graph: QuantumGraph, node: GraphNode) -> tuple[int, int]:

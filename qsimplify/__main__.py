@@ -3,10 +3,11 @@ import argparse
 from qiskit import QuantumCircuit
 
 from qsimplify.analyzer import Analyzer
+from qsimplify.converter import Converter
 from qsimplify.drawer import Drawer
 from qsimplify.simplifier import Simplifier
 from qsimplify.utils import set_debug_mode
-from qsimplify.converter import Converter
+
 
 def _main():
     circuit = QuantumCircuit(5)
@@ -26,20 +27,21 @@ def _main():
 
     converter = Converter()
     simplifier = Simplifier(converter)
-    #simplified_circuit, build_steps = simplifier.simplify_circuit(circuit, add_build_steps=True)
+    # simplified_circuit, build_steps = simplifier.simplify_circuit(circuit, add_build_steps=True)
 
-    #print("\n===== Simplified circuit =====")
-    #print(simplified_circuit.draw())
+    # print("\n===== Simplified circuit =====")
+    # print(simplified_circuit.draw())
 
-    #print("\n===== Simplified build steps =====")
-    #print(build_steps)
+    # print("\n===== Simplified build steps =====")
+    # print(build_steps)
 
-    #drawer = Drawer()
-    #drawer.save_circuit_png(circuit, "original_circuit")
-    #drawer.save_graph_png(converter.circuit_to_graph(circuit), "original_graph")
-    #drawer.save_graph_svg(converter.circuit_to_graph(circuit), "original_graph")
-    #drawer.save_circuit(simplified_circuit, "simplified_circuit.png")
-    #drawer.save_graph(converter.circuit_to_graph(simplified_circuit), "simplified_graph.png", draw_legend=False)
+    # drawer = Drawer()
+    # drawer.save_circuit_png(circuit, "original_circuit")
+    # drawer.save_graph_png(converter.circuit_to_graph(circuit), "original_graph")
+    # drawer.save_graph_svg(converter.circuit_to_graph(circuit), "original_graph")
+    # drawer.save_circuit(simplified_circuit, "simplified_circuit.png")
+    # drawer.save_graph(converter.circuit_to_graph(simplified_circuit), "simplified_graph.png", draw_legend=False)
+
 
 def _demo():
     circuit = QuantumCircuit(2)
@@ -76,7 +78,9 @@ def _demo():
     simplifier = Simplifier(converter)
 
     simplified_graph = simplifier.simplify_graph(graph)
-    simplified_circuit, build_steps = converter.graph_to_circuit(simplified_graph, add_build_steps=True)
+    simplified_circuit, build_steps = converter.graph_to_circuit(
+        simplified_graph, add_build_steps=True
+    )
     print("\n===== Simplified circuit =====")
     print(simplified_circuit.draw())
 
@@ -88,10 +92,10 @@ def _demo():
     print(simplified_metrics)
 
     drawer = Drawer()
-    #drawer.save_circuit(circuit, "original_circuit.png")
-    #drawer.save_graph(graph, "original_graph.png", draw_legend=False)
-    #drawer.save_circuit(simplified_circuit, "simplified_circuit.png")
-    #drawer.save_graph(converter.circuit_to_graph(simplified_circuit), "simplified_graph.png", draw_legend=False)
+    # drawer.save_circuit(circuit, "original_circuit.png")
+    # drawer.save_graph(graph, "original_graph.png", draw_legend=False)
+    # drawer.save_circuit(simplified_circuit, "simplified_circuit.png")
+    # drawer.save_graph(converter.circuit_to_graph(simplified_circuit), "simplified_graph.png", draw_legend=False)
 
 
 def _parse_debug_options():

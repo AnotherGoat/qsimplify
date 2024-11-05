@@ -1,5 +1,6 @@
 from qsimplify.model.graph_node import GraphNode
 
+
 class EdgeData:
     def __init__(
         self,

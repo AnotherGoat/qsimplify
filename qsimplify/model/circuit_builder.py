@@ -1,12 +1,15 @@
 from __future__ import annotations
+
 from qiskit import QuantumCircuit
-from qsimplify.model.gate_name import GateName
+
 from qsimplify.model.edge_name import EdgeName
+from qsimplify.model.gate_name import GateName
 
 _SWAPS_WITH = EdgeName.SWAPS_WITH
 _TARGETS = EdgeName.TARGETS
 _CONTROLLED_BY = EdgeName.CONTROLLED_BY
 _WORKS_WITH = EdgeName.WORKS_WITH
+
 
 class CircuitBuilder:
     def __init__(self, qubits: int, name: str = "circuit"):
@@ -93,7 +96,9 @@ class CircuitBuilder:
     def add_cx(self, control_qubit: int, target_qubit: int) -> CircuitBuilder:
         return self.add_control(GateName.CX, control_qubit, target_qubit)
 
-    def add_control(self, name: GateName, control_qubit: int, target_qubit: int) -> CircuitBuilder:
+    def add_control(
+        self, name: GateName, control_qubit: int, target_qubit: int
+    ) -> CircuitBuilder:
         if name not in (GateName.CH, GateName.CX):
             raise ValueError(f"{name} is not an asymmetrical two-qubit controlled gate")
 
@@ -111,17 +116,25 @@ class CircuitBuilder:
         self._add_build_step(GateName.CZ, qubit1, qubit2)
         return self
 
-    def add_cswap(self, control_qubit: int, target_qubit1: int, target_qubit2: int) -> CircuitBuilder:
+    def add_cswap(
+        self, control_qubit: int, target_qubit1: int, target_qubit2: int
+    ) -> CircuitBuilder:
         self._circuit.cswap(control_qubit, target_qubit1, target_qubit2)
-        self._add_build_step(GateName.CSWAP, control_qubit, target_qubit1, target_qubit2)
+        self._add_build_step(
+            GateName.CSWAP, control_qubit, target_qubit1, target_qubit2
+        )
         return self
 
-    def add_ccx(self, control_qubit1: int, control_qubit2: int, target_qubit: int) -> CircuitBuilder:
+    def add_ccx(
+        self, control_qubit1: int, control_qubit2: int, target_qubit: int
+    ) -> CircuitBuilder:
         self._circuit.ccx(control_qubit1, control_qubit2, target_qubit)
         self._add_build_step(GateName.CCX, control_qubit1, control_qubit2, target_qubit)
         return self
 
-    def build(self, add_build_steps: bool = False) -> QuantumCircuit | tuple[QuantumCircuit, str]:
+    def build(
+        self, add_build_steps: bool = False
+    ) -> QuantumCircuit | tuple[QuantumCircuit, str]:
 
         if add_build_steps:
             return self._circuit, "\n".join(self._build_steps)

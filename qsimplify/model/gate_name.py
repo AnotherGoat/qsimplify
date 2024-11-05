@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GateName(Enum):
     ID = "id"
     H = "h"

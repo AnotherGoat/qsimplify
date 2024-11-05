@@ -5,29 +5,30 @@ from dataclasses import dataclass
 @dataclass
 class QuantumMetrics:
     """
-       Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
+    Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
 
-       Attributes:
-           width (int): Number of qubits in the circuit.
-           depth (int): Maximum number of operations applied to a qubit in the circuit.
+    Attributes:
+        width (int): Number of qubits in the circuit.
+        depth (int): Maximum number of operations applied to a qubit in the circuit.
 
-           max_density (int): Maximum number of operations applied to the qubits.
-           average_density (float): Average number of operations applied to the qubits.
+        max_density (int): Maximum number of operations applied to the qubits.
+        average_density (float): Average number of operations applied to the qubits.
 
-           pauli_x_count (int): Number of Pauli-X gates (NOT).
-           pauli_y_count (int): Number of Pauli-Y gates.
-           pauli_z_count (int): Number of Pauli-Z gates.
-           pauli_count (int): Total number of Pauli gates in the circuit (calculated as the sum of Pauli-X, Pauli-Y, and Pauli-Z gates).
-           hadamard_count (int): Number of Hadamard gates.
-           initial_superposition_percent (float): Ratio of qubits with a Hadamard gate as an initial gate (qubits in superposition state).
-           other_single_gates_count (int): Number of other single-qubit gates in the circuit (excluding Pauli-X, Pauli-Y, Pauli-Z and Hadamard gates).
-           single_gate_count (int): Total number of single-qubit gates.
-           controlled_single_qubit_count (int): Total number of controlled single-qubit gates.
+        pauli_x_count (int): Number of Pauli-X gates (NOT).
+        pauli_y_count (int): Number of Pauli-Y gates.
+        pauli_z_count (int): Number of Pauli-Z gates.
+        pauli_count (int): Total number of Pauli gates in the circuit (calculated as the sum of Pauli-X, Pauli-Y, and Pauli-Z gates).
+        hadamard_count (int): Number of Hadamard gates.
+        initial_superposition_percent (float): Ratio of qubits with a Hadamard gate as an initial gate (qubits in superposition state).
+        other_single_gates_count (int): Number of other single-qubit gates in the circuit (excluding Pauli-X, Pauli-Y, Pauli-Z and Hadamard gates).
+        single_gate_count (int): Total number of single-qubit gates.
+        controlled_single_qubit_count (int): Total number of controlled single-qubit gates.
 
-           gate_count (int): Total number of gates in the circuit.
-           controlled_gate_count (int): Total number of controlled gates in the circuit.
-           single_gate_percent (float): Ratio of single gates to total gates.
+        gate_count (int): Total number of gates in the circuit.
+        controlled_gate_count (int): Total number of controlled gates in the circuit.
+        single_gate_percent (float): Ratio of single gates to total gates.
     """
+
     # Circuit Size
     width: int = -1
     depth: int = -1

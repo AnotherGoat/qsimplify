@@ -1,7 +1,9 @@
 from qiskit import QuantumCircuit
+
+from qsimplify.analyzer.quantum_metrics import QuantumMetrics
 from qsimplify.converter import Converter
 from qsimplify.model import GateName, QuantumGraph
-from qsimplify.analyzer.quantum_metrics import QuantumMetrics
+
 
 class Analyzer:
     def __init__(self, converter: Converter):
@@ -21,11 +23,17 @@ class Analyzer:
         metrics.pauli_x_count = self._count_operations(circuit, GateName.X.value)
         metrics.pauli_y_count = self._count_operations(circuit, GateName.Y.value)
         metrics.pauli_z_count = self._count_operations(circuit, GateName.Z.value)
-        metrics.pauli_count = metrics.pauli_x_count + metrics.pauli_y_count + metrics.pauli_z_count
+        metrics.pauli_count = (
+            metrics.pauli_x_count + metrics.pauli_y_count + metrics.pauli_z_count
+        )
         metrics.hadamard_count = self._count_operations(circuit, GateName.H.value)
-        metrics.initial_superposition_percent = self._calculate_superposition_rate(graph)
+        metrics.initial_superposition_percent = self._calculate_superposition_rate(
+            graph
+        )
         metrics.single_gate_count = self._count_single_gates(circuit)
-        metrics.other_single_gates_count = metrics.single_gate_count - metrics.pauli_count - metrics.hadamard_count
+        metrics.other_single_gates_count = (
+            metrics.single_gate_count - metrics.pauli_count - metrics.hadamard_count
+        )
 
         metrics.single_gate_percent = metrics.single_gate_count / metrics.gate_count
 
@@ -33,7 +41,9 @@ class Analyzer:
 
     def _count_operations(self, circuit: QuantumCircuit, operation_name: str) -> int:
         operations = self._get_operations(circuit)
-        return len([operation for operation in operations if operation == operation_name])
+        return len(
+            [operation for operation in operations if operation == operation_name]
+        )
 
     @staticmethod
     def _get_operations(circuit: QuantumCircuit) -> list[str]:
@@ -56,5 +66,7 @@ class Analyzer:
 
     @staticmethod
     def _count_single_gates(circuit: QuantumCircuit) -> int:
-        qubit_counts = [instruction.operation.num_qubits for instruction in circuit.data ]
+        qubit_counts = [
+            instruction.operation.num_qubits for instruction in circuit.data
+        ]
         return len([qubit_count for qubit_count in qubit_counts if qubit_count == 1])

@@ -1,4 +1,4 @@
-from qsimplify.model import QuantumGraph, GateName
+from qsimplify.model import GateName, QuantumGraph
 
 
 class SimplificationRule:
@@ -13,4 +13,6 @@ class SimplificationRule:
                 self.replacement.add_new_node(GateName.ID, *position)
 
     def __str__(self):
-        return f"Replace\n{self.pattern.draw_grid()}\nWith\n{self.replacement.draw_grid()}"
+        return (
+            f"Replace\n{self.pattern.draw_grid()}\nWith\n{self.replacement.draw_grid()}"
+        )

@@ -1,17 +1,22 @@
-from typing import Any, NamedTuple, Callable
+from typing import Any, Callable, NamedTuple
 
 import json5
-from qsimplify.model import GraphBuilder, GateName
+
+from qsimplify.model import GateName, GraphBuilder
 from qsimplify.simplifier.simplification_rule import SimplificationRule
+
 
 class GatePlacingData(NamedTuple):
     builder: GraphBuilder
     gate_name: GateName
     extra_data: list[int | float]
 
+
 class RuleParser:
     def __init__(self):
-        self._gate_parsing_handlers: dict[GateName, Callable[[GatePlacingData], None]] = {
+        self._gate_parsing_handlers: dict[
+            GateName, Callable[[GatePlacingData], None]
+        ] = {
             GateName.H: self._add_single_gate,
             GateName.X: self._add_single_gate,
             GateName.Y: self._add_single_gate,
@@ -48,7 +53,9 @@ class RuleParser:
 
     def _parse_rule(self, rule_data: Any) -> SimplificationRule:
         if "pattern" not in rule_data or "replacement" not in rule_data:
-            raise ValueError(f"The rule {rule_data} is missing its pattern or replacement keys")
+            raise ValueError(
+                f"The rule {rule_data} is missing its pattern or replacement keys"
+            )
 
         pattern = GraphBuilder()
 
@@ -64,22 +71,27 @@ class RuleParser:
 
     def _parse_and_add_gate(self, builder: GraphBuilder, gate_data: list[Any]):
         if not isinstance(gate_data[0], str):
-            raise ValueError(f"The gate {gate_data} must have a string as its first element")
+            raise ValueError(
+                f"The gate {gate_data} must have a string as its first element"
+            )
 
         gate_name = GateName.from_str(gate_data.pop(0))
 
         if len(gate_data) < 2:
-            raise ValueError(f"The gate {gate_name}'s extra data {gate_data} must have at least 2 elements")
+            raise ValueError(
+                f"The gate {gate_name}'s extra data {gate_data} must have at least 2 elements"
+            )
 
         if not self._all_numeric(gate_data):
-            raise ValueError(f"The gate {gate_name}'s extra data {gate_data} must only have numbers")
+            raise ValueError(
+                f"The gate {gate_name}'s extra data {gate_data} must only have numbers"
+            )
 
         if gate_name in (GateName.ID, GateName.BARRIER):
             return
 
         placing_data = GatePlacingData(builder, gate_name, gate_data)
         self._gate_parsing_handlers[gate_name](placing_data)
-
 
     @staticmethod
     def _all_numeric(data: list[Any]) -> bool:
@@ -89,7 +101,9 @@ class RuleParser:
         builder, gate_name, extra_data = data
 
         if not self._check_types(extra_data, [int, int]):
-            raise ValueError(f"The gate {gate_name}'s extra data {extra_data} must be [qubit: int, column: int]")
+            raise ValueError(
+                f"The gate {gate_name}'s extra data {extra_data} must be [qubit: int, column: int]"
+            )
 
         builder.add_single(gate_name, extra_data[0], extra_data[1])
 
@@ -98,7 +112,8 @@ class RuleParser:
 
         if not self._check_types(extra_data, [float, int, int]):
             raise ValueError(
-                f"The gate {gate_name}'s extra data {extra_data} must be [angle: float, qubit: int, column: int]")
+                f"The gate {gate_name}'s extra data {extra_data} must be [angle: float, qubit: int, column: int]"
+            )
 
         builder.add_rotation(gate_name, extra_data[0], extra_data[1], extra_data[2])
 
@@ -107,7 +122,8 @@ class RuleParser:
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
-                f"The gate {gate_name}'s extra data {extra_data} must be [qubit: int, bit: int, column: int]")
+                f"The gate {gate_name}'s extra data {extra_data} must be [qubit: int, bit: int, column: int]"
+            )
 
         builder.add_measure(extra_data[0], extra_data[1], extra_data[2])
 
@@ -116,7 +132,8 @@ class RuleParser:
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
-                f"The gate {gate_name}'s extra data {extra_data} must be [qubit1: int, qubit2: int, column: int]")
+                f"The gate {gate_name}'s extra data {extra_data} must be [qubit1: int, qubit2: int, column: int]"
+            )
 
         builder.add_swap(extra_data[0], extra_data[1], extra_data[2])
 
@@ -125,7 +142,8 @@ class RuleParser:
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
-                f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit: int, target_qubit: int, column: int]")
+                f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit: int, target_qubit: int, column: int]"
+            )
 
         builder.add_control(gate_name, extra_data[0], extra_data[1], extra_data[2])
 
@@ -134,7 +152,8 @@ class RuleParser:
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
-                f"The gate {gate_name}'s extra data {extra_data} must be [qubit1: int, qubit2: int, column: int]")
+                f"The gate {gate_name}'s extra data {extra_data} must be [qubit1: int, qubit2: int, column: int]"
+            )
 
         builder.add_cz(extra_data[0], extra_data[1], extra_data[2])
 
@@ -143,7 +162,8 @@ class RuleParser:
 
         if not self._check_types(extra_data, [int, int, int, int]):
             raise ValueError(
-                f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit: int, target_qubit1: int, target_qubit2: int, column: int]")
+                f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit: int, target_qubit1: int, target_qubit2: int, column: int]"
+            )
 
         builder.add_cswap(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
 
@@ -152,7 +172,8 @@ class RuleParser:
 
         if not self._check_types(extra_data, [int, int, int, int]):
             raise ValueError(
-                f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit1: int, control_qubit2: int, target_qubit: int, column: int]")
+                f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit1: int, control_qubit2: int, target_qubit: int, column: int]"
+            )
 
         builder.add_ccx(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
 

@@ -1,10 +1,18 @@
 from typing import Callable
+
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.quantumcircuit import BitLocations
 from typing_extensions import NamedTuple
 
-from qsimplify.model import QuantumGraph, Position, GateName, GraphNode, GraphBuilder, CircuitBuilder
+from qsimplify.model import (
+    CircuitBuilder,
+    GateName,
+    GraphBuilder,
+    GraphNode,
+    Position,
+    QuantumGraph,
+)
 from qsimplify.utils import setup_logger
 
 
@@ -16,6 +24,7 @@ class GraphPlacingData(NamedTuple):
     params: list
     column: int
 
+
 class CircuitPlacingData(NamedTuple):
     builder: CircuitBuilder
     graph: QuantumGraph
@@ -23,10 +32,13 @@ class CircuitPlacingData(NamedTuple):
     explored: set[Position]
     start: Position
 
+
 class Converter:
     def __init__(self):
         self._logger = setup_logger("Converter")
-        self._circuit_to_graph_handlers: dict[GateName, Callable[[GraphPlacingData], None]] = {
+        self._circuit_to_graph_handlers: dict[
+            GateName, Callable[[GraphPlacingData], None]
+        ] = {
             GateName.H: self._add_single_gate_to_graph,
             GateName.X: self._add_single_gate_to_graph,
             GateName.Y: self._add_single_gate_to_graph,
@@ -42,7 +54,9 @@ class Converter:
             GateName.CSWAP: self._add_cswap_gate_to_graph,
             GateName.CCX: self._add_ccx_gate_to_graph,
         }
-        self._graph_to_circuit_handlers: dict[GateName, Callable[[CircuitPlacingData], None]] = {
+        self._graph_to_circuit_handlers: dict[
+            GateName, Callable[[CircuitPlacingData], None]
+        ] = {
             GateName.H: self._add_single_gate_to_circuit,
             GateName.X: self._add_single_gate_to_circuit,
             GateName.Y: self._add_single_gate_to_circuit,
@@ -84,11 +98,16 @@ class Converter:
             target_column = max(columns)
             self._logger.debug("Column %s set as target", target_column)
 
-            target_is_occupied = any(builder.is_occupied(qubit, target_column) for qubit in qubits)
+            target_is_occupied = any(
+                builder.is_occupied(qubit, target_column) for qubit in qubits
+            )
 
             if target_is_occupied:
                 target_column += 1
-                self._logger.debug("Rightmost slot is occupied, increasing target column by 1 %s", target_column)
+                self._logger.debug(
+                    "Rightmost slot is occupied, increasing target column by 1 %s",
+                    target_column,
+                )
 
                 for qubit in qubits:
                     last_columns[qubit] = target_column
@@ -97,34 +116,42 @@ class Converter:
 
             bits = self._find_bit_indexes(circuit, instruction)
             params = instruction.operation.params
-            placing_data = GraphPlacingData(builder, gate_name, qubits, bits, params, target_column)
+            placing_data = GraphPlacingData(
+                builder, gate_name, qubits, bits, params, target_column
+            )
             self._add_instruction_to_graph(placing_data)
 
         graph = builder.build()
         self._logger.debug("After building the graph, this is the result\n%s", graph)
-        self._logger.debug("For comparison, this is the original circuit\n%s", circuit.draw())
+        self._logger.debug(
+            "For comparison, this is the original circuit\n%s", circuit.draw()
+        )
         return graph
 
     @staticmethod
-    def _find_qubit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+    def _find_qubit_indexes(
+        circuit: QuantumCircuit, instruction: CircuitInstruction
+    ) -> list[int]:
         qubits = []
 
         for qubit in instruction.qubits:
             bit_locations: BitLocations = circuit.find_bit(qubit)
 
-            for (_, qubit_index) in bit_locations.registers:
+            for _, qubit_index in bit_locations.registers:
                 qubits.append(qubit_index)
 
         return qubits
 
     @staticmethod
-    def _find_bit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+    def _find_bit_indexes(
+        circuit: QuantumCircuit, instruction: CircuitInstruction
+    ) -> list[int]:
         bits = []
 
         for bit in instruction.clbits:
             bit_locations: BitLocations = circuit.find_bit(bit)
 
-            for (_, bit_index) in bit_locations.registers:
+            for _, bit_index in bit_locations.registers:
                 bits.append(bit_index)
 
         return bits
@@ -134,45 +161,89 @@ class Converter:
 
     def _add_single_gate_to_graph(self, data: GraphPlacingData):
         builder, gate_name, qubits, _, _, column = data
-        self._logger.debug("Placing single-qubit gate on qubit %s on column %s", qubits[0], column)
+        self._logger.debug(
+            "Placing single-qubit gate on qubit %s on column %s", qubits[0], column
+        )
         builder.add_single(gate_name, qubits[0], column)
 
     def _add_rotation_gate_to_graph(self, data: GraphPlacingData):
         builder, gate_name, qubits, _, params, column = data
-        self._logger.debug("Placing rotation gate with angle %s on qubit %s on column %s", params[0], qubits[0], column)
+        self._logger.debug(
+            "Placing rotation gate with angle %s on qubit %s on column %s",
+            params[0],
+            qubits[0],
+            column,
+        )
         builder.add_rotation(gate_name, params[0], qubits[0], column)
 
     def _add_measure_gate_to_graph(self, data: GraphPlacingData):
         builder, _, qubits, bits, _, column = data
-        self._logger.debug("Placing measure gate on qubit %s to bit %s on column %s", qubits[0], bits[0], column)
+        self._logger.debug(
+            "Placing measure gate on qubit %s to bit %s on column %s",
+            qubits[0],
+            bits[0],
+            column,
+        )
         builder.add_measure(qubits[0], bits[0], column)
 
     def _add_swap_gate_to_graph(self, data: GraphPlacingData):
         builder, _, qubits, _, _, column = data
-        self._logger.debug("Placing swap gate on qubits %s and %s on column %s", qubits[0], qubits[1], column)
+        self._logger.debug(
+            "Placing swap gate on qubits %s and %s on column %s",
+            qubits[0],
+            qubits[1],
+            column,
+        )
         builder.add_swap(qubits[0], qubits[1], column)
 
     def _add_cz_gate_to_graph(self, data: GraphPlacingData):
         builder, _, qubits, _, _, column = data
-        self._logger.debug("Placing cz gate on qubits %s and %s on column %s", qubits[0], qubits[1], column)
+        self._logger.debug(
+            "Placing cz gate on qubits %s and %s on column %s",
+            qubits[0],
+            qubits[1],
+            column,
+        )
         builder.add_cz(qubits[0], qubits[1], column)
 
     def _add_cswap_gate_to_graph(self, data: GraphPlacingData):
         builder, _, qubits, _, _, column = data
-        self._logger.debug("Placing cswap gate on qubits %s (control), %s (target) and %s (target) on column %s", qubits[0], qubits[1], qubits[2], column)
+        self._logger.debug(
+            "Placing cswap gate on qubits %s (control), %s (target) and %s (target) on column %s",
+            qubits[0],
+            qubits[1],
+            qubits[2],
+            column,
+        )
         builder.add_cswap(qubits[0], qubits[1], qubits[2], column)
 
     def _add_controlled_gate_to_graph(self, data: GraphPlacingData):
         builder, gate_name, qubits, _, _, column = data
-        self._logger.debug("Placing controlled gate on qubits %s (control) and %s (target) on column %s", qubits[0], qubits[1], column)
+        self._logger.debug(
+            "Placing controlled gate on qubits %s (control) and %s (target) on column %s",
+            qubits[0],
+            qubits[1],
+            column,
+        )
         builder.add_control(gate_name, qubits[0], qubits[1], column)
 
     def _add_ccx_gate_to_graph(self, data: GraphPlacingData):
         builder, _, qubits, _, _, column = data
-        self._logger.debug("Placing ccx gate on qubits %s (control), %s (control) and %s (target) on column %s", qubits[0], qubits[1], qubits[2], column)
+        self._logger.debug(
+            "Placing ccx gate on qubits %s (control), %s (control) and %s (target) on column %s",
+            qubits[0],
+            qubits[1],
+            qubits[2],
+            column,
+        )
         builder.add_ccx(qubits[0], qubits[1], qubits[2], column)
 
-    def graph_to_circuit(self, graph: QuantumGraph, add_build_steps: bool = False, circuit_name: str = "circuit") -> QuantumCircuit | tuple[QuantumCircuit, str]:
+    def graph_to_circuit(
+        self,
+        graph: QuantumGraph,
+        add_build_steps: bool = False,
+        circuit_name: str = "circuit",
+    ) -> QuantumCircuit | tuple[QuantumCircuit, str]:
         self._logger.debug("Converting graph to circuit")
         builder = CircuitBuilder(graph.height, name=circuit_name)
         explored: set[Position] = set()
@@ -184,7 +255,13 @@ class Converter:
 
         return builder.build(add_build_steps)
 
-    def _add_to_circuit(self, builder: CircuitBuilder, graph: QuantumGraph, explored: set[Position], position: Position):
+    def _add_to_circuit(
+        self,
+        builder: CircuitBuilder,
+        graph: QuantumGraph,
+        explored: set[Position],
+        position: Position,
+    ):
         if position in explored:
             return
 
@@ -194,7 +271,9 @@ class Converter:
         if graph_node is None or graph_node.name in (GateName.ID, GateName.BARRIER):
             return
 
-        placing_data = CircuitPlacingData(builder, graph, graph_node, explored, position)
+        placing_data = CircuitPlacingData(
+            builder, graph, graph_node, explored, position
+        )
         self._add_instruction_to_circuit(placing_data)
 
     def _add_instruction_to_circuit(self, data: CircuitPlacingData):
@@ -284,7 +363,11 @@ class Converter:
             second_controller_position = edges.works_with[0].position
             target_position = edges.targets[0].position
 
-        builder.add_ccx(first_controller_position[0], second_controller_position[0], target_position[0])
+        builder.add_ccx(
+            first_controller_position[0],
+            second_controller_position[0],
+            target_position[0],
+        )
         explored.add(first_controller_position)
         explored.add(second_controller_position)
         explored.add(target_position)

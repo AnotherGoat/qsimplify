@@ -2,6 +2,7 @@ import logging
 
 _debug_mode = False
 
+
 def set_debug_mode(debug):
     global _debug_mode
     _debug_mode = debug
