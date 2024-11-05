@@ -1,23 +1,32 @@
 import itertools
+import os
 
 from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
-from qsimplify.model import QuantumGraph, GraphNode, GateName, GraphBuilder
+from qsimplify.model import QuantumGraph, GraphNode, GateName
 from qsimplify.simplifier.graph_mappings import GraphMappings
+from qsimplify.simplifier.rule_parser import RuleParser
 from qsimplify.simplifier.simplification_rule import SimplificationRule
 from qsimplify.utils import setup_logger
 
-_RULES: list[SimplificationRule] = []
-
-_pattern = GraphBuilder().add_h(0 ,0).add_h(0, 1).build()
-_replacement = GraphBuilder().add_id(0, 0).add_id(0, 1).build()
-_RULES.append(SimplificationRule(_pattern, _replacement))
 
 class Simplifier:
+    _default_rules: list[SimplificationRule]
+
     def __init__(self, converter: Converter):
-        self.logger = setup_logger("Simplifier")
+        self._logger = setup_logger("Simplifier")
         self.converter = converter
+
+        parser = RuleParser()
+        script_path = os.path.dirname(__file__)
+        default_rules_path = os.path.join(script_path, "default_rules.json5")
+
+        self._default_rules = parser.load_rules_from_file(default_rules_path)
+
+        for rule in self._default_rules:
+            print(str(rule) + "\n")
+
 
     def simplify_circuit(self, circuit: QuantumCircuit, add_build_steps: bool = False, circuit_name: str = "circuit") -> QuantumCircuit | tuple[QuantumCircuit, str]:
         graph = self.converter.circuit_to_graph(circuit)
@@ -25,10 +34,13 @@ class Simplifier:
         return self.converter.graph_to_circuit(simplified_graph, add_build_steps=add_build_steps, circuit_name=circuit_name)
 
 
-    def simplify_graph(self, graph: QuantumGraph) -> QuantumGraph:
+    def simplify_graph(self, graph: QuantumGraph, rules: list[SimplificationRule] | None = None) -> QuantumGraph:
+        if rules is None:
+            rules = self._default_rules
+
         result = graph.copy()
 
-        for rule in _RULES:
+        for rule in rules:
             self.apply_simplify_rule(result, rule)
 
         return result
@@ -44,16 +56,16 @@ class Simplifier:
 
     def find_pattern(self, graph: QuantumGraph, pattern: QuantumGraph) -> GraphMappings | None:
         pattern_start = self._find_start(pattern)
-        self.logger.debug("Pattern start found at %s", pattern_start.position)
+        self._logger.debug("Pattern start found at %s", pattern_start.position)
 
         for row_index in range(graph.height):
             for column_index in range(graph.width):
                 position = (row_index, column_index)
-                self.logger.debug("Checking graph on position %s", position)
+                self._logger.debug("Checking graph on position %s", position)
                 node = graph[*position]
 
                 if not self._are_nodes_similar(node, pattern_start):
-                    self.logger.debug("No similarities found when comparing %s and %s", node, pattern_start)
+                    self._logger.debug("No similarities found when comparing %s and %s", node, pattern_start)
                     continue
 
                 mappings = self._match_pattern(graph, pattern, node, pattern_start)
@@ -84,14 +96,14 @@ class Simplifier:
 
     def _match_pattern(self, graph: QuantumGraph, pattern: QuantumGraph, start: GraphNode, pattern_start: GraphNode) -> GraphMappings | None:
         for row_permutation in self._calculate_row_permutations(graph, pattern, start, pattern_start):
-            self.logger.debug("Trying row permutation %s on start %s", row_permutation, start)
+            self._logger.debug("Trying row permutation %s on start %s", row_permutation, start)
             subgraph, mappings = self.extract_subgraph(graph, row_permutation, start.position[1], pattern.width)
 
             if subgraph is not None and subgraph == pattern:
-                self.logger.debug("Match found with mappings %s", mappings)
+                self._logger.debug("Match found with mappings %s", mappings)
                 return mappings
 
-        self.logger.debug("No matches found")
+        self._logger.debug("No matches found")
         return None
 
 
@@ -119,7 +131,7 @@ class Simplifier:
         mappings = self._extract_subgraph_mappings(graph, rows, starting_column, width)
 
         if mappings is None:
-            self.logger.debug("Mappings couldn't be extracted")
+            self._logger.debug("Mappings couldn't be extracted")
             return None, None
 
         subgraph = QuantumGraph()
@@ -132,7 +144,7 @@ class Simplifier:
             for edge in edges:
                 subgraph.add_new_edge(edge.name, *mappings[edge.start.position], *mappings[edge.end.position])
 
-        self.logger.debug("Mappings are valid, filling the subgraph")
+        self._logger.debug("Mappings are valid, filling the subgraph")
         subgraph.fill_empty_spaces()
         subgraph.fill_positional_edges()
         return subgraph, mappings

@@ -17,20 +17,20 @@ _DARK_GRAY = "#424242"
 
 class Drawer:
     def __init__(self):
-        self.logger = setup_logger("Drawer")
+        self._logger = setup_logger("Drawer")
 
     def save_circuit_png(self, circuit: QuantumCircuit, file_name: str):
-        self.logger.info("Saving circuit to file %s.png", file_name)
+        self._logger.info("Saving circuit to file %s.png", file_name)
 
         figure = circuit.draw("mpl")
         figure.savefig(f"{file_name}.png")
 
     def save_graph_png(self, graph: QuantumGraph, file_name: str):
-        self.logger.info("Saving graph to file %s.png", file_name)
+        self._logger.info("Saving graph to file %s.png", file_name)
         self._save_graph(graph, file_name, "png", dpi=str(150))
 
     def save_graph_svg(self, graph: QuantumGraph, file_name: str):
-        self.logger.info("Saving graph to file %s.svg", file_name)
+        self._logger.info("Saving graph to file %s.svg", file_name)
         self._save_graph(graph, file_name, "svg")
 
     def _save_graph(self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str):

@@ -17,7 +17,6 @@ class GateName(Enum):
     CSWAP = "cswap"
     CCX = "ccx"
     BARRIER = "barrier"
-    BLOCKED = "|"
 
     @classmethod
     def from_str(cls, name: str):
