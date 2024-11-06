@@ -4,7 +4,7 @@ import os
 from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
-from qsimplify.model import GateName, GraphNode, QuantumGraph
+from qsimplify.model import GateName, GraphNode, Position, QuantumGraph
 from qsimplify.simplifier.graph_mappings import GraphMappings
 from qsimplify.simplifier.rule_parser import RuleParser
 from qsimplify.simplifier.simplification_rule import SimplificationRule
@@ -23,9 +23,6 @@ class Simplifier:
         default_rules_path = os.path.join(script_path, "default_rules.json5")
 
         self._default_rules = parser.load_rules_from_file(default_rules_path)
-
-        for rule in self._default_rules:
-            print(str(rule) + "\n")
 
     def simplify_circuit(
         self,
@@ -53,36 +50,40 @@ class Simplifier:
         return result
 
     def apply_simplify_rule(self, graph: QuantumGraph, rule: SimplificationRule):
-        mappings = self.find_pattern(graph, rule.pattern)
+        self._logger.debug("Applying rule with mask %s", rule.mask)
+        mappings = self.find_pattern(graph, rule.pattern, mask=rule.mask)
 
         while mappings is not None:
             self.replace_pattern(graph, rule.replacement, mappings)
-            mappings = self.find_pattern(graph, rule.pattern)
+            mappings = self.find_pattern(graph, rule.pattern, mask=rule.mask)
 
     def find_pattern(
-        self, graph: QuantumGraph, pattern: QuantumGraph
+        self,
+        graph: QuantumGraph,
+        pattern: QuantumGraph,
+        mask: dict[Position, bool] = None,
     ) -> GraphMappings | None:
         pattern_start = self._find_start(pattern)
         self._logger.debug("Pattern start found at %s", pattern_start.position)
 
-        for row_index in range(graph.height):
-            for column_index in range(graph.width):
-                position = (row_index, column_index)
-                self._logger.debug("Checking graph on position %s", position)
-                node = graph[*position]
+        for position in graph.iter_positions_by_row():
+            self._logger.debug("Checking graph on position %s", position)
+            node = graph[*position]
 
-                if not self._are_nodes_similar(node, pattern_start):
-                    self._logger.debug(
-                        "No similarities found when comparing %s and %s",
-                        node,
-                        pattern_start,
-                    )
-                    continue
+            if not self._are_nodes_similar(node, pattern_start):
+                self._logger.debug(
+                    "No similarities found when comparing %s and %s",
+                    node,
+                    pattern_start,
+                )
+                continue
 
-                mappings = self._match_pattern(graph, pattern, node, pattern_start)
+            mappings = self._match_pattern(
+                graph, pattern, node, pattern_start, mask=mask
+            )
 
-                if mappings is not None:
-                    return mappings
+            if mappings is not None:
+                return mappings
 
         return None
 
@@ -113,6 +114,7 @@ class Simplifier:
         pattern: QuantumGraph,
         start: GraphNode,
         pattern_start: GraphNode,
+        mask: dict[Position, bool] = None,
     ) -> GraphMappings | None:
         for row_permutation in self._calculate_row_permutations(
             graph, pattern, start, pattern_start
@@ -121,7 +123,7 @@ class Simplifier:
                 "Trying row permutation %s on start %s", row_permutation, start
             )
             subgraph, mappings = self.extract_subgraph(
-                graph, row_permutation, start.position[1], pattern.width
+                graph, row_permutation, start.position[1], pattern.width, mask=mask
             )
 
             if subgraph is not None and subgraph == pattern:
@@ -158,12 +160,23 @@ class Simplifier:
         return permutations
 
     def extract_subgraph(
-        self, graph: QuantumGraph, rows: list[int], starting_column: int, width: int
+        self,
+        graph: QuantumGraph,
+        rows: list[int],
+        starting_column: int,
+        width: int,
+        mask: dict[Position, bool] = None,
     ) -> tuple[QuantumGraph | None, GraphMappings | None]:
         if len(rows) == 0 or width <= 0 or len(graph) == 0:
             raise ValueError("The graph, rows or width are invalid")
 
-        mappings = self._extract_subgraph_mappings(graph, rows, starting_column, width)
+        if mask is None:
+            mask = self._generate_full_mask(width, len(rows))
+
+        mappings = self._extract_subgraph_mappings(
+            graph, rows, starting_column, width, mask
+        )
+        self._logger.debug("Extracting mappings for width %s", width)
 
         if mappings is None:
             self._logger.debug("Mappings couldn't be extracted")
@@ -197,10 +210,27 @@ class Simplifier:
         subgraph.fill_positional_edges()
         return subgraph, mappings
 
+    @staticmethod
+    def _generate_full_mask(width: int, height: int) -> dict[Position, bool]:
+        mask = {}
+
+        for row in range(height):
+            for column in range(width):
+                position = (row, column)
+                mask[position] = True
+
+        return mask
+
     def _extract_subgraph_mappings(
-        self, graph: QuantumGraph, rows: list[int], starting_column: int, width: int
+        self,
+        graph: QuantumGraph,
+        rows: list[int],
+        starting_column: int,
+        width: int,
+        mask: dict[Position, bool],
     ) -> GraphMappings | None:
         mappings: GraphMappings = {}
+        self._logger.debug("Starting mapping extraction")
 
         for new_row, old_row in enumerate(rows):
             new_column = 0
@@ -210,12 +240,21 @@ class Simplifier:
                 if new_column == width:
                     break
 
-                node = self._find_next_right_node(graph, old_row, old_column)
+                self._logger.debug(
+                    "Trying to map %s into %s",
+                    (old_row, old_column),
+                    (new_row, new_column),
+                )
+                node = self._find_next_right_node(
+                    graph, old_row, old_column, not mask[new_row, new_column]
+                )
 
                 if node is None:
+                    self._logger.debug("No node found at the right side")
                     return None
 
                 mappings[node.position] = (new_row, new_column)
+                self._logger.debug("Mappings updated to %s", mappings)
                 old_column = node.position[1] + 1
                 new_column += 1
 
@@ -232,34 +271,48 @@ class Simplifier:
 
         return mappings
 
-    @staticmethod
     def _find_next_right_node(
-        graph: QuantumGraph, starting_row: int, starting_column: int
+        self,
+        graph: QuantumGraph,
+        starting_row: int,
+        starting_column: int,
+        can_be_identity: bool,
     ) -> GraphNode | None:
         edge_data = graph.node_edge_data(starting_row, starting_column)
+        self._logger.debug("Going to the right starting from edge %s", edge_data)
+        self._logger.debug("Can it be identity? %s", can_be_identity)
 
         if edge_data is None:
+            self._logger.debug(
+                "No edge data found at position %s", (starting_row, starting_column)
+            )
             return None
 
         while True:
             origin = edge_data.origin
 
-            if origin.name != GateName.ID:
+            if can_be_identity or origin.name != GateName.ID:
+                self._logger.debug(
+                    "The origin %s can be accepted, finishing exploration", origin
+                )
                 return origin
 
             if edge_data.right is None:
+                self._logger.debug("Reached the rightmost node, no origin found")
                 return None
 
             edge_data = graph.node_edge_data(*edge_data.right.position)
 
-    @staticmethod
     def replace_pattern(
-        graph: QuantumGraph, replacement: QuantumGraph, mappings: GraphMappings
+        self, graph: QuantumGraph, replacement: QuantumGraph, mappings: GraphMappings
     ):
-        for node in mappings.keys():
-            graph.remove_node(node)
+        self._logger.debug("Removing nodes with mappings %s", mappings)
+        for original_position in mappings.keys():
+            graph.clear_node(*original_position)
 
-        reverse_mappings = {value: key for key, value in mappings.items()}
+        mappings = {key: value for key, value in mappings.items() if value is not None}
+        reverse_mappings = self._invert_mappings(mappings)
+        self._logger.debug("Reversed mappings are %s", reverse_mappings)
 
         for original, match in mappings.items():
             node = replacement[match]
@@ -276,3 +329,7 @@ class Simplifier:
                 )
 
         graph.fill_positional_edges()
+
+    @staticmethod
+    def _invert_mappings(mappings: GraphMappings) -> GraphMappings:
+        return {value: key for key, value in mappings.items()}

@@ -39,7 +39,7 @@ poetry run pylint
 - Format code
 
 ```shell
-poetry run black .
+poetry run isort . && black .
 ```
 
 - Check types

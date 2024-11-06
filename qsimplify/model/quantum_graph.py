@@ -77,9 +77,14 @@ class QuantumGraph:
             measure_to=measure_to,
         )
 
-    def remove_node(self, position: Position):
+    def remove_node(self, row: int, column: int):
         """Remove the GraphNode at the specified (row, column) Position and all its edges."""
-        self._network.remove_node(position)
+        self._network.remove_node((row, column))
+
+    def clear_node(self, row: int, column: int):
+        """Replace the GraphNode at the specified (row, column) Position with an identity node."""
+        self.remove_node(row, column)
+        self.add_new_node(GateName.ID, row, column)
 
     def __getitem__(self, position: Position) -> GraphNode | None:
         """Get the GraphNode at the specified (row, column) Position."""
@@ -284,6 +289,49 @@ class QuantumGraph:
 
         for edge in non_positional_edges:
             self.add_edge(edge)
+
+    def clean_empty_columns(self):
+        empty_columns = self._find_empty_columns()
+        offset = 0
+        initial_width = self.width
+
+        for column_index in empty_columns:
+            adjusted_column = column_index - offset
+
+            for row_index in range(self.height):
+                self.remove_node(row_index, adjusted_column)
+            offset += 1
+
+            for subsequent_column in range(adjusted_column + 1, initial_width):
+                for row_index in range(self.height):
+                    node = self[row_index, subsequent_column]
+
+                    if node is not None:
+                        self.move_node(
+                            (row_index, subsequent_column),
+                            (row_index, subsequent_column - 1),
+                        )
+
+    def move_node(self, start: Position, end: Position):
+        pass
+
+    def _find_empty_columns(self) -> list[int]:
+        empty_columns = []
+
+        for column_index in range(self.width):
+            is_empty = True
+
+            for row_index in range(self.height):
+                node = self[row_index, column_index]
+
+                if node is not None and node.name != GateName.ID:
+                    is_empty = False
+                    break
+
+            if is_empty:
+                empty_columns.append(column_index)
+
+        return empty_columns
 
     def clear(self):
         """Remove all the nodes and edges from the graph."""
