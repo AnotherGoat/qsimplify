@@ -8,6 +8,7 @@ from qsimplify.utils import setup_logger
 _RED = "#EF9A9A"
 _DARK_RED = "#B71C1C"
 _GREEN = "#A5D6A7"
+_DARK_GREEN = "#1B5E20"
 _BLUE = "#90CAF9"
 _DARK_BLUE = "#0D47A1"
 _ORANGE = "#FFCC80"
@@ -17,13 +18,14 @@ _DARK_GRAY = "#424242"
 
 
 class Drawer:
-    def __init__(self):
+    def __init__(self, view: bool = False):
         self._logger = setup_logger("Drawer")
+        self.view = view
 
     def save_circuit_png(self, circuit: QuantumCircuit, file_name: str):
         self._logger.info("Saving circuit to file %s.png", file_name)
 
-        figure = circuit.draw("mpl")
+        figure = circuit.draw("mpl", )
         figure.savefig(f"{file_name}.png")
 
     def save_graph_png(self, graph: QuantumGraph, file_name: str):
@@ -47,7 +49,7 @@ class Drawer:
             f"{file_name}.gv",
             outfile=f"{file_name}.{extension}",
             engine="neato",
-            view=True,
+            view=self.view,
         )
 
     def _draw_nodes(self, graph: QuantumGraph, image: Digraph):
@@ -73,7 +75,7 @@ class Drawer:
     def _find_node_label(node: GraphNode) -> str:
         match node.name:
             case GateName.RX | GateName.RY | GateName.RZ:
-                top_label = f"{node.name.name}({node.rotation})"
+                top_label = f"{node.name.name}({node.rotation:.3f})"
             case GateName.MEASURE:
                 top_label = f"M({node.measure_to})"
             case _:
@@ -101,7 +103,7 @@ class Drawer:
 
     def _draw_edges(self, graph: QuantumGraph, image: Digraph):
         for edge in graph.iter_edges():
-            if edge.name == EdgeName.WORKS_WITH:
+            if edge.start.name != GateName.CZ and edge.name == EdgeName.WORKS_WITH:
                 continue
 
             settings = {
@@ -123,3 +125,5 @@ class Drawer:
                 return _DARK_RED
             case EdgeName.TARGETS | EdgeName.CONTROLLED_BY:
                 return _DARK_BLUE
+            case EdgeName.WORKS_WITH:
+                return _DARK_GREEN

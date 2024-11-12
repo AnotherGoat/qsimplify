@@ -16,7 +16,7 @@ class Simplifier:
 
     def __init__(self, converter: Converter):
         self._logger = setup_logger("Simplifier")
-        self.converter = converter
+        self._converter = converter
 
         parser = RuleParser()
         script_path = os.path.dirname(__file__)
@@ -30,9 +30,9 @@ class Simplifier:
         add_build_steps: bool = False,
         circuit_name: str = "circuit",
     ) -> QuantumCircuit | tuple[QuantumCircuit, str]:
-        graph = self.converter.circuit_to_graph(circuit)
+        graph = self._converter.circuit_to_graph(circuit)
         simplified_graph = self.simplify_graph(graph)
-        return self.converter.graph_to_circuit(
+        return self._converter.graph_to_circuit(
             simplified_graph, add_build_steps=add_build_steps, circuit_name=circuit_name
         )
 
@@ -45,11 +45,11 @@ class Simplifier:
         result = graph.copy()
 
         for rule in rules:
-            self.apply_simplify_rule(result, rule)
+            self.apply_simplification_rule(result, rule)
 
         return result
 
-    def apply_simplify_rule(self, graph: QuantumGraph, rule: SimplificationRule):
+    def apply_simplification_rule(self, graph: QuantumGraph, rule: SimplificationRule):
         self._logger.debug("Applying rule with mask %s", rule.mask)
         mappings = self.find_pattern(graph, rule.pattern, mask=rule.mask)
 

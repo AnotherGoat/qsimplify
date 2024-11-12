@@ -867,6 +867,16 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "pylatexenc"
+version = "2.10"
+description = "Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pylatexenc-2.10.tar.gz", hash = "sha256:3dd8fd84eb46dc30bee1e23eaab8d8fb5a7f507347b23e5f38ad9675c84f40d3"},
+]
+
+[[package]]
 name = "pylint"
 version = "3.3.1"
 description = "python code static checker"
@@ -1214,4 +1224,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "b8575776d0959f121dc529e9f37f6e7f5b1bb1aeac9e183c52fca5771f20c4ec"
+content-hash = "9521f6e0b05f7b9025299a83b0102e3a31144c76476b5d44e5be9b4dc8cb8c09"

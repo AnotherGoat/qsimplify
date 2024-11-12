@@ -7,12 +7,12 @@ from qsimplify.model import GateName, QuantumGraph
 
 class Analyzer:
     def __init__(self, converter: Converter):
-        self.converter = converter
+        self._converter = converter
 
     def calculate_metrics(self, circuit: QuantumCircuit) -> QuantumMetrics:
         metrics = QuantumMetrics()
 
-        graph = self.converter.circuit_to_graph(circuit)
+        graph = self._converter.circuit_to_graph(circuit)
         metrics.width = graph.height
         metrics.depth = graph.width
 
