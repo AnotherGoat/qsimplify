@@ -1,33 +1,32 @@
-[tool.poetry]
+[project]
 name = "qsimplify"
 version = "0.1.0"
-description = ""
-authors = ["Víctor Mardones <vmardones.dev@gmail.com>"]
+description = "A quantum circuit simplifier"
 readme = "README.md"
+authors = [
+    { name = "Víctor Mardones", email = "vmardones.dev@gmail.com" }
+]
+requires-python = ">=3.12,<4"
+dependencies = [
+    "graphviz>=0.20.3",
+    "json5>=0.12.0",
+    "matplotlib>=3.10.1",
+    "networkx>=3.4.2",
+    "pylatexenc>=2.10",
+    "qiskit>=2.0.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-qiskit = "^1.2.4"
-networkx = "^3.4"
-pytest = "^8.3.3"
-matplotlib = {extras = ["collections"], version = "^3.9.2"}
-graphviz = "^0.20.3"
-json5 = "^0.9.25"
-pylatexenc = "^2.10"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^8.3.3"
-pytest-cov = "^6.0.0"
-
-[tool.poetry.group.dev.dependencies]
-pylint = "^3.3.1"
-pyright = "^1.1.386"
-black = "^24.10.0"
-isort = "^5.13.2"
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "pyright>=1.1.398",
+    "ruff>=0.11.4",
+]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+]
 
 [tool.isort]
 profile = "black"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

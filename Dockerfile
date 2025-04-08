@@ -1,31 +1,20 @@
 # Minified Python container
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Send output streams straight into the terminal, without buffering them
 ENV PYTHONUNBUFFERED=1
 
-# Install Graphviz (used for drawing graphs) and pipx (recommended way to use Poetry)
+# Install Graphviz (used for drawing graphs)
 RUN apt-get update && \
-    apt-get install --no-install-suggests --no-install-recommends -y graphviz pipx
+    apt-get install --no-install-suggests --no-install-recommends -y graphviz
 
-# Add root Python venv to path
-ENV PATH="/root/.local/bin:${PATH}"
-
-# Install Poetry
-ENV POETRY_VERSION=1.8.3
-RUN pipx install "poetry==$POETRY_VERSION"
-
-# Create directory that output files are saved to
-WORKDIR /app
-RUN mkdir -p /app/out
+# Install UV
+COPY --from=ghcr.io/astral-sh/uv:0.6.13 /uv /uvx /bin/
 
 # Install project dependencies
-COPY pyproject.toml poetry.lock ./
-RUN poetry install --only main --no-root --no-directory
+WORKDIR /app
+COPY . ./
+RUN uv sync --frozen
 
-COPY qsimplify/ ./qsimplify
-COPY tests/ ./tests
-RUN poetry install --only main
-
-CMD ["poetry", "run", "python", "-m", "qsimplify"]
-ENTRYPOINT ["poetry", "run"]
+CMD ["uv", "run", "python", "-m", "qsimplify"]
+ENTRYPOINT ["uv", "run"]

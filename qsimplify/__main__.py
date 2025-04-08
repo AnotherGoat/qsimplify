@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 from qiskit import QuantumCircuit
 
@@ -50,6 +51,8 @@ def _main():
     simplified_metrics = analyzer.calculate_metrics(simplified_circuit)
     print("\n===== Simplified metrics =====")
     print(simplified_metrics)
+
+    Path("out").mkdir(exist_ok=True)
 
     drawer = Drawer()
     drawer.save_circuit_png(circuit, "out/original_circuit")

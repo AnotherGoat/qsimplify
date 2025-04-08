@@ -15,61 +15,62 @@
 - Install dependencies
 
 ```shell
-poetry install
+uv sync
 ```
 
 - Run unit tests
 
 ```shell
-poetry run pytest
+uv run pytest
 ```
 
 - Run unit tests with coverage
 
 ```shell
-poetry run pytest --cov=qsimplify --cov-report=html:coverage
+uv run pytest --cov=qsimplify --cov-report=html:coverage
 ```
 
 - Lint code
 
 ```shell
-poetry run pylint
+uv run ruff check
 ```
 
 - Format code
 
 ```shell
-poetry run isort . && black .
+uv run isort . && black .
 ```
 
 - Check types
 
 ```shell
-poetry run pyright
+uv run pyright
 ```
 
 - Run demo
 
 ```shell
-poetry run python -m qsimplify
+uv run python -m qsimplify
 ```
 
 - Run demo in debug mode
 
 ```shell
-poetry run python -m qsimplify --debug
+uv run python -m qsimplify --debug
 ```
 
 - Build the Docker image
 
 ```shell
-docker build -t qsimplify .
+sudo docker build -t qsimplify .
 ```
 
-- Run the Docker image
+- Run the Docker image and keep the output files in the "out" subdirectory
 
 ```shell
-docker run -it --rm -v "$(pwd):/app/out" qsimplify
+mkdir out
+sudo docker run -it --rm -v "$(pwd)/out:/app/out" qsimplify
 ```
 
 ## Examples

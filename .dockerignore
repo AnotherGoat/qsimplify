@@ -1,10 +1,13 @@
+.git/
 .idea/
 .pytest_cache/
 .ruff_cache/
 .venv/
+coverage/
+.coverage
+.dockerignore
+Dockerfile
 **/__pycache__/
 **/*.gv
 **/*.png
 **/*.svg
-coverage/
-.coverage

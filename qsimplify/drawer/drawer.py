@@ -25,7 +25,7 @@ class Drawer:
     def save_circuit_png(self, circuit: QuantumCircuit, file_name: str):
         self._logger.info("Saving circuit to file %s.png", file_name)
 
-        figure = circuit.draw("mpl", )
+        figure = circuit.draw("mpl")
         figure.savefig(f"{file_name}.png")
 
     def save_graph_png(self, graph: QuantumGraph, file_name: str):
