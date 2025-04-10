@@ -2,7 +2,7 @@ from qiskit import QuantumCircuit
 
 from qsimplify.analyzer.quantum_metrics import QuantumMetrics
 from qsimplify.converter import Converter
-from qsimplify.model import GateName, QuantumGraph
+from qsimplify.model import GateName, Position, QuantumGraph
 
 
 class Analyzer:
@@ -53,14 +53,16 @@ class Analyzer:
     def _calculate_superposition_rate(graph: QuantumGraph) -> float:
         superposition_count = 0
         row = 0
+        position = Position(row, 0)
 
-        while graph.has_node_at(row, 0):
-            node = graph[row, 0]
+        while graph.has_node_at(position):
+            node = graph[position]
 
             if node.name == GateName.H:
                 superposition_count += 1
 
             row += 1
+            position = Position(row, 0)
 
         return superposition_count / graph.height
 

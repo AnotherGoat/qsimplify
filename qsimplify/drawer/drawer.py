@@ -69,7 +69,7 @@ class Drawer:
 
     @staticmethod
     def _find_draw_position(graph: QuantumGraph, node: GraphNode) -> tuple[int, int]:
-        return node.position[1], graph.height - node.position[0] - 1
+        return node.position.column, graph.height - node.position.row - 1
 
     @staticmethod
     def _find_node_label(node: GraphNode) -> str:
@@ -127,3 +127,5 @@ class Drawer:
                 return _DARK_BLUE
             case EdgeName.WORKS_WITH:
                 return _DARK_GREEN
+
+        return _DARK_GRAY

@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
-from qsimplify.model import GraphBuilder
+from qsimplify.model import GraphBuilder, Position
 from qsimplify.simplifier import Simplifier
 
 converter = Converter()
@@ -52,7 +52,7 @@ def test_replace_pattern():
 
     replacement = GraphBuilder().add_y(0, 0).add_y(0, 1).build()
 
-    mappings = {(0, 1): (0, 0), (0, 2): (0, 1)}
+    mappings = {Position(0, 1): Position(0, 0), Position(0, 2): Position(0, 1)}
 
     expected = GraphBuilder().add_x(0, 0).add_y(0, 1).add_y(0, 2).build()
 
@@ -185,7 +185,7 @@ def test_find_pattern_in_same_pattern():
 
     mappings = simplifier.find_pattern(graph, pattern)
 
-    expected_mappings = {m: m for m in [(0, 0), (0, 1)]}
+    expected_mappings = {position: position for position in [Position(0, 0), Position(0, 1)]}
 
     assert mappings == expected_mappings
 
@@ -197,7 +197,7 @@ def test_find_pattern_in_same_two_qubit_pattern():
 
     mappings = simplifier.find_pattern(graph, pattern)
 
-    expected_mappings = {m: m for m in [(0, 0), (0, 1), (1, 0), (1, 1)]}
+    expected_mappings = {position: position for position in [Position(0, 0), Position(0, 1), Position(1, 0), Position(1, 1)]}
 
     assert mappings == expected_mappings
 
@@ -209,7 +209,7 @@ def test_find_inverted_two_qubit_pattern():
 
     mappings = simplifier.find_pattern(graph, pattern)
 
-    expected_mappings = {(0, 0): (1, 0), (0, 1): (1, 1), (1, 0): (0, 0), (1, 1): (0, 1)}
+    expected_mappings = {Position(0, 0): Position(1, 0), Position(0, 1): Position(1, 1), Position(1, 0): Position(0, 0), Position(1, 1): Position(0, 1)}
 
     assert mappings == expected_mappings
 
@@ -221,7 +221,7 @@ def test_find_same_controlled_pattern():
 
     mappings = simplifier.find_pattern(graph, pattern)
 
-    expected_mappings = {m: m for m in [(0, 0), (1, 0)]}
+    expected_mappings = {position: position for position in [Position(0, 0), Position(1, 0)]}
 
     assert mappings == expected_mappings
 
@@ -237,7 +237,7 @@ def test_find_same_mixed_pattern():
 
     mappings = simplifier.find_pattern(graph, pattern)
 
-    expected_mappings = {m: m for m in [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]}
+    expected_mappings = {position: position for position in [Position(0, 0), Position(0, 1), Position(0, 2), Position(1, 0), Position(1, 1), Position(1, 2)]}
 
     assert mappings == expected_mappings
 
@@ -252,19 +252,22 @@ def test_find_same_mixed_pattern_with_mask():
     )
 
     mask = {
-        (0, 0): True,
-        (0, 1): True,
-        (0, 2): True,
-        (0, 3): False,
-        (1, 0): True,
-        (1, 1): False,
-        (1, 2): True,
-        (1, 3): True,
+        Position(0, 0): True,
+        Position(0, 1): True,
+        Position(0, 2): True,
+        Position(0, 3): False,
+        Position(1, 0): True,
+        Position(1, 1): False,
+        Position(1, 2): True,
+        Position(1, 3): True,
     }
     mappings = simplifier.find_pattern(graph, pattern, mask=mask)
 
     expected_mappings = {
-        m: m for m in [(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3)]
+        position: position for position in [
+            Position(0, 0), Position(0, 1), Position(0, 2), Position(0, 3), Position(1, 0), Position(1, 1),
+            Position(1, 2), Position(1, 3)
+        ]
     }
 
     assert mappings == expected_mappings
@@ -280,26 +283,26 @@ def test_find_inverted_pattern_with_mask():
     )
 
     mask = {
-        (0, 0): True,
-        (0, 1): True,
-        (0, 2): True,
-        (0, 3): False,
-        (1, 0): True,
-        (1, 1): False,
-        (1, 2): True,
-        (1, 3): True,
+        Position(0, 0): True,
+        Position(0, 1): True,
+        Position(0, 2): True,
+        Position(0, 3): False,
+        Position(1, 0): True,
+        Position(1, 1): False,
+        Position(1, 2): True,
+        Position(1, 3): True,
     }
     mappings = simplifier.find_pattern(graph, pattern, mask=mask)
 
     expected_mappings = {
-        (0, 0): (1, 0),
-        (0, 1): (1, 1),
-        (0, 2): (1, 2),
-        (0, 3): (1, 3),
-        (1, 0): (0, 0),
-        (1, 1): (0, 1),
-        (1, 2): (0, 2),
-        (1, 3): (0, 3),
+        Position(0, 0): Position(1, 0),
+        Position(0, 1): Position(1, 1),
+        Position(0, 2): Position(1, 2),
+        Position(0, 3): Position(1, 3),
+        Position(1, 0): Position(0, 0),
+        Position(1, 1): Position(0, 1),
+        Position(1, 2): Position(0, 2),
+        Position(1, 3): Position(0, 3),
     }
 
     assert mappings == expected_mappings
@@ -316,7 +319,7 @@ def test_find_symmetrical_mappings():
 
     mappings = simplifier.find_pattern(graph, pattern)
 
-    expected_mappings = {m: m for m in [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]}
+    expected_mappings = {position: position for position in [Position(0, 0), Position(0, 1), Position(0, 2), Position(1, 0), Position(1, 1), Position(1, 2)]}
 
     assert mappings == expected_mappings
 
@@ -326,27 +329,27 @@ def test_find_three_qubit_permutations():
 
     graph = GraphBuilder().add_h(0, 0).add_x(1, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {m: m for m in [(0, 0), (1, 0)]}
+    assert mappings == {position: position for position in [Position(0, 0), Position(1, 0)]}
 
     graph = GraphBuilder().add_h(1, 0).add_x(0, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {(0, 0): (1, 0), (1, 0): (0, 0)}
+    assert mappings == {Position(0, 0): Position(1, 0), Position(1, 0): Position(0, 0)}
 
     graph = GraphBuilder().add_h(0, 0).add_x(2, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {(0, 0): (0, 0), (2, 0): (1, 0)}
+    assert mappings == {Position(0, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
     graph = GraphBuilder().add_h(2, 0).add_x(0, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {(0, 0): (1, 0), (2, 0): (0, 0)}
+    assert mappings == {Position(0, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 
     graph = GraphBuilder().add_h(1, 0).add_x(2, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {(1, 0): (0, 0), (2, 0): (1, 0)}
+    assert mappings == {Position(1, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
     graph = GraphBuilder().add_h(2, 0).add_x(1, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {(1, 0): (1, 0), (2, 0): (0, 0)}
+    assert mappings == {Position(1, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 
 
 def test_find_same_with_parameters():
@@ -356,7 +359,7 @@ def test_find_same_with_parameters():
 
     mappings = simplifier.find_pattern(graph, pattern)
 
-    expected_mappings = {m: m for m in [(0, 0), (0, 1)]}
+    expected_mappings = {position: position for position in [Position(0, 0), Position(0, 1)]}
 
     assert mappings == expected_mappings
 
@@ -378,7 +381,7 @@ def test_find_on_second_column():
 
     graph = GraphBuilder().add_h(0, 0).add_x(0, 1).add_z(0, 2).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {(0, 1): (0, 0), (0, 2): (0, 1)}
+    assert mappings == {Position(0, 1): Position(0, 0), Position(0, 2): Position(0, 1)}
 
 
 def test_find_uneven():
@@ -386,7 +389,7 @@ def test_find_uneven():
 
     graph = GraphBuilder().add_x(0, 0).add_y(0, 1).add_z(1, 1).add_h(1, 2).build()
     mappings = simplifier.find_pattern(graph, pattern)
-    assert mappings == {(0, 0): (0, 0), (0, 1): (0, 1), (1, 1): (1, 0), (1, 2): (1, 1)}
+    assert mappings == {Position(0, 0): Position(0, 0), Position(0, 1): Position(0, 1), Position(1, 1): Position(1, 0), Position(1, 2): Position(1, 1)}
 
 
 def test_replace_single_qubit_gates():
@@ -394,7 +397,7 @@ def test_replace_single_qubit_gates():
 
     graph = GraphBuilder().add_h(0, 0).add_h(0, 1).add_h(1, 0).add_h(1, 1).build()
 
-    mappings = {(0, 0): (0, 1), (1, 0): (0, 0), (1, 1): (1, 0)}
+    mappings = {Position(0, 0): Position(0, 1), Position(1, 0): Position(0, 0), Position(1, 1): Position(1, 0)}
 
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = (
@@ -411,7 +414,7 @@ def test_replace_with_parameters():
 
     graph = GraphBuilder().add_h(0, 0).add_h(0, 1).add_h(1, 0).add_h(1, 1).build()
 
-    mappings = {(0, 0): (0, 1), (1, 0): (0, 0), (1, 1): (1, 0)}
+    mappings = {Position(0, 0): Position(0, 1), Position(1, 0): Position(0, 0), Position(1, 1): Position(1, 0)}
 
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = (
@@ -431,7 +434,7 @@ def test_replace_controlled_gates():
 
     graph = GraphBuilder().add_id(0, 0).add_id(0, 1).add_id(1, 0).add_id(1, 1).build()
 
-    mappings = {(0, 0): (0, 1), (0, 1): (1, 0), (1, 0): (1, 1), (1, 1): (0, 0)}
+    mappings = {Position(0, 0): Position(0, 1), Position(0, 1): Position(1, 0), Position(1, 0): Position(1, 1), Position(1, 1): Position(0, 0)}
 
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = GraphBuilder().add_cx(1, 0, 0).add_cx(1, 0, 1).build()
@@ -452,7 +455,7 @@ def test_replace_uneven():
         .add_h(1, 2)
         .build()
     )
-    mappings = {(0, 0): (0, 0), (0, 1): (0, 1), (1, 1): (1, 0), (1, 2): (1, 1)}
+    mappings = {Position(0, 0): Position(0, 0), Position(0, 1): Position(0, 1), Position(1, 1): Position(1, 0), Position(1, 2): Position(1, 1)}
 
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = (
@@ -483,7 +486,7 @@ def test_replace_adds_identities():
         .add_h(1, 4)
         .build()
     )
-    mappings = {(1, 1): None, (0, 2): (0, 0), (1, 2): (1, 0), (1, 4): None}
+    mappings = {Position(1, 1): None, Position(0, 2): Position(0, 0), Position(1, 2): Position(1, 0), Position(1, 4): None}
 
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = (

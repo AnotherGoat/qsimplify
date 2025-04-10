@@ -68,7 +68,7 @@ class Simplifier:
 
         for position in graph.iter_positions_by_row():
             self._logger.debug("Checking graph on position %s", position)
-            node = graph[*position]
+            node = graph[position]
 
             if not self._are_nodes_similar(node, pattern_start):
                 self._logger.debug(
@@ -93,7 +93,7 @@ class Simplifier:
             raise ValueError("Invalid pattern")
 
         for row_index in range(pattern.height):
-            potential_start = pattern[row_index, 0]
+            potential_start = pattern[Position(row_index, 0)]
 
             if potential_start is not None:
                 return potential_start
@@ -123,7 +123,7 @@ class Simplifier:
                 "Trying row permutation %s on start %s", row_permutation, start
             )
             subgraph, mappings = self.extract_subgraph(
-                graph, row_permutation, start.position[1], pattern.width, mask=mask
+                graph, row_permutation, start.position.column, pattern.width, mask=mask
             )
 
             if subgraph is not None and subgraph == pattern:
@@ -141,7 +141,7 @@ class Simplifier:
         pattern_start: GraphNode,
     ) -> list[list[int]]:
         pattern_height = pattern.height
-        row = start.position[0]
+        row = start.position.row
 
         if pattern_height == 1:
             return [[row]]
@@ -155,7 +155,7 @@ class Simplifier:
         ]
 
         for permutation in permutations:
-            permutation.insert(pattern_start.position[0], row)
+            permutation.insert(pattern_start.position.row, row)
 
         return permutations
 
@@ -188,21 +188,21 @@ class Simplifier:
             node = graph[old_position]
             subgraph.add_new_node(
                 node.name,
-                *new_position,
+                new_position,
                 rotation=node.rotation,
                 measure_to=node.measure_to,
             )
 
             edges = [
                 edge
-                for edge in graph.node_edges(*old_position)
+                for edge in graph.node_edges(old_position)
                 if not edge.name.is_positional()
             ]
             for edge in edges:
                 subgraph.add_new_edge(
                     edge.name,
-                    *mappings[edge.start.position],
-                    *mappings[edge.end.position],
+                    mappings[edge.start.position],
+                    mappings[edge.end.position],
                 )
 
         self._logger.debug("Mappings are valid, filling the subgraph")
@@ -216,7 +216,7 @@ class Simplifier:
 
         for row in range(height):
             for column in range(width):
-                position = (row, column)
+                position = Position(row, column)
                 mask[position] = True
 
         return mask
@@ -242,26 +242,28 @@ class Simplifier:
 
                 self._logger.debug(
                     "Trying to map %s into %s",
-                    (old_row, old_column),
-                    (new_row, new_column),
+                    Position(old_row, old_column),
+                    Position(new_row, new_column),
                 )
                 node = self._find_next_right_node(
-                    graph, old_row, old_column, not mask[new_row, new_column]
+                    graph,
+                    Position(old_row, old_column),
+                    not mask[Position(new_row, new_column)],
                 )
 
                 if node is None:
                     self._logger.debug("No node found at the right side")
                     return None
 
-                mappings[node.position] = (new_row, new_column)
+                mappings[node.position] = Position(new_row, new_column)
                 self._logger.debug("Mappings updated to %s", mappings)
-                old_column = node.position[1] + 1
+                old_column = node.position.column + 1
                 new_column += 1
 
         for old_position in mappings.keys():
             edges = [
                 edge
-                for edge in graph.node_edges(*old_position)
+                for edge in graph.node_edges(old_position)
                 if not edge.name.is_positional()
             ]
 
@@ -274,18 +276,15 @@ class Simplifier:
     def _find_next_right_node(
         self,
         graph: QuantumGraph,
-        starting_row: int,
-        starting_column: int,
+        start: Position,
         can_be_identity: bool,
     ) -> GraphNode | None:
-        edge_data = graph.node_edge_data(starting_row, starting_column)
+        edge_data = graph.node_edge_data(start)
         self._logger.debug("Going to the right starting from edge %s", edge_data)
         self._logger.debug("Can it be identity? %s", can_be_identity)
 
         if edge_data is None:
-            self._logger.debug(
-                "No edge data found at position %s", (starting_row, starting_column)
-            )
+            self._logger.debug("No edge data found at position %s", start)
             return None
 
         while True:
@@ -301,14 +300,14 @@ class Simplifier:
                 self._logger.debug("Reached the rightmost node, no origin found")
                 return None
 
-            edge_data = graph.node_edge_data(*edge_data.right.position)
+            edge_data = graph.node_edge_data(edge_data.right.position)
 
     def replace_pattern(
         self, graph: QuantumGraph, replacement: QuantumGraph, mappings: GraphMappings
     ):
         self._logger.debug("Removing nodes with mappings %s", mappings)
         for original_position in mappings.keys():
-            graph.clear_node(*original_position)
+            graph.clear_node(original_position)
 
         mappings = {key: value for key, value in mappings.items() if value is not None}
         reverse_mappings = self._invert_mappings(mappings)
@@ -317,15 +316,15 @@ class Simplifier:
         for original, match in mappings.items():
             node = replacement[match]
             graph.add_new_node(
-                node.name, *original, rotation=node.rotation, measure_to=node.measure_to
+                node.name, original, rotation=node.rotation, measure_to=node.measure_to
             )
 
-            for edge in replacement.node_edges(*match):
+            for edge in replacement.node_edges(match):
                 if edge.name.is_positional():
                     continue
 
                 graph.add_new_edge(
-                    edge.name, *original, *reverse_mappings[edge.end.position]
+                    edge.name, original, reverse_mappings[edge.end.position]
                 )
 
         graph.fill_positional_edges()

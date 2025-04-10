@@ -12,10 +12,6 @@ from qsimplify.model.graph_edge import GraphEdge
 from qsimplify.model.graph_node import GraphNode
 from qsimplify.model.position import Position
 
-_TARGETS = EdgeName.TARGETS
-_CONTROLLED_BY = EdgeName.CONTROLLED_BY
-_WORKS_WITH = EdgeName.WORKS_WITH
-
 
 class QuantumGraph:
     """
@@ -35,7 +31,7 @@ class QuantumGraph:
         if len(self) == 0:
             return 0
 
-        return max(position[1] for position in self._get_positions()) + 1
+        return max(position.column for position in self._get_positions()) + 1
 
     @property
     def height(self) -> int:
@@ -43,7 +39,7 @@ class QuantumGraph:
         if len(self) == 0:
             return 0
 
-        return max(position[0] for position in self._get_positions()) + 1
+        return max(position.row for position in self._get_positions()) + 1
 
     def _get_positions(self) -> Iterator[Position]:
         for position in self._network.nodes:
@@ -62,13 +58,11 @@ class QuantumGraph:
     def add_new_node(
         self,
         name: GateName,
-        row: int,
-        column: int,
+        position: Position,
         rotation: float | None = None,
         measure_to: int | None = None,
     ):
         """Add a new node to the graph."""
-        position = (row, column)
         self._network.add_node(
             position,
             name=name,
@@ -77,24 +71,24 @@ class QuantumGraph:
             measure_to=measure_to,
         )
 
-    def remove_node(self, row: int, column: int):
-        """Remove the GraphNode at the specified (row, column) Position and all its edges."""
-        self._network.remove_node((row, column))
+    def remove_node(self, position: Position):
+        """Remove the GraphNode at the specified position and all its edges."""
+        self._network.remove_node(position)
 
-    def clear_node(self, row: int, column: int):
-        """Replace the GraphNode at the specified (row, column) Position with an identity node."""
-        self.remove_node(row, column)
-        self.add_new_node(GateName.ID, row, column)
+    def clear_node(self, position: Position):
+        """Replace the GraphNode at the specified position with an identity node."""
+        self.remove_node(position)
+        self.add_new_node(GateName.ID, position)
 
     def __getitem__(self, position: Position) -> GraphNode | None:
-        """Get the GraphNode at the specified (row, column) Position."""
-        if not self.has_node_at(*position):
+        """Get the GraphNode at the specified position."""
+        if not self.has_node_at(position):
             return None
 
         node = self._network.nodes[position]
         return GraphNode(
             node["name"],
-            *node["position"],
+            node["position"],
             rotation=node["rotation"],
             measure_to=node["measure_to"],
         )
@@ -104,7 +98,7 @@ class QuantumGraph:
         for _, data in self._network.nodes(data=True):
             yield GraphNode(
                 data["name"],
-                *data["position"],
+                data["position"],
                 rotation=data["rotation"],
                 measure_to=data["measure_to"],
             )
@@ -116,9 +110,9 @@ class QuantumGraph:
         """
         for row in range(self.height):
             for column in range(self.width):
-                position = (row, column)
+                position = Position(row, column)
 
-                if self.has_node_at(*position):
+                if self.has_node_at(position):
                     yield position
 
     def iter_positions_by_column(self) -> Iterator[Position]:
@@ -128,9 +122,9 @@ class QuantumGraph:
         """
         for column in range(self.width):
             for row in range(self.height):
-                position = (row, column)
+                position = Position(row, column)
 
-                if self.has_node_at(*position):
+                if self.has_node_at(position):
                     yield position
 
     def nodes(self) -> list[GraphNode]:
@@ -141,55 +135,47 @@ class QuantumGraph:
         """Add an existing GraphEdge to the graph."""
         self._network.add_edge(edge.start.position, edge.end.position, name=edge.name)
 
-    def add_new_edge(
-        self,
-        name: EdgeName,
-        start_row: int,
-        start_column: int,
-        end_row: int,
-        end_column: int,
-    ):
+    def add_new_edge(self, name: EdgeName, start: Position, end: Position):
         """Add a new edge to the graph."""
-        start = (start_row, start_column)
-        end = (end_row, end_column)
         self._network.add_edge(start, end, name=name)
 
     def iter_edges(self) -> Iterator[GraphEdge]:
         """Iterate over the edges in the graph."""
         for start, end, data in self._network.edges(data=True):
-            yield GraphEdge(data["name"], self[*start], self[*end])
+            yield GraphEdge(data["name"], self[start], self[end])
 
     def edges(self) -> list[GraphEdge]:
         """Retrieve all the edges in the graph."""
         return [edge for edge in self.iter_edges()]
 
-    def iter_node_edges(self, row: int, column: int) -> Iterator[GraphEdge]:
-        start = (row, column)
+    def iter_node_edges(self, position: Position) -> Iterator[GraphEdge]:
+        for _, end, data in self._network.out_edges(position, data=True):
+            yield GraphEdge(data["name"], self[position], self[end])
 
-        for _, end, data in self._network.out_edges(start, data=True):
-            yield GraphEdge(data["name"], self[start], self[end])
+    def node_edges(self, position: Position) -> list[GraphEdge]:
+        return [edge for edge in self.iter_node_edges(position)]
 
-    def node_edges(self, row: int, column: int) -> list[GraphEdge]:
-        return [edge for edge in self.iter_node_edges(row, column)]
-
-    def node_edge_data(self, row: int, column: int) -> EdgeData | None:
-        start = (row, column)
-        origin = self[*start]
+    def node_edge_data(self, position: Position) -> EdgeData | None:
+        origin = self[position]
 
         if origin is None:
             return None
 
         edge_data = {
-            _TARGETS.value: [],
-            _CONTROLLED_BY.value: [],
-            _WORKS_WITH.value: [],
+            EdgeName.TARGETS.value: [],
+            EdgeName.CONTROLLED_BY.value: [],
+            EdgeName.WORKS_WITH.value: [],
         }
 
-        for _, end, data in self._network.out_edges(start, data=True):
+        for _, end, data in self._network.out_edges(position, data=True):
             edge_name = data["name"]
             destination_node = self[end]
 
-            if edge_name in [_TARGETS, _CONTROLLED_BY, _WORKS_WITH]:
+            if edge_name in [
+                EdgeName.TARGETS,
+                EdgeName.CONTROLLED_BY,
+                EdgeName.WORKS_WITH,
+            ]:
                 edge_data[edge_name.value].append(destination_node)
             else:
                 edge_data[edge_name.value] = destination_node
@@ -241,43 +227,48 @@ class QuantumGraph:
 
         return networkx.utils.graphs_equal(self._network, other._network)
 
-    def is_occupied(self, row: int, column: int) -> bool:
+    def is_occupied(self, position: Position) -> bool:
         """Check whether the graph has a non-filler node at the specified row and column."""
-        return self.has_node_at(row, column) and self[row, column].name != GateName.ID
+        return self.has_node_at(position) and self[position].name != GateName.ID
 
-    def has_node_at(self, row: int, column: int) -> bool:
+    def has_node_at(self, position: Position) -> bool:
         """Check whether the graph has a node at the specified row and column."""
-        return (row, column) in self._network
+        return position in self._network
 
     def fill_empty_spaces(self):
         for row in range(self.height):
             for column in range(self.width):
-                position = (row, column)
+                position = Position(row, column)
 
-                if self.has_node_at(*position):
+                if self.has_node_at(position):
                     continue
 
-                self.add_new_node(GateName.ID, *position)
+                self.add_new_node(GateName.ID, position)
 
     def fill_positional_edges(self):
         self._clear_positional_edges()
 
         for row_index in range(self.height):
             for column_index in range(self.width):
-                node_position = (row_index, column_index)
-                adjacent_positions = self._find_adjacent_positions(*node_position)
+                node_position = Position(row_index, column_index)
+                adjacent_positions = self._find_adjacent_positions(node_position)
 
                 for direction, adjacent_position in adjacent_positions.items():
-                    if self.has_node_at(*adjacent_position):
-                        self.add_new_edge(direction, *node_position, *adjacent_position)
+                    if self.has_node_at(adjacent_position):
+                        self.add_new_edge(direction, node_position, adjacent_position)
 
     @staticmethod
-    def _find_adjacent_positions(
-        row_index: int, column_index: int
-    ) -> dict[EdgeName, Position]:
+    def _find_adjacent_positions(position: Position) -> dict[EdgeName, Position]:
+        row, column = position
+
+        if column == 0:
+            return {
+                EdgeName.RIGHT: Position(row, column + 1)
+            }
+
         return {
-            EdgeName.LEFT: (row_index, column_index - 1),
-            EdgeName.RIGHT: (row_index, column_index + 1),
+            EdgeName.LEFT: Position(row, column - 1),
+            EdgeName.RIGHT: Position(row, column + 1),
         }
 
     def _clear_positional_edges(self):
@@ -299,17 +290,18 @@ class QuantumGraph:
             adjusted_column = column_index - offset
 
             for row_index in range(self.height):
-                self.remove_node(row_index, adjusted_column)
+                self.remove_node(Position(row_index, adjusted_column))
             offset += 1
 
             for subsequent_column in range(adjusted_column + 1, initial_width):
                 for row_index in range(self.height):
-                    node = self[row_index, subsequent_column]
+                    node_position = Position(row_index, subsequent_column)
+                    node = self[node_position]
 
                     if node is not None:
                         self.move_node(
-                            (row_index, subsequent_column),
-                            (row_index, subsequent_column - 1),
+                            node_position,
+                            Position(row_index, subsequent_column - 1),
                         )
 
     def move_node(self, start: Position, end: Position):
@@ -322,7 +314,7 @@ class QuantumGraph:
             is_empty = True
 
             for row_index in range(self.height):
-                node = self[row_index, column_index]
+                node = self[Position(row_index, column_index)]
 
                 if node is not None and node.name != GateName.ID:
                     is_empty = False

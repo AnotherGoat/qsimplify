@@ -1,4 +1,4 @@
-from qsimplify.model import GraphBuilder
+from qsimplify.model import GraphBuilder, Position
 from qsimplify.simplifier import SimplificationRule
 
 
@@ -9,10 +9,10 @@ def test_rule_mask():
     rule = SimplificationRule(pattern, replacement)
 
     expected = {
-        (0, 0): True,
-        (0, 1): False,
-        (0, 2): False,
-        (0, 3): True,
+        Position(0, 0): True,
+        Position(0, 1): False,
+        Position(0, 2): False,
+        Position(0, 3): True,
     }
 
     assert rule.mask == expected

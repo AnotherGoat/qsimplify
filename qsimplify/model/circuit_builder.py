@@ -2,13 +2,7 @@ from __future__ import annotations
 
 from qiskit import QuantumCircuit
 
-from qsimplify.model.edge_name import EdgeName
 from qsimplify.model.gate_name import GateName
-
-_SWAPS_WITH = EdgeName.SWAPS_WITH
-_TARGETS = EdgeName.TARGETS
-_CONTROLLED_BY = EdgeName.CONTROLLED_BY
-_WORKS_WITH = EdgeName.WORKS_WITH
 
 
 class CircuitBuilder:

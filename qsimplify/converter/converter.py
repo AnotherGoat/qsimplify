@@ -129,9 +129,7 @@ class Converter:
         return graph
 
     @staticmethod
-    def _find_qubit_indexes(
-        circuit: QuantumCircuit, instruction: CircuitInstruction
-    ) -> list[int]:
+    def _find_qubit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
         qubits = []
 
         for qubit in instruction.qubits:
@@ -143,9 +141,7 @@ class Converter:
         return qubits
 
     @staticmethod
-    def _find_bit_indexes(
-        circuit: QuantumCircuit, instruction: CircuitInstruction
-    ) -> list[int]:
+    def _find_bit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
         bits = []
 
         for bit in instruction.clbits:
@@ -160,14 +156,14 @@ class Converter:
         self._circuit_to_graph_handlers[data.gate_name](data)
 
     def _add_single_gate_to_graph(self, data: GraphPlacingData):
-        builder, gate_name, qubits, _, _, column = data
+        builder, gate_name, qubits, column = data.builder, data.gate_name, data.qubits, data.column
         self._logger.debug(
             "Placing single-qubit gate on qubit %s on column %s", qubits[0], column
         )
         builder.add_single(gate_name, qubits[0], column)
 
     def _add_rotation_gate_to_graph(self, data: GraphPlacingData):
-        builder, gate_name, qubits, _, params, column = data
+        builder, gate_name, qubits, params, column = data.builder, data.gate_name, data.qubits, data.params, data.column
         self._logger.debug(
             "Placing rotation gate with angle %s on qubit %s on column %s",
             params[0],
@@ -177,7 +173,7 @@ class Converter:
         builder.add_rotation(gate_name, params[0], qubits[0], column)
 
     def _add_measure_gate_to_graph(self, data: GraphPlacingData):
-        builder, _, qubits, bits, _, column = data
+        builder, qubits, bits, column = data.builder, data.qubits, data.bits, data.column
         self._logger.debug(
             "Placing measure gate on qubit %s to bit %s on column %s",
             qubits[0],
@@ -187,7 +183,7 @@ class Converter:
         builder.add_measure(qubits[0], bits[0], column)
 
     def _add_swap_gate_to_graph(self, data: GraphPlacingData):
-        builder, _, qubits, _, _, column = data
+        builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing swap gate on qubits %s and %s on column %s",
             qubits[0],
@@ -197,7 +193,7 @@ class Converter:
         builder.add_swap(qubits[0], qubits[1], column)
 
     def _add_cz_gate_to_graph(self, data: GraphPlacingData):
-        builder, _, qubits, _, _, column = data
+        builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing cz gate on qubits %s and %s on column %s",
             qubits[0],
@@ -207,7 +203,7 @@ class Converter:
         builder.add_cz(qubits[0], qubits[1], column)
 
     def _add_cswap_gate_to_graph(self, data: GraphPlacingData):
-        builder, _, qubits, _, _, column = data
+        builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing cswap gate on qubits %s (control), %s (target) and %s (target) on column %s",
             qubits[0],
@@ -218,7 +214,7 @@ class Converter:
         builder.add_cswap(qubits[0], qubits[1], qubits[2], column)
 
     def _add_controlled_gate_to_graph(self, data: GraphPlacingData):
-        builder, gate_name, qubits, _, _, column = data
+        builder, gate_name, qubits, column = data.builder, data.gate_name, data.qubits, data.column
         self._logger.debug(
             "Placing controlled gate on qubits %s (control) and %s (target) on column %s",
             qubits[0],
@@ -228,7 +224,7 @@ class Converter:
         builder.add_control(gate_name, qubits[0], qubits[1], column)
 
     def _add_ccx_gate_to_graph(self, data: GraphPlacingData):
-        builder, _, qubits, _, _, column = data
+        builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing ccx gate on qubits %s (control), %s (control) and %s (target) on column %s",
             qubits[0],
@@ -250,7 +246,7 @@ class Converter:
 
         for column_index in range(graph.width):
             for row_index in range(graph.height):
-                position = (row_index, column_index)
+                position = Position(row_index, column_index)
                 self._add_to_circuit(builder, graph, explored, position)
 
         return builder.build(add_build_steps)
@@ -266,7 +262,7 @@ class Converter:
             return
 
         explored.add(position)
-        graph_node = graph[*position]
+        graph_node = graph[position]
 
         if graph_node is None or graph_node.name in (GateName.ID, GateName.BARRIER):
             return
@@ -281,31 +277,31 @@ class Converter:
 
     @staticmethod
     def _add_single_gate_to_circuit(data: CircuitPlacingData):
-        builder, _, graph_node, _, start = data
-        builder.add_single(graph_node.name, start[0])
+        builder, graph_node, start = data.builder, data.graph_node, data.start
+        builder.add_single(graph_node.name, start.row)
 
     @staticmethod
     def _add_rotation_gate_to_circuit(data: CircuitPlacingData):
-        builder, _, graph_node, _, start = data
-        builder.add_rotation(graph_node.name, graph_node.rotation, start[0])
+        builder, graph_node, start = data.builder, data.graph_node, data.start
+        builder.add_rotation(graph_node.name, graph_node.rotation, start.row)
 
     @staticmethod
     def _add_measure_gate_to_circuit(data: CircuitPlacingData):
-        builder, _, graph_node, _, start = data
-        builder.add_measure(start[0], graph_node.measure_to)
+        builder, graph_node, start = data.builder, data.graph_node, data.start
+        builder.add_measure(start.row, graph_node.measure_to)
 
     @staticmethod
     def _add_swap_gate_to_circuit(data: CircuitPlacingData):
-        builder, graph, _, explored, start = data
-        edges = graph.node_edge_data(*start)
+        builder, graph, explored, start = data.builder, data.graph, data.explored, data.start
+        edges = graph.node_edge_data(start)
         other_position = edges.swaps_with.position
-        builder.add_swap(start[0], other_position[0])
+        builder.add_swap(start.row, other_position.row)
         explored.add(other_position)
 
     @staticmethod
     def _add_controlled_gate_to_circuit(data: CircuitPlacingData):
-        builder, graph, graph_node, explored, start = data
-        edges = graph.node_edge_data(*start)
+        builder, graph, graph_node, explored, start = data.builder, data.graph, data.graph_node, data.explored, data.start
+        edges = graph.node_edge_data(start)
         is_target = edges.targets == []
 
         if is_target:
@@ -315,22 +311,22 @@ class Converter:
             controller_position = start
             target_position = edges.targets[0].position
 
-        builder.add_control(graph_node.name, controller_position[0], target_position[0])
+        builder.add_control(graph_node.name, controller_position.row, target_position.row)
         explored.add(controller_position)
         explored.add(target_position)
 
     @staticmethod
     def _add_cz_gate_to_circuit(data: CircuitPlacingData):
-        builder, graph, _, explored, start = data
-        edges = graph.node_edge_data(*start)
+        builder, graph, explored, start = data.builder, data.graph, data.explored, data.start
+        edges = graph.node_edge_data(start)
         other_position = edges.works_with[0].position
-        builder.add_cz(start[0], other_position[0])
+        builder.add_cz(start.row, other_position.row)
         explored.add(other_position)
 
     @staticmethod
     def _add_cswap_gate_to_circuit(data: CircuitPlacingData):
-        builder, graph, _, explored, start = data
-        edges = graph.node_edge_data(*start)
+        builder, graph, explored, start = data.builder, data.graph, data.explored, data.start
+        edges = graph.node_edge_data(start)
         is_target = edges.targets == []
 
         if is_target:
@@ -342,16 +338,16 @@ class Converter:
             first_position = edges.targets[0].position
             second_position = edges.targets[1].position
 
-        builder.add_cswap(controller_position[0], first_position[0], second_position[0])
+        builder.add_cswap(controller_position.row, first_position.row, second_position.row)
         explored.add(controller_position)
         explored.add(first_position)
         explored.add(second_position)
 
     @staticmethod
     def _add_ccx_gate_to_circuit(data: CircuitPlacingData):
-        builder, graph, _, explored, start = data
+        builder, graph, explored, start = data.builder, data.graph, data.explored, data.start
 
-        edges = graph.node_edge_data(*start)
+        edges = graph.node_edge_data(start)
         is_target = edges.targets == []
 
         if is_target:
@@ -364,9 +360,9 @@ class Converter:
             target_position = edges.targets[0].position
 
         builder.add_ccx(
-            first_controller_position[0],
-            second_controller_position[0],
-            target_position[0],
+            first_controller_position.row,
+            second_controller_position.row,
+            target_position.row,
         )
         explored.add(first_controller_position)
         explored.add(second_controller_position)

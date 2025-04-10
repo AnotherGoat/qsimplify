@@ -1,24 +1,17 @@
+from dataclasses import dataclass, field
+
 from qsimplify.model.graph_node import GraphNode
 
 
+@dataclass(frozen=True)
 class EdgeData:
-    def __init__(
-        self,
-        origin: GraphNode,
-        left: GraphNode | None = None,
-        right: GraphNode | None = None,
-        swaps_with: GraphNode | None = None,
-        targets: list[GraphNode] | None = None,
-        controlled_by: list[GraphNode] | None = None,
-        works_with: list[GraphNode] | None = None,
-    ):
-        self.origin = origin
-        self.left = left
-        self.right = right
-        self.swaps_with = swaps_with
-        self.targets = targets if targets is not None else []
-        self.controlled_by = controlled_by if controlled_by is not None else []
-        self.works_with = works_with if works_with is not None else []
+    origin: GraphNode
+    left: GraphNode | None = None
+    right: GraphNode | None = None
+    swaps_with: GraphNode | None = None
+    targets: list[GraphNode] = field(default_factory=list)
+    controlled_by: list[GraphNode] = field(default_factory=list)
+    works_with: list[GraphNode] = field(default_factory=list)
 
     def __str__(self) -> str:
         target_names = [str(target) for target in self.targets]

@@ -21,13 +21,13 @@ uv sync
 - Run unit tests
 
 ```shell
-uv run pytest
+uv run --group=test pytest
 ```
 
 - Run unit tests with coverage
 
 ```shell
-uv run pytest --cov=qsimplify --cov-report=html:coverage
+uv run --group=test pytest --cov=qsimplify --cov-report=html:coverage
 ```
 
 - Lint code
@@ -39,7 +39,7 @@ uv run ruff check
 - Format code
 
 ```shell
-uv run isort . && black .
+uv run isort . && uv run black .
 ```
 
 - Check types
