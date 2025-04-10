@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from qsimplify.model.position import Position
 from qsimplify.model.gate_name import GateName
+from qsimplify.model.position import Position
 
 
 @dataclass(frozen=True)

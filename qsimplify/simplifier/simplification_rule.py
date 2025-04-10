@@ -14,11 +14,7 @@ class SimplificationRule:
                 self.replacement.add_new_node(GateName.ID, position)
 
     def _generate_mask(self):
-        self.mask = {
-            node.position: node.name != GateName.ID for node in self.replacement
-        }
+        self.mask = {node.position: node.name != GateName.ID for node in self.replacement}
 
     def __str__(self):
-        return (
-            f"Replace\n{self.pattern.draw_grid()}\nWith\n{self.replacement.draw_grid()}"
-        )
+        return f"Replace\n{self.pattern.draw_grid()}\nWith\n{self.replacement.draw_grid()}"

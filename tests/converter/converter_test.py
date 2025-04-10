@@ -124,9 +124,7 @@ def test_rotation_nodes():
 
     graph = converter.circuit_to_graph(circuit)
 
-    expected = (
-        GraphBuilder().add_rx(0.75, 0, 0).add_ry(0.5, 0, 1).add_rz(0.25, 0, 2).build()
-    )
+    expected = GraphBuilder().add_rx(0.75, 0, 0).add_ry(0.5, 0, 1).add_rz(0.25, 0, 2).build()
 
     assert graph == expected
 

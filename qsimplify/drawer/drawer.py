@@ -36,9 +36,7 @@ class Drawer:
         self._logger.info("Saving graph to file %s.svg", file_name)
         self._save_graph(graph, file_name, "svg")
 
-    def _save_graph(
-        self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str
-    ):
+    def _save_graph(self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str):
         image = graphviz.Digraph(format=extension)
         image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", **kwargs)
 

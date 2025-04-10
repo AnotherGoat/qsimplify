@@ -190,9 +190,7 @@ class QuantumGraph:
         return "\n".join(result)
 
     def draw_grid(self):
-        grid = [
-            [GateName.ID.value for _ in range(self.width)] for _ in range(self.height)
-        ]
+        grid = [[GateName.ID.value for _ in range(self.width)] for _ in range(self.height)]
 
         for position in self._get_positions():
             row, column = position
@@ -262,9 +260,7 @@ class QuantumGraph:
         row, column = position
 
         if column == 0:
-            return {
-                EdgeName.RIGHT: Position(row, column + 1)
-            }
+            return {EdgeName.RIGHT: Position(row, column + 1)}
 
         return {
             EdgeName.LEFT: Position(row, column - 1),
@@ -272,9 +268,7 @@ class QuantumGraph:
         }
 
     def _clear_positional_edges(self):
-        non_positional_edges = [
-            edge for edge in self.edges() if not edge.name.is_positional()
-        ]
+        non_positional_edges = [edge for edge in self.edges() if not edge.name.is_positional()]
 
         self.clear_edges()
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from qsimplify.model.position import Position
 from qsimplify.model.edge_name import EdgeName
 from qsimplify.model.gate_name import GateName
+from qsimplify.model.position import Position
 from qsimplify.model.quantum_graph import QuantumGraph
 
 
@@ -47,9 +47,7 @@ class GraphBuilder:
     def add_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
         return self.add_rotation(GateName.RZ, theta, qubit, column)
 
-    def add_rotation(
-        self, name: GateName, angle: float, qubit: int, column: int
-    ) -> GraphBuilder:
+    def add_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
         if name not in (GateName.RX, GateName.RY, GateName.RZ):
             raise ValueError(f"{name} is not a rotation gate")
 
@@ -57,9 +55,7 @@ class GraphBuilder:
         return self
 
     def add_measure(self, qubit: int, bit: int, column: int) -> GraphBuilder:
-        self._graph.add_new_node(
-            GateName.MEASURE, Position(qubit, column), measure_to=bit
-        )
+        self._graph.add_new_node(GateName.MEASURE, Position(qubit, column), measure_to=bit)
         return self
 
     def add_swap(self, qubit1: int, qubit2: int, column: int) -> GraphBuilder:
@@ -73,14 +69,10 @@ class GraphBuilder:
         self._graph.add_new_edge(EdgeName.SWAPS_WITH, second, first)
         return self
 
-    def add_ch(
-        self, control_qubit: int, target_qubit: int, column: int
-    ) -> GraphBuilder:
+    def add_ch(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
         return self.add_control(GateName.CH, control_qubit, target_qubit, column)
 
-    def add_cx(
-        self, control_qubit: int, target_qubit: int, column: int
-    ) -> GraphBuilder:
+    def add_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
         return self.add_control(GateName.CX, control_qubit, target_qubit, column)
 
     def add_control(

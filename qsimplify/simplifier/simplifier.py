@@ -78,9 +78,7 @@ class Simplifier:
                 )
                 continue
 
-            mappings = self._match_pattern(
-                graph, pattern, node, pattern_start, mask=mask
-            )
+            mappings = self._match_pattern(graph, pattern, node, pattern_start, mask=mask)
 
             if mappings is not None:
                 return mappings
@@ -119,9 +117,7 @@ class Simplifier:
         for row_permutation in self._calculate_row_permutations(
             graph, pattern, start, pattern_start
         ):
-            self._logger.debug(
-                "Trying row permutation %s on start %s", row_permutation, start
-            )
+            self._logger.debug("Trying row permutation %s on start %s", row_permutation, start)
             subgraph, mappings = self.extract_subgraph(
                 graph, row_permutation, start.position.column, pattern.width, mask=mask
             )
@@ -146,9 +142,7 @@ class Simplifier:
         if pattern_height == 1:
             return [[row]]
 
-        other_rows = [
-            row_index for row_index in range(graph.height) if row_index != row
-        ]
+        other_rows = [row_index for row_index in range(graph.height) if row_index != row]
         permutations = [
             list(permutation)
             for permutation in itertools.permutations(other_rows, pattern.height - 1)
@@ -173,9 +167,7 @@ class Simplifier:
         if mask is None:
             mask = self._generate_full_mask(width, len(rows))
 
-        mappings = self._extract_subgraph_mappings(
-            graph, rows, starting_column, width, mask
-        )
+        mappings = self._extract_subgraph_mappings(graph, rows, starting_column, width, mask)
         self._logger.debug("Extracting mappings for width %s", width)
 
         if mappings is None:
@@ -194,9 +186,7 @@ class Simplifier:
             )
 
             edges = [
-                edge
-                for edge in graph.node_edges(old_position)
-                if not edge.name.is_positional()
+                edge for edge in graph.node_edges(old_position) if not edge.name.is_positional()
             ]
             for edge in edges:
                 subgraph.add_new_edge(
@@ -262,9 +252,7 @@ class Simplifier:
 
         for old_position in mappings.keys():
             edges = [
-                edge
-                for edge in graph.node_edges(old_position)
-                if not edge.name.is_positional()
+                edge for edge in graph.node_edges(old_position) if not edge.name.is_positional()
             ]
 
             for edge in edges:
@@ -291,9 +279,7 @@ class Simplifier:
             origin = edge_data.origin
 
             if can_be_identity or origin.name != GateName.ID:
-                self._logger.debug(
-                    "The origin %s can be accepted, finishing exploration", origin
-                )
+                self._logger.debug("The origin %s can be accepted, finishing exploration", origin)
                 return origin
 
             if edge_data.right is None:
@@ -323,9 +309,7 @@ class Simplifier:
                 if edge.name.is_positional():
                     continue
 
-                graph.add_new_edge(
-                    edge.name, original, reverse_mappings[edge.end.position]
-                )
+                graph.add_new_edge(edge.name, original, reverse_mappings[edge.end.position])
 
         graph.fill_positional_edges()
 

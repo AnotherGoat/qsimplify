@@ -14,9 +14,7 @@ class GatePlacingData(NamedTuple):
 
 class RuleParser:
     def __init__(self):
-        self._gate_parsing_handlers: dict[
-            GateName, Callable[[GatePlacingData], None]
-        ] = {
+        self._gate_parsing_handlers: dict[GateName, Callable[[GatePlacingData], None]] = {
             GateName.H: self._add_single_gate,
             GateName.X: self._add_single_gate,
             GateName.Y: self._add_single_gate,
@@ -53,9 +51,7 @@ class RuleParser:
 
     def _parse_rule(self, rule_data: Any) -> SimplificationRule:
         if "pattern" not in rule_data or "replacement" not in rule_data:
-            raise ValueError(
-                f"The rule {rule_data} is missing its pattern or replacement keys"
-            )
+            raise ValueError(f"The rule {rule_data} is missing its pattern or replacement keys")
 
         pattern = GraphBuilder()
 
@@ -71,9 +67,7 @@ class RuleParser:
 
     def _parse_and_add_gate(self, builder: GraphBuilder, gate_data: list[Any]):
         if not isinstance(gate_data[0], str):
-            raise ValueError(
-                f"The gate {gate_data} must have a string as its first element"
-            )
+            raise ValueError(f"The gate {gate_data} must have a string as its first element")
 
         gate_name = GateName.from_str(gate_data.pop(0))
 
