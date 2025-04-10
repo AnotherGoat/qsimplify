@@ -33,7 +33,7 @@ uv run --group=test pytest --cov=qsimplify --cov-report=html:coverage
 - Lint code
 
 ```shell
-uv run ruff check
+uv run ruff check qsimplify/
 ```
 
 - Format code

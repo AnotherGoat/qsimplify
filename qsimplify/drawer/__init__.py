@@ -1,1 +1,1 @@
-from qsimplify.drawer.drawer import *
+from qsimplify.drawer.drawer import Drawer as Drawer

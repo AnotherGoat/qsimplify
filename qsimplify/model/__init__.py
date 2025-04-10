@@ -1,9 +1,9 @@
-from qsimplify.model.circuit_builder import *
-from qsimplify.model.edge_data import *
-from qsimplify.model.edge_name import *
-from qsimplify.model.gate_name import *
-from qsimplify.model.graph_builder import *
-from qsimplify.model.graph_edge import *
-from qsimplify.model.graph_node import *
-from qsimplify.model.position import *
-from qsimplify.model.quantum_graph import *
+from qsimplify.model.circuit_builder import CircuitBuilder as CircuitBuilder
+from qsimplify.model.edge_data import EdgeData as EdgeData
+from qsimplify.model.edge_name import EdgeName as EdgeName
+from qsimplify.model.gate_name import GateName as GateName
+from qsimplify.model.graph_builder import GraphBuilder as GraphBuilder
+from qsimplify.model.graph_edge import GraphEdge as GraphEdge
+from qsimplify.model.graph_node import GraphNode as GraphNode
+from qsimplify.model.position import Position as Position
+from qsimplify.model.quantum_graph import QuantumGraph as QuantumGraph

@@ -2,7 +2,7 @@ import textwrap
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class QuantumMetrics:
     """
     Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
