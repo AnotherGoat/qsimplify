@@ -14,19 +14,19 @@ class QuantumMetrics:
         max_density (int): Maximum number of operations applied to the qubits.
         average_density (float): Average number of operations applied to the qubits.
 
-        pauli_x_count (int): Number of Pauli-X gates (NOT).
-        pauli_y_count (int): Number of Pauli-Y gates.
-        pauli_z_count (int): Number of Pauli-Z gates.
+        x_count (int): Number of Pauli-X gates (NOT).
+        y_count (int): Number of Pauli-Y gates.
+        z_count (int): Number of Pauli-Z gates.
         pauli_count (int): Total number of Pauli gates in the circuit (calculated as the sum of Pauli-X, Pauli-Y, and Pauli-Z gates).
         hadamard_count (int): Number of Hadamard gates.
         initial_superposition_percent (float): Ratio of qubits with a Hadamard gate as an initial gate (qubits in superposition state).
-        other_single_gates_count (int): Number of other single-qubit gates in the circuit (excluding Pauli-X, Pauli-Y, Pauli-Z and Hadamard gates).
-        single_gate_count (int): Total number of single-qubit gates.
+        other_single_qubit_count (int): Number of other single-qubit gates in the circuit (excluding Pauli-X, Pauli-Y, Pauli-Z and Hadamard gates).
+        single_qubit_count (int): Total number of single-qubit gates.
         controlled_single_qubit_count (int): Total number of controlled single-qubit gates.
 
         gate_count (int): Total number of gates in the circuit.
         controlled_gate_count (int): Total number of controlled gates in the circuit.
-        single_gate_percent (float): Ratio of single gates to total gates.
+        single_qubit_percent (float): Ratio of single gates to total gates.
     """
 
     # Circuit Size
@@ -38,14 +38,14 @@ class QuantumMetrics:
     average_density: float = -1.0
 
     # Single-Qubit Gates
-    pauli_x_count: int = -1
-    pauli_y_count: int = -1
-    pauli_z_count: int = -1
+    x_count: int = -1
+    y_count: int = -1
+    z_count: int = -1
     pauli_count: int = -1
     hadamard_count: int = -1
     initial_superposition_percent: float = -1.0
-    other_single_gates_count: int = -1
-    single_gate_count: int = -1
+    other_single_qubit_count: int = -1
+    single_qubit_count: int = -1
     controlled_single_qubit_count: int = -1
 
     # Multi-Qubit Gates
@@ -63,7 +63,7 @@ class QuantumMetrics:
     # All Gates in the Circuit
     gate_count: int = -1
     controlled_gate_count: int = -1
-    single_gate_percent: float = -1.0
+    single_qubit_percent: float = -1.0
 
     # Measurement Gates
     measure_count: int = -1
@@ -84,14 +84,14 @@ class QuantumMetrics:
             - AvgDens (Average Density): {self.average_density:.2f}
 
             Single-Qubit Gates:
-            - NoP-X (Pauli-X Count): {self.pauli_x_count}
-            - NoP-Y (Pauli-Y Count): {self.pauli_y_count}
-            - NoP-Z (Pauli-Z Count): {self.pauli_z_count}
+            - NoP-X (Pauli-X Count): {self.x_count}
+            - NoP-Y (Pauli-Y Count): {self.y_count}
+            - NoP-Z (Pauli-Z Count): {self.z_count}
             - TNo-P (Total Pauli Count): {self.pauli_count}
             - NoH (Hadamard Count): {self.hadamard_count}
             - %SpposQ (Initial Superposition Percent): {self.initial_superposition_percent:.2f}
-            - NoOtherSG (Other Single-Qubit Gates Count): {self.other_single_gates_count}
-            - TNoSQG (Total Single-Qubit Gates): {self.single_gate_count}
+            - NoOtherSG (Other Single-Qubit Gates Count): {self.other_single_qubit_count}
+            - TNoSQG (Total Single-Qubit Gates): {self.single_qubit_count}
             - TNoSQG (Controlled Single-Qubit Gates): {self.controlled_single_qubit_count}
 
             Multi-Qubit Gates:
@@ -109,7 +109,7 @@ class QuantumMetrics:
             All Gates in the Circuit:
             - NoGates (Total Gate Count): {self.gate_count}
             - NoCGates (Controlled Gate Count): {self.controlled_gate_count}
-            - %SGates (Single Gate Percent): {self.single_gate_percent:.2f}
+            - %SGates (Single Gate Percent): {self.single_qubit_percent:.2f}
             
             Measurement Gates:
             - NoQM (Measured Qubit Count): {self.measure_count}

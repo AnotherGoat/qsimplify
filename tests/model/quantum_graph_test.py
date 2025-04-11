@@ -30,6 +30,17 @@ def test_graph_height():
     assert graph.height == 6
 
 
+def test_remove_empty_columns():
+    graph = QuantumGraph()
+
+    graph.add_new_node(X, Position(0, 0))
+    graph.add_new_node(X, Position(0, 5))
+    graph.clean_up()
+
+    print(graph)
+    assert graph.width == 2
+
+
 def test_empty_dimensions():
     graph = QuantumGraph()
 

@@ -18,21 +18,22 @@ class Analyzer:
         pauli_count = x_count + y_count + z_count
         hadamard_count = self._count_operations(circuit, GateName.H)
         single_gate_count = self._count_single_gates(circuit)
+        single_qubit_percent = 0 if gate_count == 0 else single_gate_count / gate_count
 
         return QuantumMetrics(
             width=graph.height,
             depth=graph.width,
             max_density=graph.width,
             gate_count=gate_count,
-            pauli_x_count=x_count,
-            pauli_y_count=y_count,
-            pauli_z_count=z_count,
+            x_count=x_count,
+            y_count=y_count,
+            z_count=z_count,
             pauli_count=pauli_count,
             hadamard_count=hadamard_count,
             initial_superposition_percent=self._calculate_superposition_rate(graph),
-            single_gate_count=self._count_single_gates(circuit),
-            other_single_gates_count=single_gate_count - pauli_count - hadamard_count,
-            single_gate_percent=single_gate_count / gate_count,
+            single_qubit_count=self._count_single_gates(circuit),
+            other_single_qubit_count=single_gate_count - pauli_count - hadamard_count,
+            single_qubit_percent=single_qubit_percent,
         )
 
     def _count_operations(self, circuit: QuantumCircuit, gate_name: GateName) -> int:
@@ -45,6 +46,9 @@ class Analyzer:
 
     @staticmethod
     def _calculate_superposition_rate(graph: QuantumGraph) -> float:
+        if graph.height == 0:
+            return 0
+
         superposition_count = 0
         row = 0
         position = Position(row, 0)

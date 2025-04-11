@@ -73,7 +73,11 @@ class QuantumGraph:
 
     def remove_node(self, position: Position) -> None:
         """Remove the GraphNode at the specified position and all its edges."""
-        self._network.remove_node(position)
+        if self.has_node_at(position):
+            self._network.remove_node(position)
+
+    def move_node(self, start: Position, end: Position) -> None:
+        pass
 
     def clear_node(self, position: Position) -> None:
         """Replace the GraphNode at the specified position with an identity node."""
@@ -233,6 +237,56 @@ class QuantumGraph:
         """Check whether the graph has a node at the specified row and column."""
         return position in self._network
 
+    def clean_up(self) -> None:
+        """Clean up this graph, which removes empty rows and columns, and also fills up any empty spaces."""
+        self.remove_empty_rows()
+        self.remove_empty_columns()
+        self.fill_empty_spaces()
+        self.fill_positional_edges()
+
+    def remove_empty_rows(self) -> None:
+        pass
+
+    def remove_empty_columns(self) -> None:
+        empty_columns = self._find_empty_columns()
+        print(empty_columns)
+        initial_width = self.width
+
+        for offset, column_index in enumerate(empty_columns):
+            adjusted_column = column_index - offset
+
+            for row_index in range(self.height):
+                self.remove_node(Position(row_index, adjusted_column))
+
+            for subsequent_column in range(adjusted_column + 1, initial_width):
+                for row_index in range(self.height):
+                    node_position = Position(row_index, subsequent_column)
+                    node = self[node_position]
+
+                    if node is not None:
+                        self.move_node(
+                            node_position,
+                            Position(row_index, subsequent_column - 1),
+                        )
+
+    def _find_empty_columns(self) -> list[int]:
+        empty_columns = []
+
+        for column_index in range(self.width):
+            is_empty = True
+
+            for row_index in range(self.height):
+                node = self[Position(row_index, column_index)]
+
+                if node is not None and node.name != GateName.ID:
+                    is_empty = False
+                    break
+
+            if is_empty:
+                empty_columns.append(column_index)
+
+        return empty_columns
+
     def fill_empty_spaces(self) -> None:
         for row in range(self.height):
             for column in range(self.width):
@@ -274,48 +328,6 @@ class QuantumGraph:
 
         for edge in non_positional_edges:
             self.add_edge(edge)
-
-    def clean_empty_columns(self) -> None:
-        empty_columns = self._find_empty_columns()
-        initial_width = self.width
-
-        for offset, column_index in enumerate(empty_columns):
-            adjusted_column = column_index - offset
-
-            for row_index in range(self.height):
-                self.remove_node(Position(row_index, adjusted_column))
-
-            for subsequent_column in range(adjusted_column + 1, initial_width):
-                for row_index in range(self.height):
-                    node_position = Position(row_index, subsequent_column)
-                    node = self[node_position]
-
-                    if node is not None:
-                        self.move_node(
-                            node_position,
-                            Position(row_index, subsequent_column - 1),
-                        )
-
-    def move_node(self, start: Position, end: Position) -> None:
-        pass
-
-    def _find_empty_columns(self) -> list[int]:
-        empty_columns = []
-
-        for column_index in range(self.width):
-            is_empty = True
-
-            for row_index in range(self.height):
-                node = self[Position(row_index, column_index)]
-
-                if node is not None and node.name != GateName.ID:
-                    is_empty = False
-                    break
-
-            if is_empty:
-                empty_columns.append(column_index)
-
-        return empty_columns
 
     def clear(self) -> None:
         """Remove all the nodes and edges from the graph."""

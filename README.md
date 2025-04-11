@@ -21,13 +21,13 @@ uv sync
 - Run unit tests
 
 ```shell
-uv run --group=test pytest
+uv run pytest
 ```
 
 - Run unit tests with coverage
 
 ```shell
-uv run --group=test pytest --cov=qsimplify --cov-report=html:coverage
+uv run pytest --cov=qsimplify --cov-report=html:coverage
 ```
 
 - Lint code
