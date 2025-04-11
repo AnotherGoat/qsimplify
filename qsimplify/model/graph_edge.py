@@ -10,5 +10,5 @@ class GraphEdge:
     start: GraphNode
     end: GraphNode
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"[{self.name.value}] from {self.start} to {self.end}"

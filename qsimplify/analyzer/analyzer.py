@@ -6,38 +6,38 @@ from qsimplify.model import GateName, Position, QuantumGraph
 
 
 class Analyzer:
-    def __init__(self, converter: Converter):
+    def __init__(self, converter: Converter) -> None:
         self._converter = converter
 
     def calculate_metrics(self, circuit: QuantumCircuit) -> QuantumMetrics:
-        metrics = QuantumMetrics()
-
         graph = self._converter.circuit_to_graph(circuit)
-        metrics.width = graph.height
-        metrics.depth = graph.width
+        gate_count = len(circuit.data)
+        x_count = self._count_operations(circuit, GateName.X)
+        y_count = self._count_operations(circuit, GateName.Y)
+        z_count = self._count_operations(circuit, GateName.Z)
+        pauli_count = x_count + y_count + z_count
+        hadamard_count = self._count_operations(circuit, GateName.H)
+        single_gate_count = self._count_single_gates(circuit)
 
-        metrics.max_density = graph.width
-
-        metrics.gate_count = len(circuit.data)
-
-        metrics.pauli_x_count = self._count_operations(circuit, GateName.X.value)
-        metrics.pauli_y_count = self._count_operations(circuit, GateName.Y.value)
-        metrics.pauli_z_count = self._count_operations(circuit, GateName.Z.value)
-        metrics.pauli_count = metrics.pauli_x_count + metrics.pauli_y_count + metrics.pauli_z_count
-        metrics.hadamard_count = self._count_operations(circuit, GateName.H.value)
-        metrics.initial_superposition_percent = self._calculate_superposition_rate(graph)
-        metrics.single_gate_count = self._count_single_gates(circuit)
-        metrics.other_single_gates_count = (
-            metrics.single_gate_count - metrics.pauli_count - metrics.hadamard_count
+        return QuantumMetrics(
+            width=graph.height,
+            depth=graph.width,
+            max_density=graph.width,
+            gate_count=gate_count,
+            pauli_x_count=x_count,
+            pauli_y_count=y_count,
+            pauli_z_count=z_count,
+            pauli_count=pauli_count,
+            hadamard_count=hadamard_count,
+            initial_superposition_percent=self._calculate_superposition_rate(graph),
+            single_gate_count=self._count_single_gates(circuit),
+            other_single_gates_count=single_gate_count - pauli_count - hadamard_count,
+            single_gate_percent=single_gate_count / gate_count,
         )
 
-        metrics.single_gate_percent = metrics.single_gate_count / metrics.gate_count
-
-        return metrics
-
-    def _count_operations(self, circuit: QuantumCircuit, operation_name: str) -> int:
+    def _count_operations(self, circuit: QuantumCircuit, gate_name: GateName) -> int:
         operations = self._get_operations(circuit)
-        return len([operation for operation in operations if operation == operation_name])
+        return len([operation for operation in operations if operation == gate_name.value])
 
     @staticmethod
     def _get_operations(circuit: QuantumCircuit) -> list[str]:

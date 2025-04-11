@@ -39,7 +39,7 @@ uv run ruff check qsimplify/
 - Format code
 
 ```shell
-uv run isort . && uv run black .
+uv run ruff check --fix --select I && uv run ruff format
 ```
 
 - Check types

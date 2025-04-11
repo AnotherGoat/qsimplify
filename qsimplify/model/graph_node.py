@@ -19,7 +19,7 @@ class GraphNode:
     rotation: float | None = None
     measure_to: int | None = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         rotation_data = f" (rotation={self.rotation})" if self.rotation else ""
         measure_to_data = f" (measure_to={self.measure_to})" if self.measure_to else ""
         return f"{self.name.value} at {self.position}{rotation_data}{measure_to_data}"

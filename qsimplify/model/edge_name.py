@@ -9,5 +9,5 @@ class EdgeName(Enum):
     CONTROLLED_BY = "controlled_by"
     WORKS_WITH = "works_with"
 
-    def is_positional(self):
+    def is_positional(self) -> bool:
         return self in (EdgeName.LEFT, EdgeName.RIGHT)

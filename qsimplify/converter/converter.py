@@ -34,7 +34,7 @@ class CircuitPlacingData(NamedTuple):
 
 
 class Converter:
-    def __init__(self):
+    def __init__(self) -> None:
         self._logger = setup_logger("Converter")
         self._circuit_to_graph_handlers: dict[GateName, Callable[[GraphPlacingData], None]] = {
             GateName.H: self._add_single_gate_to_graph,
@@ -142,10 +142,10 @@ class Converter:
 
         return bits
 
-    def _add_instruction_to_graph(self, data: GraphPlacingData):
+    def _add_instruction_to_graph(self, data: GraphPlacingData) -> None:
         self._circuit_to_graph_handlers[data.gate_name](data)
 
-    def _add_single_gate_to_graph(self, data: GraphPlacingData):
+    def _add_single_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, gate_name, qubits, column = (
             data.builder,
             data.gate_name,
@@ -155,7 +155,7 @@ class Converter:
         self._logger.debug("Placing single-qubit gate on qubit %s on column %s", qubits[0], column)
         builder.add_single(gate_name, qubits[0], column)
 
-    def _add_rotation_gate_to_graph(self, data: GraphPlacingData):
+    def _add_rotation_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, gate_name, qubits, params, column = (
             data.builder,
             data.gate_name,
@@ -171,7 +171,7 @@ class Converter:
         )
         builder.add_rotation(gate_name, params[0], qubits[0], column)
 
-    def _add_measure_gate_to_graph(self, data: GraphPlacingData):
+    def _add_measure_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, bits, column = (
             data.builder,
             data.qubits,
@@ -186,7 +186,7 @@ class Converter:
         )
         builder.add_measure(qubits[0], bits[0], column)
 
-    def _add_swap_gate_to_graph(self, data: GraphPlacingData):
+    def _add_swap_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing swap gate on qubits %s and %s on column %s",
@@ -196,7 +196,7 @@ class Converter:
         )
         builder.add_swap(qubits[0], qubits[1], column)
 
-    def _add_cz_gate_to_graph(self, data: GraphPlacingData):
+    def _add_cz_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing cz gate on qubits %s and %s on column %s",
@@ -206,7 +206,7 @@ class Converter:
         )
         builder.add_cz(qubits[0], qubits[1], column)
 
-    def _add_cswap_gate_to_graph(self, data: GraphPlacingData):
+    def _add_cswap_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing cswap gate on qubits %s (control), %s (target) and %s (target) on column %s",
@@ -217,7 +217,7 @@ class Converter:
         )
         builder.add_cswap(qubits[0], qubits[1], qubits[2], column)
 
-    def _add_controlled_gate_to_graph(self, data: GraphPlacingData):
+    def _add_controlled_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, gate_name, qubits, column = (
             data.builder,
             data.gate_name,
@@ -232,7 +232,7 @@ class Converter:
         )
         builder.add_control(gate_name, qubits[0], qubits[1], column)
 
-    def _add_ccx_gate_to_graph(self, data: GraphPlacingData):
+    def _add_ccx_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
         self._logger.debug(
             "Placing ccx gate on qubits %s (control), %s (control) and %s (target) on column %s",
@@ -266,7 +266,7 @@ class Converter:
         graph: QuantumGraph,
         explored: set[Position],
         position: Position,
-    ):
+    ) -> None:
         if position in explored:
             return
 
@@ -279,26 +279,26 @@ class Converter:
         placing_data = CircuitPlacingData(builder, graph, graph_node, explored, position)
         self._add_instruction_to_circuit(placing_data)
 
-    def _add_instruction_to_circuit(self, data: CircuitPlacingData):
+    def _add_instruction_to_circuit(self, data: CircuitPlacingData) -> None:
         self._graph_to_circuit_handlers[data.graph_node.name](data)
 
     @staticmethod
-    def _add_single_gate_to_circuit(data: CircuitPlacingData):
+    def _add_single_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph_node, start = data.builder, data.graph_node, data.start
         builder.add_single(graph_node.name, start.row)
 
     @staticmethod
-    def _add_rotation_gate_to_circuit(data: CircuitPlacingData):
+    def _add_rotation_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph_node, start = data.builder, data.graph_node, data.start
         builder.add_rotation(graph_node.name, graph_node.rotation, start.row)
 
     @staticmethod
-    def _add_measure_gate_to_circuit(data: CircuitPlacingData):
+    def _add_measure_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph_node, start = data.builder, data.graph_node, data.start
         builder.add_measure(start.row, graph_node.measure_to)
 
     @staticmethod
-    def _add_swap_gate_to_circuit(data: CircuitPlacingData):
+    def _add_swap_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
             data.builder,
             data.graph,
@@ -311,7 +311,7 @@ class Converter:
         explored.add(other_position)
 
     @staticmethod
-    def _add_controlled_gate_to_circuit(data: CircuitPlacingData):
+    def _add_controlled_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, graph_node, explored, start = (
             data.builder,
             data.graph,
@@ -334,7 +334,7 @@ class Converter:
         explored.add(target_position)
 
     @staticmethod
-    def _add_cz_gate_to_circuit(data: CircuitPlacingData):
+    def _add_cz_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
             data.builder,
             data.graph,
@@ -347,7 +347,7 @@ class Converter:
         explored.add(other_position)
 
     @staticmethod
-    def _add_cswap_gate_to_circuit(data: CircuitPlacingData):
+    def _add_cswap_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
             data.builder,
             data.graph,
@@ -372,7 +372,7 @@ class Converter:
         explored.add(second_position)
 
     @staticmethod
-    def _add_ccx_gate_to_circuit(data: CircuitPlacingData):
+    def _add_ccx_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
             data.builder,
             data.graph,

@@ -1,5 +1,5 @@
 import itertools
-import os
+from pathlib import Path
 
 from qiskit import QuantumCircuit
 
@@ -14,13 +14,13 @@ from qsimplify.utils import setup_logger
 class Simplifier:
     _default_rules: list[SimplificationRule]
 
-    def __init__(self, converter: Converter):
+    def __init__(self, converter: Converter) -> None:
         self._logger = setup_logger("Simplifier")
         self._converter = converter
 
         parser = RuleParser()
-        script_path = os.path.dirname(__file__)
-        default_rules_path = os.path.join(script_path, "default_rules.json5")
+        script_path = Path(__file__).parent
+        default_rules_path = script_path / "default_rules.json5"
 
         self._default_rules = parser.load_rules_from_file(default_rules_path)
 
@@ -49,7 +49,7 @@ class Simplifier:
 
         return result
 
-    def apply_simplification_rule(self, graph: QuantumGraph, rule: SimplificationRule):
+    def apply_simplification_rule(self, graph: QuantumGraph, rule: SimplificationRule) -> None:
         self._logger.debug("Applying rule with mask %s", rule.mask)
         mappings = self.find_pattern(graph, rule.pattern, mask=rule.mask)
 
@@ -61,7 +61,7 @@ class Simplifier:
         self,
         graph: QuantumGraph,
         pattern: QuantumGraph,
-        mask: dict[Position, bool] = None,
+        mask: dict[Position, bool] | None = None,
     ) -> GraphMappings | None:
         pattern_start = self._find_start(pattern)
         self._logger.debug("Pattern start found at %s", pattern_start.position)
@@ -112,7 +112,7 @@ class Simplifier:
         pattern: QuantumGraph,
         start: GraphNode,
         pattern_start: GraphNode,
-        mask: dict[Position, bool] = None,
+        mask: dict[Position, bool] | None = None,
     ) -> GraphMappings | None:
         for row_permutation in self._calculate_row_permutations(
             graph, pattern, start, pattern_start
@@ -159,7 +159,7 @@ class Simplifier:
         rows: list[int],
         starting_column: int,
         width: int,
-        mask: dict[Position, bool] = None,
+        mask: dict[Position, bool] | None = None,
     ) -> tuple[QuantumGraph | None, GraphMappings | None]:
         if len(rows) == 0 or width <= 0 or len(graph) == 0:
             raise ValueError("The graph, rows or width are invalid")
@@ -250,13 +250,13 @@ class Simplifier:
                 old_column = node.position.column + 1
                 new_column += 1
 
-        for old_position in mappings.keys():
+        for old_position in mappings:
             edges = [
                 edge for edge in graph.node_edges(old_position) if not edge.name.is_positional()
             ]
 
             for edge in edges:
-                if edge.end.position not in mappings.keys():
+                if edge.end.position not in mappings:
                     return None
 
         return mappings
@@ -290,9 +290,9 @@ class Simplifier:
 
     def replace_pattern(
         self, graph: QuantumGraph, replacement: QuantumGraph, mappings: GraphMappings
-    ):
+    ) -> None:
         self._logger.debug("Removing nodes with mappings %s", mappings)
-        for original_position in mappings.keys():
+        for original_position in mappings:
             graph.clear_node(original_position)
 
         mappings = {key: value for key, value in mappings.items() if value is not None}

@@ -18,25 +18,27 @@ _DARK_GRAY = "#424242"
 
 
 class Drawer:
-    def __init__(self, view: bool = False):
+    def __init__(self, view: bool = False) -> None:
         self._logger = setup_logger("Drawer")
         self.view = view
 
-    def save_circuit_png(self, circuit: QuantumCircuit, file_name: str):
+    def save_circuit_png(self, circuit: QuantumCircuit, file_name: str) -> None:
         self._logger.info("Saving circuit to file %s.png", file_name)
 
         figure = circuit.draw("mpl")
         figure.savefig(f"{file_name}.png")
 
-    def save_graph_png(self, graph: QuantumGraph, file_name: str):
+    def save_graph_png(self, graph: QuantumGraph, file_name: str) -> None:
         self._logger.info("Saving graph to file %s.png", file_name)
         self._save_graph(graph, file_name, "png", dpi=str(150))
 
-    def save_graph_svg(self, graph: QuantumGraph, file_name: str):
+    def save_graph_svg(self, graph: QuantumGraph, file_name: str) -> None:
         self._logger.info("Saving graph to file %s.svg", file_name)
         self._save_graph(graph, file_name, "svg")
 
-    def _save_graph(self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str):
+    def _save_graph(
+        self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str
+    ) -> None:
         image = graphviz.Digraph(format=extension)
         image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", **kwargs)
 
@@ -50,7 +52,7 @@ class Drawer:
             view=self.view,
         )
 
-    def _draw_nodes(self, graph: QuantumGraph, image: Digraph):
+    def _draw_nodes(self, graph: QuantumGraph, image: Digraph) -> None:
         for node in graph:
             x, y = self._find_draw_position(graph, node)
 
@@ -99,7 +101,7 @@ class Drawer:
             case _:
                 return _GRAY
 
-    def _draw_edges(self, graph: QuantumGraph, image: Digraph):
+    def _draw_edges(self, graph: QuantumGraph, image: Digraph) -> None:
         for edge in graph.iter_edges():
             if edge.start.name != GateName.CZ and edge.name == EdgeName.WORKS_WITH:
                 continue

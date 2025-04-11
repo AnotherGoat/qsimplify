@@ -72,7 +72,7 @@ class QuantumMetrics:
     # Other Metrics
     ancilla_percent: float = -1.0
 
-    def __str__(self):
+    def __str__(self) -> str:
         return textwrap.dedent(
             f"""
             Circuit Size:

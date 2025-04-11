@@ -6,12 +6,12 @@ from qsimplify.model.gate_name import GateName
 
 
 class CircuitBuilder:
-    def __init__(self, qubits: int, name: str = "circuit"):
+    def __init__(self, qubits: int, name: str = "circuit") -> None:
         self._name = name
         self._circuit = QuantumCircuit(qubits)
         self._build_steps = [f"{self._name} = QuantumCircuit({qubits})"]
 
-    def _add_build_step(self, name: GateName, *params: int | float):
+    def _add_build_step(self, name: GateName, *params: int | float) -> None:
         joined_params = ", ".join([str(param) for param in params])
         self._build_steps.append(f"{self._name}.{name.value}({joined_params})")
 
@@ -123,7 +123,6 @@ class CircuitBuilder:
         return self
 
     def build(self, add_build_steps: bool = False) -> QuantumCircuit | tuple[QuantumCircuit, str]:
-
         if add_build_steps:
             return self._circuit, "\n".join(self._build_steps)
 

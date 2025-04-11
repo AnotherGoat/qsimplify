@@ -7,7 +7,7 @@ from qsimplify.model.quantum_graph import QuantumGraph
 
 
 class GraphBuilder:
-    def __init__(self):
+    def __init__(self) -> None:
         self._graph = QuantumGraph()
 
     def __str__(self) -> str:

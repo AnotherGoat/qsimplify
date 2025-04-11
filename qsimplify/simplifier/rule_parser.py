@@ -1,4 +1,5 @@
-from typing import Any, Callable, NamedTuple
+from pathlib import Path
+from typing import Callable, NamedTuple
 
 import json5
 
@@ -13,7 +14,7 @@ class GatePlacingData(NamedTuple):
 
 
 class RuleParser:
-    def __init__(self):
+    def __init__(self) -> None:
         self._gate_parsing_handlers: dict[GateName, Callable[[GatePlacingData], None]] = {
             GateName.H: self._add_single_gate,
             GateName.X: self._add_single_gate,
@@ -31,8 +32,8 @@ class RuleParser:
             GateName.CCX: self._add_ccx_gate,
         }
 
-    def load_rules_from_file(self, json5_path: str) -> list[SimplificationRule]:
-        with open(json5_path, "r") as file:
+    def load_rules_from_file(self, path: Path) -> list[SimplificationRule]:
+        with path.open("r") as file:
             json_data = json5.load(file, allow_duplicate_keys=False)
 
         return self._parse_rules(json_data)
@@ -41,15 +42,10 @@ class RuleParser:
         json_data = json5.loads(json5_text, allow_duplicate_keys=False)
         return self._parse_rules(json_data)
 
-    def _parse_rules(self, json_data: Any) -> list[SimplificationRule]:
-        rules = []
+    def _parse_rules(self, json_data: list[dict]) -> list[SimplificationRule]:
+        return [self._parse_rule(rule_data) for rule_data in json_data]
 
-        for rule_data in json_data:
-            rules.append(self._parse_rule(rule_data))
-
-        return rules
-
-    def _parse_rule(self, rule_data: Any) -> SimplificationRule:
+    def _parse_rule(self, rule_data: dict) -> SimplificationRule:
         if "pattern" not in rule_data or "replacement" not in rule_data:
             raise ValueError(f"The rule {rule_data} is missing its pattern or replacement keys")
 
@@ -65,7 +61,7 @@ class RuleParser:
 
         return SimplificationRule(pattern.build(), replacement.build())
 
-    def _parse_and_add_gate(self, builder: GraphBuilder, gate_data: list[Any]):
+    def _parse_and_add_gate(self, builder: GraphBuilder, gate_data: list) -> None:
         if not isinstance(gate_data[0], str):
             raise ValueError(f"The gate {gate_data} must have a string as its first element")
 
@@ -88,11 +84,11 @@ class RuleParser:
         self._gate_parsing_handlers[gate_name](placing_data)
 
     @staticmethod
-    def _all_numeric(data: list[Any]) -> bool:
+    def _all_numeric(data: list) -> bool:
         return all(isinstance(item, (int, float)) for item in data)
 
-    def _add_single_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_single_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [int, int]):
             raise ValueError(
@@ -101,8 +97,8 @@ class RuleParser:
 
         builder.add_single(gate_name, extra_data[0], extra_data[1])
 
-    def _add_rotation_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_rotation_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [float, int, int]):
             raise ValueError(
@@ -111,8 +107,8 @@ class RuleParser:
 
         builder.add_rotation(gate_name, extra_data[0], extra_data[1], extra_data[2])
 
-    def _add_measure_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_measure_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
@@ -121,8 +117,8 @@ class RuleParser:
 
         builder.add_measure(extra_data[0], extra_data[1], extra_data[2])
 
-    def _add_swap_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_swap_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
@@ -131,8 +127,8 @@ class RuleParser:
 
         builder.add_swap(extra_data[0], extra_data[1], extra_data[2])
 
-    def _add_controlled_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_controlled_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
@@ -141,8 +137,8 @@ class RuleParser:
 
         builder.add_control(gate_name, extra_data[0], extra_data[1], extra_data[2])
 
-    def _add_cz_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_cz_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [int, int, int]):
             raise ValueError(
@@ -151,8 +147,8 @@ class RuleParser:
 
         builder.add_cz(extra_data[0], extra_data[1], extra_data[2])
 
-    def _add_cswap_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_cswap_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [int, int, int, int]):
             raise ValueError(
@@ -161,8 +157,8 @@ class RuleParser:
 
         builder.add_cswap(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
 
-    def _add_ccx_gate(self, data: GatePlacingData):
-        builder, gate_name, extra_data = data
+    def _add_ccx_gate(self, data: GatePlacingData) -> None:
+        builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
 
         if not self._check_types(extra_data, [int, int, int, int]):
             raise ValueError(
@@ -172,8 +168,10 @@ class RuleParser:
         builder.add_ccx(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
 
     @staticmethod
-    def _check_types(data: list[int | float], types: list[type]):
+    def _check_types(data: list[int | float], types: list[type]) -> bool:
         if len(data) != len(types):
             return False
 
-        return all(isinstance(item, item_type) for item, item_type in zip(data, types))
+        return all(
+            isinstance(item, item_type) for item, item_type in zip(data, types, strict=False)
+        )

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 
@@ -20,8 +22,8 @@ class GateName(Enum):
     BARRIER = "barrier"
 
     @classmethod
-    def from_str(cls, name: str):
+    def from_str(cls, name: str) -> GateName:
         try:
             return cls(name.lower())
-        except ValueError:
-            raise ValueError(f"'{name}' is not a valid GateName")
+        except ValueError as error:
+            raise ValueError(f"'{name}' is not a valid GateName") from error

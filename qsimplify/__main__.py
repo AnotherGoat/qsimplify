@@ -10,7 +10,7 @@ from qsimplify.simplifier import Simplifier
 from qsimplify.utils import set_debug_mode
 
 
-def _main():
+def _run_demo() -> None:
     circuit = QuantumCircuit(3)
     circuit.cx(0, 1)
     circuit.id(1)
@@ -63,7 +63,7 @@ def _main():
     drawer.save_graph_svg(simplified_graph, "out/simplified_graph")
 
 
-def _parse_debug_options():
+def _parse_debug_options() -> None:
     parser = argparse.ArgumentParser(description="Quantum circuit simplifier")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args()
@@ -72,4 +72,4 @@ def _parse_debug_options():
 
 if __name__ == "__main__":
     _parse_debug_options()
-    _main()
+    _run_demo()
