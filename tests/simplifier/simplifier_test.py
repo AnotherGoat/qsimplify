@@ -348,19 +348,19 @@ def test_find_three_qubit_permutations():
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(0, 0): Position(1, 0), Position(1, 0): Position(0, 0)}
 
-    graph = GraphBuilder().add_h(0, 0).add_x(2, 0).build()
+    graph = GraphBuilder().add_h(0, 0).add_x(2, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(0, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
-    graph = GraphBuilder().add_h(2, 0).add_x(0, 0).build()
+    graph = GraphBuilder().add_h(2, 0).add_x(0, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(0, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 
-    graph = GraphBuilder().add_h(1, 0).add_x(2, 0).build()
+    graph = GraphBuilder().add_h(1, 0).add_x(2, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(1, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
-    graph = GraphBuilder().add_h(2, 0).add_x(1, 0).build()
+    graph = GraphBuilder().add_h(2, 0).add_x(1, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(1, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 

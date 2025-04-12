@@ -47,13 +47,7 @@ class QuantumGraph:
 
     def add_node(self, node: GraphNode) -> None:
         """Add an existing GraphNode to the graph."""
-        self._network.add_node(
-            node.position,
-            name=node.name,
-            position=node.position,
-            rotation=node.rotation,
-            measure_to=node.measure_to,
-        )
+        self.add_new_node(node.name, node.position, node.rotation, node.measure_to)
 
     def add_new_node(
         self,
@@ -66,7 +60,6 @@ class QuantumGraph:
         self._network.add_node(
             position,
             name=name,
-            position=position,
             rotation=rotation,
             measure_to=measure_to,
         )
@@ -77,7 +70,29 @@ class QuantumGraph:
             self._network.remove_node(position)
 
     def move_node(self, start: Position, end: Position) -> None:
-        pass
+        """Move the node at the specified position to another position, removing the node at the destination."""
+        if not self.has_node_at(start):
+            raise ValueError(f"Node at position {start} does not exist")
+
+        if start == end:
+            raise ValueError(f"Start and end positions shouldn't be the same {start}")
+
+        node = self._network.nodes[start]
+        in_edges = list(self._network.in_edges(start, data=True))
+        out_edges = list(self._network.out_edges(start, data=True))
+
+        self.remove_node(end)
+        self.remove_node(start)
+        self._network.add_node(end, **node)
+
+        for source, _, data in in_edges:
+            if source != start:
+                self._network.add_edge(source, end, **data)
+        
+        for _, target, data in out_edges:
+            if target != start:
+                self._network.add_edge(end, target, **data)
+
 
     def clear_node(self, position: Position) -> None:
         """Replace the GraphNode at the specified position with an identity node."""
@@ -92,19 +107,19 @@ class QuantumGraph:
         node = self._network.nodes[position]
         return GraphNode(
             node["name"],
-            node["position"],
+            position,
             rotation=node["rotation"],
             measure_to=node["measure_to"],
         )
 
     def __iter__(self) -> Iterator[GraphNode]:
         """Iterate over the nodes in the graph."""
-        for _, data in self._network.nodes(data=True):
+        for position, node in self._network.nodes(data=True):
             yield GraphNode(
-                data["name"],
-                data["position"],
-                rotation=data["rotation"],
-                measure_to=data["measure_to"],
+                node["name"],
+                position,
+                rotation=node["rotation"],
+                measure_to=node["measure_to"],
             )
 
     def iter_positions_by_row(self) -> Iterator[Position]:
@@ -237,97 +252,24 @@ class QuantumGraph:
         """Check whether the graph has a node at the specified row and column."""
         return position in self._network
 
-    def clean_up(self) -> None:
-        """Clean up this graph, which removes empty rows and columns, and also fills up any empty spaces."""
-        self.remove_empty_rows()
-        self.remove_empty_columns()
-        self.fill_empty_spaces()
-        self.fill_positional_edges()
+    def insert_column(self, column_index: int) -> None:
+        """Insert an empty column at the given index by shifting all columns at or to the right of it rightward by one."""
+        if len(self) == 0:
+            raise ValueError("It's not possible to insert a column on an empty graph")
 
-    def remove_empty_rows(self) -> None:
-        pass
+        if column_index < 0 or column_index > self.width:
+            raise ValueError(f"Column index {column_index} is out of bounds")
 
-    def remove_empty_columns(self) -> None:
-        empty_columns = self._find_empty_columns()
-        print(empty_columns)
-        initial_width = self.width
+        for column in reversed(range(column_index, self.width)):
+            for row in range(self.height):
+                old_position = Position(row, column)
+                new_position = Position(row, column + 1)
 
-        for offset, column_index in enumerate(empty_columns):
-            adjusted_column = column_index - offset
+                if self.has_node_at(old_position):
+                    self.move_node(old_position, new_position)
 
-            for row_index in range(self.height):
-                self.remove_node(Position(row_index, adjusted_column))
-
-            for subsequent_column in range(adjusted_column + 1, initial_width):
-                for row_index in range(self.height):
-                    node_position = Position(row_index, subsequent_column)
-                    node = self[node_position]
-
-                    if node is not None:
-                        self.move_node(
-                            node_position,
-                            Position(row_index, subsequent_column - 1),
-                        )
-
-    def _find_empty_columns(self) -> list[int]:
-        empty_columns = []
-
-        for column_index in range(self.width):
-            is_empty = True
-
-            for row_index in range(self.height):
-                node = self[Position(row_index, column_index)]
-
-                if node is not None and node.name != GateName.ID:
-                    is_empty = False
-                    break
-
-            if is_empty:
-                empty_columns.append(column_index)
-
-        return empty_columns
-
-    def fill_empty_spaces(self) -> None:
         for row in range(self.height):
-            for column in range(self.width):
-                position = Position(row, column)
-
-                if self.has_node_at(position):
-                    continue
-
-                self.add_new_node(GateName.ID, position)
-
-    def fill_positional_edges(self) -> None:
-        self._clear_positional_edges()
-
-        for row_index in range(self.height):
-            for column_index in range(self.width):
-                node_position = Position(row_index, column_index)
-                adjacent_positions = self._find_adjacent_positions(node_position)
-
-                for direction, adjacent_position in adjacent_positions.items():
-                    if self.has_node_at(adjacent_position):
-                        self.add_new_edge(direction, node_position, adjacent_position)
-
-    @staticmethod
-    def _find_adjacent_positions(position: Position) -> dict[EdgeName, Position]:
-        row, column = position
-
-        if column == 0:
-            return {EdgeName.RIGHT: Position(row, column + 1)}
-
-        return {
-            EdgeName.LEFT: Position(row, column - 1),
-            EdgeName.RIGHT: Position(row, column + 1),
-        }
-
-    def _clear_positional_edges(self) -> None:
-        non_positional_edges = [edge for edge in self.edges() if not edge.name.is_positional()]
-
-        self.clear_edges()
-
-        for edge in non_positional_edges:
-            self.add_edge(edge)
+            self.add_new_node(GateName.ID, Position(row, column_index))
 
     def clear(self) -> None:
         """Remove all the nodes and edges from the graph."""

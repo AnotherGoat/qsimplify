@@ -4,7 +4,7 @@ from pathlib import Path
 from qiskit import QuantumCircuit
 
 from qsimplify.converter import Converter
-from qsimplify.model import GateName, GraphNode, Position, QuantumGraph
+from qsimplify.model import GateName, GraphNode, Position, QuantumGraph, graph_cleaner
 from qsimplify.simplifier.graph_mappings import GraphMappings
 from qsimplify.simplifier.rule_parser import RuleParser
 from qsimplify.simplifier.simplification_rule import SimplificationRule
@@ -196,8 +196,7 @@ class Simplifier:
                 )
 
         self._logger.debug("Mappings are valid, filling the subgraph")
-        subgraph.fill_empty_spaces()
-        subgraph.fill_positional_edges()
+        graph_cleaner.clean_and_fill(subgraph)
         return subgraph, mappings
 
     @staticmethod
@@ -311,7 +310,7 @@ class Simplifier:
 
                 graph.add_new_edge(edge.name, original, reverse_mappings[edge.end.position])
 
-        graph.fill_positional_edges()
+        graph_cleaner.clean_and_fill(graph)
 
     @staticmethod
     def _invert_mappings(mappings: GraphMappings) -> GraphMappings:

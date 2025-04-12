@@ -59,7 +59,7 @@ class RuleParser:
         for gate_data in rule_data["replacement"]:
             self._parse_and_add_gate(replacement, gate_data)
 
-        return SimplificationRule(pattern.build(), replacement.build())
+        return SimplificationRule(pattern.build(clean_up=False), replacement.build(clean_up=False))
 
     def _parse_and_add_gate(self, builder: GraphBuilder, gate_data: list) -> None:
         if not isinstance(gate_data[0], str):

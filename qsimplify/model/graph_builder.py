@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from qsimplify.model import graph_cleaner
 from qsimplify.model.edge_name import EdgeName
 from qsimplify.model.gate_name import GateName
 from qsimplify.model.position import Position
@@ -140,7 +141,14 @@ class GraphBuilder:
         self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target, control2)
         return self
 
-    def build(self) -> QuantumGraph:
-        self._graph.fill_empty_spaces()
-        self._graph.fill_positional_edges()
+    def build(self, clean_up: bool = True) -> QuantumGraph:
+        """
+        Build the graph to get a working result.
+        By default, any empty rows and columns will be deleted, unless clean_up is set to False.
+        """
+        if clean_up:
+            graph_cleaner.clean_and_fill(self._graph)
+        else:
+            graph_cleaner.fill(self._graph)
+
         return self._graph

@@ -31,14 +31,13 @@ def test_width():
     metrics = analyzer.calculate_metrics(circuit)
     assert metrics.width == 3
 
-    # TODO: Instead of returning 5 for this case, remove empty qubits
     circuit = QuantumCircuit(5)
     circuit.x(0)
     circuit.x(1)
     circuit.x(4)
 
     metrics = analyzer.calculate_metrics(circuit)
-    assert metrics.width == 5
+    assert metrics.width == 3
 
 
 def test_empty_depth():

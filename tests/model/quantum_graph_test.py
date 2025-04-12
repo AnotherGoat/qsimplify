@@ -1,3 +1,6 @@
+import pytest
+from typing_extensions import assert_type
+
 from qsimplify.model import GraphBuilder, GraphEdge, GraphNode, Position, QuantumGraph
 from tests import *
 
@@ -30,57 +33,11 @@ def test_graph_height():
     assert graph.height == 6
 
 
-def test_remove_empty_columns():
-    graph = QuantumGraph()
-
-    graph.add_new_node(X, Position(0, 0))
-    graph.add_new_node(X, Position(0, 5))
-    graph.clean_up()
-
-    print(graph)
-    assert graph.width == 2
-
-
 def test_empty_dimensions():
     graph = QuantumGraph()
 
     assert graph.width == 0
     assert graph.height == 0
-
-
-def test_fill_empty_spaces():
-    graph = QuantumGraph()
-
-    graph.add_new_node(H, Position(1, 1))
-    graph.fill_empty_spaces()
-
-    assert len(graph) == 4
-    assert graph[Position(0, 0)].name == ID
-    assert graph[Position(0, 1)].name == ID
-    assert graph[Position(1, 0)].name == ID
-
-
-def test_fill_positional_edges():
-    graph = QuantumGraph()
-
-    nodes = [
-        GraphNode(ID, Position(0, 0)),
-        GraphNode(ID, Position(0, 1)),
-        GraphNode(ID, Position(1, 0)),
-        GraphNode(ID, Position(1, 1)),
-    ]
-
-    for node in nodes:
-        graph.add_node(node)
-
-    graph.fill_positional_edges()
-    edges = graph.edges()
-
-    assert len(edges) == 4
-    assert GraphEdge(RIGHT, nodes[0], nodes[1]) in edges
-    assert GraphEdge(LEFT, nodes[1], nodes[0]) in edges
-    assert GraphEdge(RIGHT, nodes[2], nodes[3]) in edges
-    assert GraphEdge(LEFT, nodes[3], nodes[2]) in edges
 
 
 def test_graph_equals():
@@ -147,3 +104,140 @@ def test_doesnt_have_nodes_outside():
     assert not graph.has_node_at(Position(0, 3))
     assert not graph.has_node_at(Position(3, 0))
     assert not graph.has_node_at(Position(3, 3))
+
+
+def test_move_nonexistent_node():
+    graph = QuantumGraph()
+
+    graph.add_new_node(X, Position(0, 1))
+    graph.add_new_node(Y, Position(0, 2))
+
+    with pytest.raises(ValueError, match="Node at position \(0, 3\) does not exist"):
+        graph.move_node(Position(0, 3), Position(1, 3))
+
+
+def test_null_move():
+    graph = QuantumGraph()
+
+    graph.add_new_node(H, Position(0, 0))
+
+    with pytest.raises(ValueError, match="Start and end positions shouldn't be the same \(0, 0\)"):
+        graph.move_node(Position(0, 0), Position(0, 0))
+
+
+def test_move_node():
+    graph = QuantumGraph()
+
+    graph.add_new_node(X, Position(0, 1))
+    graph.add_new_node(Y, Position(0, 2))
+    graph.add_new_node(Z, Position(0, 3))
+
+    graph.move_node(Position(0, 1), Position(1, 1))
+
+    assert not graph.has_node_at(Position(0, 1))
+    assert graph[Position(1, 1)] == GraphNode(X, Position(1, 1))
+
+
+def test_move_node_preserves_edges():
+    graph = QuantumGraph()
+
+    graph.add_new_node(H, Position(0, 1))
+    graph.add_new_node(Y, Position(1, 1))
+    graph.add_new_node(CX, Position(0, 0))
+    graph.add_new_node(CX, Position(1, 0))
+
+    graph.add_new_edge(RIGHT, Position(0, 0), Position(0, 1))
+    graph.add_new_edge(LEFT, Position(0, 1), Position(0, 0))
+    graph.add_new_edge(TARGETS, Position(0, 0), Position(1, 0))
+    graph.add_new_edge(CONTROLLED_BY, Position(1, 0), Position(0, 0))
+
+    graph.move_node(Position(0, 0), Position(4, 0))
+
+    hadamard = GraphNode(H, Position(0, 1))
+    cx_controller = GraphNode(CX, Position(4, 0))
+    cx_target = GraphNode(CX, Position(1, 0))
+
+    edges = graph.edges()
+    assert GraphEdge(RIGHT, cx_controller, hadamard) in edges
+    assert GraphEdge(LEFT, hadamard, cx_controller) in edges
+    assert GraphEdge(TARGETS, cx_controller, cx_target) in edges
+    assert GraphEdge(CONTROLLED_BY, cx_target, cx_controller) in edges
+
+
+def test_insert_column_on_empty_graph():
+    graph = QuantumGraph()
+
+    with pytest.raises(ValueError, match="It's not possible to insert a column on an empty graph"):
+        graph.insert_column(0)
+
+
+def test_insert_out_of_range_column():
+    graph = QuantumGraph()
+
+    graph.add_new_node(X, Position(0, 0))
+    graph.add_new_node(Y, Position(0, 1))
+
+    with pytest.raises(ValueError, match="Column index -1 is out of bounds"):
+        graph.insert_column(-1)
+
+    with pytest.raises(ValueError, match="Column index 3 is out of bounds"):
+        graph.insert_column(3)
+
+
+def test_insert_column_at_end():
+    graph = QuantumGraph()
+
+    graph.add_new_node(H, Position(0, 0))
+    graph.add_new_node(X, Position(0, 1))
+    graph.add_new_node(Y, Position(0, 2))
+    graph.insert_column(1)
+
+    print(graph.nodes())
+
+    assert graph.width == 4
+    assert graph.height == 1
+
+    hadamard = GraphNode(H, Position(0, 0))
+    identity = GraphNode(ID, Position(0, 1))
+    x = GraphNode(X, Position(0, 2))
+    y = GraphNode(Y, Position(0, 3))
+
+    assert graph[Position(0, 1)] == identity
+    assert graph[Position(0, 2)] == x
+    assert graph[Position(0, 3)] == y
+
+    edges = graph.edges()
+    assert len(edges) == 6
+    assert GraphEdge(EdgeName.RIGHT, hadamard, identity) in edges
+    assert GraphEdge(EdgeName.LEFT, identity, hadamard) in edges
+    assert GraphEdge(EdgeName.RIGHT, identity, x) in edges
+    assert GraphEdge(EdgeName.LEFT, x, identity) in edges
+    assert GraphEdge(EdgeName.RIGHT, x, y) in edges
+    assert GraphEdge(EdgeName.LEFT, y, x) in edges
+
+
+def test_insert_column_at_end():
+    graph = QuantumGraph()
+
+    graph.add_new_node(X, Position(0, 0))
+    graph.add_new_node(Y, Position(0, 1))
+    graph.add_new_node(Z, Position(0, 2))
+    graph.insert_column(3)
+
+    assert graph.width == 4
+    assert graph.height == 1
+    assert graph[Position(0, 3)] == GraphNode(ID, Position(0, 3))
+
+
+def test_insert_column_at_empty_space():
+    graph = QuantumGraph()
+
+    graph.add_new_node(X, Position(0, 0))
+    graph.add_new_node(Y, Position(0, 2))
+    graph.insert_column(1)
+
+    assert graph.width == 4
+    assert graph.height == 1
+    assert graph[Position(0, 1)] == GraphNode(ID, Position(0, 1))
+    assert not graph.has_node_at(Position(0, 2))
+    assert graph[Position(0, 3)] == GraphNode(Y, Position(0, 3))
