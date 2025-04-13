@@ -22,7 +22,7 @@ class QuantumMetrics:
         initial_superposition_percent (float): Ratio of qubits with a Hadamard gate as an initial gate (qubits in superposition state).
         other_single_qubit_count (int): Number of other single-qubit gates in the circuit (excluding Pauli-X, Pauli-Y, Pauli-Z and Hadamard gates).
         single_qubit_count (int): Total number of single-qubit gates.
-        controlled_single_qubit_count (int): Total number of controlled single-qubit gates.
+        single_controlled_qubit_count (int): Total number of controlled single-qubit gates.
 
         gate_count (int): Total number of gates in the circuit.
         controlled_gate_count (int): Total number of controlled gates in the circuit.
@@ -30,47 +30,46 @@ class QuantumMetrics:
     """
 
     # Circuit Size
-    width: int = -1
-    depth: int = -1
+    width: int
+    depth: int
 
     # Circuit Density
-    max_density: int = -1
-    average_density: float = -1.0
+    max_density: int
+    average_density: float
 
     # Single-Qubit Gates
-    x_count: int = -1
-    y_count: int = -1
-    z_count: int = -1
-    pauli_count: int = -1
-    hadamard_count: int = -1
-    initial_superposition_percent: float = -1.0
-    other_single_qubit_count: int = -1
-    single_qubit_count: int = -1
-    controlled_single_qubit_count: int = -1
+    x_count: int
+    y_count: int
+    z_count: int
+    pauli_count: int
+    hadamard_count: int
+    initial_superposition_percent: float
+    other_single_qubit_count: int
+    single_qubit_count: int
+    single_controlled_qubit_count: int
 
     # Multi-Qubit Gates
-    controlled_multi_qubit_count: int = -1
-    swap_count: int = -1
-    cnot_count: int = -1
-    cnot_qubit_percent: float = -1.0
-    average_cnot: float = -1.0
-    max_cnot: int = -1
-    toffoli_count: int = -1
-    toffoli_qubit_percent: float = -1.0
-    average_toffoli: float = -1.0
-    max_toffoli: int = -1
+    swap_count: int
+    cnot_count: int
+    cnot_qubit_percent: float
+    average_cnot: float
+    max_cnot: int
+    toffoli_count: int
+    toffoli_qubit_percent: float
+    average_toffoli: float
+    max_toffoli: int
 
     # All Gates in the Circuit
-    gate_count: int = -1
-    controlled_gate_count: int = -1
-    single_qubit_percent: float = -1.0
+    gate_count: int
+    controlled_gate_count: int
+    single_qubit_percent: float
 
     # Measurement Gates
-    measure_count: int = -1
-    measure_percent: float = -1.0
+    measure_count: int
+    measure_percent: float
 
     # Other Metrics
-    ancilla_percent: float = -1.0
+    ancilla_percent: float
 
     def __str__(self) -> str:
         return textwrap.dedent(
@@ -92,10 +91,9 @@ class QuantumMetrics:
             - %SpposQ (Initial Superposition Percent): {self.initial_superposition_percent:.2f}
             - NoOtherSG (Other Single-Qubit Gates Count): {self.other_single_qubit_count}
             - TNoSQG (Total Single-Qubit Gates): {self.single_qubit_count}
-            - TNoSQG (Controlled Single-Qubit Gates): {self.controlled_single_qubit_count}
+            - TNoSQG (Controlled Single-Qubit Gates): {self.single_controlled_qubit_count}
 
             Multi-Qubit Gates:
-            - NoCAnyG (Controlled Multi-Qubit Gates): {self.controlled_multi_qubit_count}
             - NoSWAP (SWAP Count): {self.swap_count}
             - NoCNOT (CNOT Count): {self.cnot_count}
             - %QinCNOT (Ratio of qubits affected by CNOT Gates): {self.cnot_qubit_percent:.2f}
@@ -108,7 +106,7 @@ class QuantumMetrics:
 
             All Gates in the Circuit:
             - NoGates (Total Gate Count): {self.gate_count}
-            - NoCGates (Controlled Gate Count): {self.controlled_gate_count}
+            - NoCAnyG/NoCGates (Controlled Gate Count): {self.controlled_gate_count}
             - %SGates (Single Gate Percent): {self.single_qubit_percent:.2f}
             
             Measurement Gates:

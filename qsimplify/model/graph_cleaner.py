@@ -38,6 +38,7 @@ def _remove_empty_rows(graph: QuantumGraph) -> None:
                         Position(subsequent_row - 1, column_index),
                     )
 
+
 def _find_empty_rows(graph: QuantumGraph) -> list[int]:
     empty_rows = []
 
@@ -78,6 +79,7 @@ def _remove_empty_columns(graph: QuantumGraph) -> None:
                         Position(row_index, subsequent_column - 1),
                     )
 
+
 def _find_empty_columns(graph: QuantumGraph) -> list[int]:
     empty_columns = []
 
@@ -95,6 +97,7 @@ def _find_empty_columns(graph: QuantumGraph) -> list[int]:
             empty_columns.append(column_index)
 
     return empty_columns
+
 
 def _fill_empty_spaces(graph: QuantumGraph) -> None:
     for row in range(graph.height):
@@ -119,6 +122,7 @@ def _fix_positional_edges(graph: QuantumGraph) -> None:
                 if graph.has_node_at(adjacent_position):
                     graph.add_new_edge(direction, node_position, adjacent_position)
 
+
 def _clear_positional_edges(graph: QuantumGraph) -> None:
     non_positional_edges = [edge for edge in graph.edges() if not edge.name.is_positional()]
 
@@ -126,6 +130,7 @@ def _clear_positional_edges(graph: QuantumGraph) -> None:
 
     for edge in non_positional_edges:
         graph.add_edge(edge)
+
 
 def _find_adjacent_positions(position: Position) -> dict[EdgeName, Position]:
     row, column = position

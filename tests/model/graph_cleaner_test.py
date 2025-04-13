@@ -1,6 +1,7 @@
 from qsimplify.model import GraphEdge, GraphNode, Position, QuantumGraph, graph_cleaner
 from tests import *
 
+
 def test_fill_empty_spaces():
     graph = QuantumGraph()
 

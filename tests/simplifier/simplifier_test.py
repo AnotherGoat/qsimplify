@@ -525,7 +525,4 @@ def test_replace_adds_identities():
         GraphBuilder().add_y(0, 0).add_y(0, 1).add_z(1, 0).add_cz(0, 1, 2).add_z(0, 3).build()
     )
 
-    print(graph.draw_grid())
-    print(expected_graph.draw_grid())
-
     assert graph == expected_graph

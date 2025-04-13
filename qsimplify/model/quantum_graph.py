@@ -88,11 +88,10 @@ class QuantumGraph:
         for source, _, data in in_edges:
             if source != start:
                 self._network.add_edge(source, end, **data)
-        
+
         for _, target, data in out_edges:
             if target != start:
                 self._network.add_edge(end, target, **data)
-
 
     def clear_node(self, position: Position) -> None:
         """Replace the GraphNode at the specified position with an identity node."""

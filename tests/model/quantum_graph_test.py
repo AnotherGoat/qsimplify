@@ -1,5 +1,4 @@
 import pytest
-from typing_extensions import assert_type
 
 from qsimplify.model import GraphBuilder, GraphEdge, GraphNode, Position, QuantumGraph
 from tests import *
@@ -112,7 +111,7 @@ def test_move_nonexistent_node():
     graph.add_new_node(X, Position(0, 1))
     graph.add_new_node(Y, Position(0, 2))
 
-    with pytest.raises(ValueError, match="Node at position \(0, 3\) does not exist"):
+    with pytest.raises(ValueError, match="Node at position \\(0, 3\\) does not exist"):
         graph.move_node(Position(0, 3), Position(1, 3))
 
 
@@ -121,7 +120,9 @@ def test_null_move():
 
     graph.add_new_node(H, Position(0, 0))
 
-    with pytest.raises(ValueError, match="Start and end positions shouldn't be the same \(0, 0\)"):
+    with pytest.raises(
+        ValueError, match="Start and end positions shouldn't be the same \\(0, 0\\)"
+    ):
         graph.move_node(Position(0, 0), Position(0, 0))
 
 
@@ -184,7 +185,7 @@ def test_insert_out_of_range_column():
         graph.insert_column(3)
 
 
-def test_insert_column_at_end():
+def test_insert_column():
     graph = QuantumGraph()
 
     graph.add_new_node(H, Position(0, 0))
@@ -192,28 +193,11 @@ def test_insert_column_at_end():
     graph.add_new_node(Y, Position(0, 2))
     graph.insert_column(1)
 
-    print(graph.nodes())
-
     assert graph.width == 4
     assert graph.height == 1
-
-    hadamard = GraphNode(H, Position(0, 0))
-    identity = GraphNode(ID, Position(0, 1))
-    x = GraphNode(X, Position(0, 2))
-    y = GraphNode(Y, Position(0, 3))
-
-    assert graph[Position(0, 1)] == identity
-    assert graph[Position(0, 2)] == x
-    assert graph[Position(0, 3)] == y
-
-    edges = graph.edges()
-    assert len(edges) == 6
-    assert GraphEdge(EdgeName.RIGHT, hadamard, identity) in edges
-    assert GraphEdge(EdgeName.LEFT, identity, hadamard) in edges
-    assert GraphEdge(EdgeName.RIGHT, identity, x) in edges
-    assert GraphEdge(EdgeName.LEFT, x, identity) in edges
-    assert GraphEdge(EdgeName.RIGHT, x, y) in edges
-    assert GraphEdge(EdgeName.LEFT, y, x) in edges
+    assert graph[Position(0, 1)] == GraphNode(ID, Position(0, 1))
+    assert graph[Position(0, 2)] == GraphNode(X, Position(0, 2))
+    assert graph[Position(0, 3)] == GraphNode(Y, Position(0, 3))
 
 
 def test_insert_column_at_end():

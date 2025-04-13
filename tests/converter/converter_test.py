@@ -41,9 +41,6 @@ def test_one_qubit_nodes():
         .build()
     )
 
-    print(graph)
-    print(expected)
-
     assert graph == expected
 
 
@@ -73,9 +70,6 @@ def test_two_qubit_nodes():
         .add_y(1, 3)
         .build()
     )
-
-    print(graph)
-    print(expected)
 
     assert graph == expected
 
@@ -166,9 +160,6 @@ def test_control_edge_data():
     graph = converter.circuit_to_graph(circuit)
 
     expected = GraphBuilder().add_cx(1, 0, 0).add_ccx(1, 2, 0, 1).build()
-
-    print(graph)
-    print(expected)
 
     assert graph == expected
 
