@@ -95,7 +95,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [qubit: int, column: int]"
             )
 
-        builder.add_single(gate_name, extra_data[0], extra_data[1])
+        builder.put_single(gate_name, extra_data[0], extra_data[1])
 
     def _add_rotation_gate(self, data: GatePlacingData) -> None:
         builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
@@ -105,7 +105,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [angle: float, qubit: int, column: int]"
             )
 
-        builder.add_rotation(gate_name, extra_data[0], extra_data[1], extra_data[2])
+        builder.put_rotation(gate_name, extra_data[0], extra_data[1], extra_data[2])
 
     def _add_measure_gate(self, data: GatePlacingData) -> None:
         builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
@@ -115,7 +115,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [qubit: int, bit: int, column: int]"
             )
 
-        builder.add_measure(extra_data[0], extra_data[1], extra_data[2])
+        builder.put_measure(extra_data[0], extra_data[1], extra_data[2])
 
     def _add_swap_gate(self, data: GatePlacingData) -> None:
         builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
@@ -125,7 +125,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [qubit1: int, qubit2: int, column: int]"
             )
 
-        builder.add_swap(extra_data[0], extra_data[1], extra_data[2])
+        builder.put_swap(extra_data[0], extra_data[1], extra_data[2])
 
     def _add_controlled_gate(self, data: GatePlacingData) -> None:
         builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
@@ -135,7 +135,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit: int, target_qubit: int, column: int]"
             )
 
-        builder.add_control(gate_name, extra_data[0], extra_data[1], extra_data[2])
+        builder.put_control(gate_name, extra_data[0], extra_data[1], extra_data[2])
 
     def _add_cz_gate(self, data: GatePlacingData) -> None:
         builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
@@ -145,7 +145,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [qubit1: int, qubit2: int, column: int]"
             )
 
-        builder.add_cz(extra_data[0], extra_data[1], extra_data[2])
+        builder.put_cz(extra_data[0], extra_data[1], extra_data[2])
 
     def _add_cswap_gate(self, data: GatePlacingData) -> None:
         builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
@@ -155,7 +155,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit: int, target_qubit1: int, target_qubit2: int, column: int]"
             )
 
-        builder.add_cswap(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
+        builder.put_cswap(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
 
     def _add_ccx_gate(self, data: GatePlacingData) -> None:
         builder, gate_name, extra_data = data.builder, data.gate_name, data.extra_data
@@ -165,7 +165,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {extra_data} must be [control_qubit1: int, control_qubit2: int, target_qubit: int, column: int]"
             )
 
-        builder.add_ccx(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
+        builder.put_ccx(extra_data[0], extra_data[1], extra_data[2], extra_data[3])
 
     @staticmethod
     def _check_types(data: list[int | float], types: list[type]) -> bool:

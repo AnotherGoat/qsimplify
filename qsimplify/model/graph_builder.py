@@ -17,49 +17,94 @@ class GraphBuilder:
     def is_occupied(self, row: int, column: int) -> bool:
         return self._graph.is_occupied(Position(row, column))
 
-    def add_id(self, qubit: int, column: int) -> GraphBuilder:
-        return self.add_single(GateName.ID, qubit, column)
+    def push_id(self, qubit: int) -> GraphBuilder:
+        return self.put_id(qubit, self._find_push_column([qubit]))
 
-    def add_h(self, qubit: int, column: int) -> GraphBuilder:
-        return self.add_single(GateName.H, qubit, column)
+    def push_h(self, qubit: int) -> GraphBuilder:
+        return self.put_h(qubit, self._find_push_column([qubit]))
 
-    def add_x(self, qubit: int, column: int) -> GraphBuilder:
-        return self.add_single(GateName.X, qubit, column)
+    def push_x(self, qubit: int) -> GraphBuilder:
+        return self.put_x(qubit, self._find_push_column([qubit]))
 
-    def add_y(self, qubit: int, column: int) -> GraphBuilder:
-        return self.add_single(GateName.Y, qubit, column)
+    def push_y(self, qubit: int) -> GraphBuilder:
+        return self.put_y(qubit, self._find_push_column([qubit]))
 
-    def add_z(self, qubit: int, column: int) -> GraphBuilder:
-        return self.add_single(GateName.Z, qubit, column)
+    def push_z(self, qubit: int) -> GraphBuilder:
+        return self.put_z(qubit, self._find_push_column([qubit]))
 
-    def add_single(self, name: GateName, qubit: int, column: int) -> GraphBuilder:
+    def push_rx(self, phi: float, qubit: int) -> GraphBuilder:
+        return self.put_rx(phi, qubit, self._find_push_column([qubit]))
+
+    def push_ry(self, theta: float, qubit: int) -> GraphBuilder:
+        return self.put_ry(theta, qubit, self._find_push_column([qubit]))
+
+    def push_rz(self, theta: float, qubit: int) -> GraphBuilder:
+        return self.put_rz(theta, qubit, self._find_push_column([qubit]))
+
+    def push_measure(self, qubit: int, bit: int) -> GraphBuilder:
+        return self.put_measure(qubit, bit, self._find_push_column([qubit]))
+
+    def push_swap(self, qubit1: int, qubit2: int) -> GraphBuilder:
+        return  self.put_swap(qubit1, qubit2, self._find_push_column([qubit1, qubit2]))
+
+    def push_ch(self, control_qubit: int, target_qubit: int) -> GraphBuilder:
+        return self.put_ch(control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit]))
+
+    def push_cx(self, control_qubit: int, target_qubit: int) -> GraphBuilder:
+        return self.put_cx(control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit]))
+
+    def push_cz(self, qubit1: int, qubit2: int) -> GraphBuilder:
+        return self.put_cz(qubit1, qubit2, self._find_push_column([qubit1, qubit2]))
+
+    def push_cswap(self, control_qubit: int, target_qubit1: int, target_qubit2: int) -> GraphBuilder:
+        return self.put_cswap(control_qubit, target_qubit1, target_qubit2, self._find_push_column([control_qubit, target_qubit1, target_qubit2]))
+
+    def push_ccx(self, control_qubit1: int, control_qubit2: int, target_qubit: int) -> GraphBuilder:
+        return self.put_ccx(control_qubit1, control_qubit2, target_qubit, self._find_push_column([control_qubit1, control_qubit2, target_qubit]))
+
+    def put_id(self, qubit: int, column: int) -> GraphBuilder:
+        return self.put_single(GateName.ID, qubit, column)
+
+    def put_h(self, qubit: int, column: int) -> GraphBuilder:
+        return self.put_single(GateName.H, qubit, column)
+
+    def put_x(self, qubit: int, column: int) -> GraphBuilder:
+        return self.put_single(GateName.X, qubit, column)
+
+    def put_y(self, qubit: int, column: int) -> GraphBuilder:
+        return self.put_single(GateName.Y, qubit, column)
+
+    def put_z(self, qubit: int, column: int) -> GraphBuilder:
+        return self.put_single(GateName.Z, qubit, column)
+
+    def put_single(self, name: GateName, qubit: int, column: int) -> GraphBuilder:
         if name not in (GateName.ID, GateName.H, GateName.X, GateName.Y, GateName.Z):
             raise ValueError(f"{name} is not a single-qubit gate without parameters")
 
         self._graph.add_new_node(name, Position(qubit, column))
         return self
 
-    def add_rx(self, phi: float, qubit: int, column: int) -> GraphBuilder:
-        return self.add_rotation(GateName.RX, phi, qubit, column)
+    def put_rx(self, phi: float, qubit: int, column: int) -> GraphBuilder:
+        return self.put_rotation(GateName.RX, phi, qubit, column)
 
-    def add_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        return self.add_rotation(GateName.RY, theta, qubit, column)
+    def put_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self.put_rotation(GateName.RY, theta, qubit, column)
 
-    def add_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        return self.add_rotation(GateName.RZ, theta, qubit, column)
+    def put_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
+        return self.put_rotation(GateName.RZ, theta, qubit, column)
 
-    def add_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
+    def put_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
         if name not in (GateName.RX, GateName.RY, GateName.RZ):
             raise ValueError(f"{name} is not a rotation gate")
 
         self._graph.add_new_node(name, Position(qubit, column), rotation=angle)
         return self
 
-    def add_measure(self, qubit: int, bit: int, column: int) -> GraphBuilder:
+    def put_measure(self, qubit: int, bit: int, column: int) -> GraphBuilder:
         self._graph.add_new_node(GateName.MEASURE, Position(qubit, column), measure_to=bit)
         return self
 
-    def add_swap(self, qubit1: int, qubit2: int, column: int) -> GraphBuilder:
+    def put_swap(self, qubit1: int, qubit2: int, column: int) -> GraphBuilder:
         first = Position(qubit1, column)
         second = Position(qubit2, column)
 
@@ -70,13 +115,13 @@ class GraphBuilder:
         self._graph.add_new_edge(EdgeName.SWAPS_WITH, second, first)
         return self
 
-    def add_ch(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
-        return self.add_control(GateName.CH, control_qubit, target_qubit, column)
+    def put_ch(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self.put_control(GateName.CH, control_qubit, target_qubit, column)
 
-    def add_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
-        return self.add_control(GateName.CX, control_qubit, target_qubit, column)
+    def put_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        return self.put_control(GateName.CX, control_qubit, target_qubit, column)
 
-    def add_control(
+    def put_control(
         self, name: GateName, control_qubit: int, target_qubit: int, column: int
     ) -> GraphBuilder:
         if name not in (GateName.CH, GateName.CX):
@@ -92,7 +137,7 @@ class GraphBuilder:
         self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target, control)
         return self
 
-    def add_cz(self, qubit1: int, qubit2: int, column: int) -> GraphBuilder:
+    def put_cz(self, qubit1: int, qubit2: int, column: int) -> GraphBuilder:
         first = Position(qubit1, column)
         second = Position(qubit2, column)
 
@@ -103,7 +148,7 @@ class GraphBuilder:
         self._graph.add_new_edge(EdgeName.WORKS_WITH, second, first)
         return self
 
-    def add_cswap(
+    def put_cswap(
         self, control_qubit: int, target_qubit1: int, target_qubit2: int, column: int
     ) -> GraphBuilder:
         control = Position(control_qubit, column)
@@ -122,7 +167,7 @@ class GraphBuilder:
         self._graph.add_new_edge(EdgeName.SWAPS_WITH, target2, target1)
         return self
 
-    def add_ccx(
+    def put_ccx(
         self, control_qubit1: int, control_qubit2: int, target_qubit: int, column: int
     ) -> GraphBuilder:
         control1 = Position(control_qubit1, column)
@@ -141,6 +186,19 @@ class GraphBuilder:
         self._graph.add_new_edge(EdgeName.CONTROLLED_BY, target, control2)
         return self
 
+    def _find_push_column(self, qubits: list[int]) -> int:
+        latest_columns = []
+
+        for row in qubits:
+            for column in reversed(range(self._graph.width)):
+                node = self._graph[Position(row, column)]
+
+                if node is not None and node.name != GateName.ID:
+                    latest_columns.append(column + 1)
+                    break
+
+        return max(latest_columns) if latest_columns else 0
+
     def build(self, clean_up: bool = True) -> QuantumGraph:
         """
         Build the graph to get a working result.
@@ -150,5 +208,13 @@ class GraphBuilder:
             graph_cleaner.clean_and_fill(self._graph)
         else:
             graph_cleaner.fill(self._graph)
+
+        return self._graph
+
+    def measure_all(self) -> QuantumGraph:
+        graph_cleaner.clean_and_fill(self._graph)
+
+        for row in range(self._graph.height):
+            self.push_measure(row, row)
 
         return self._graph

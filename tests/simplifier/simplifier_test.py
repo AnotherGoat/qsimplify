@@ -19,7 +19,7 @@ def test_simplified_graph_is_new_instance():
 
 def test_remove_filler_and_identities():
     graph = (
-        GraphBuilder().add_id(0, 0).add_id(1, 0).add_cx(0, 1, 1).add_id(0, 2).add_id(1, 2).build()
+        GraphBuilder().put_id(0, 0).put_id(1, 0).put_cx(0, 1, 1).put_id(0, 2).put_id(1, 2).build()
     )
 
     simplified_graph = simplifier.simplify_graph(graph)
@@ -32,23 +32,23 @@ def test_remove_filler_and_identities():
 
 
 def test_remove_duplicate_hadamards():
-    graph = GraphBuilder().add_h(0, 0).add_h(0, 1).add_h(0, 2).build()
+    graph = GraphBuilder().put_h(0, 0).put_h(0, 1).put_h(0, 2).build()
 
     simplified_graph = simplifier.simplify_graph(graph)
 
-    expected = GraphBuilder().add_id(0, 0).add_id(0, 1).add_h(0, 2).build()
+    expected = GraphBuilder().put_id(0, 0).put_id(0, 1).put_h(0, 2).build()
 
     assert simplified_graph == expected
 
 
 def test_replace_pattern():
-    graph = GraphBuilder().add_x(0, 0).add_h(0, 1).add_h(0, 2).build()
+    graph = GraphBuilder().put_x(0, 0).put_h(0, 1).put_h(0, 2).build()
 
-    replacement = GraphBuilder().add_y(0, 0).add_y(0, 1).build()
+    replacement = GraphBuilder().put_y(0, 0).put_y(0, 1).build()
 
     mappings = {Position(0, 1): Position(0, 0), Position(0, 2): Position(0, 1)}
 
-    expected = GraphBuilder().add_x(0, 0).add_y(0, 1).add_y(0, 2).build()
+    expected = GraphBuilder().put_x(0, 0).put_y(0, 1).put_y(0, 2).build()
 
     simplifier.replace_pattern(graph, replacement, mappings)
 
@@ -56,59 +56,59 @@ def test_replace_pattern():
 
 
 def test_extract_subgraph_single_qubit():
-    graph = GraphBuilder().add_x(0, 0).add_h(0, 1).add_z(0, 2).build()
+    graph = GraphBuilder().put_x(0, 0).put_h(0, 1).put_z(0, 2).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 3)
     assert subgraph == graph
 
-    first = GraphBuilder().add_x(0, 0).build()
+    first = GraphBuilder().put_x(0, 0).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 1)
     assert subgraph == first
 
-    second = GraphBuilder().add_h(0, 0).build()
+    second = GraphBuilder().put_h(0, 0).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 1, 1)
     assert subgraph == second
 
-    third = GraphBuilder().add_z(0, 0).build()
+    third = GraphBuilder().put_z(0, 0).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 2, 1)
     assert subgraph == third
 
-    start = GraphBuilder().add_x(0, 0).add_h(0, 1).build()
+    start = GraphBuilder().put_x(0, 0).put_h(0, 1).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
     assert subgraph == start
 
-    end = GraphBuilder().add_h(0, 0).add_z(0, 1).build()
+    end = GraphBuilder().put_h(0, 0).put_z(0, 1).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 1, 2)
     assert subgraph == end
 
 
 def test_extract_subgraph_two_qubits():
-    graph = GraphBuilder().add_x(0, 0).add_y(0, 1).add_z(1, 0).add_h(1, 1).build()
+    graph = GraphBuilder().put_x(0, 0).put_y(0, 1).put_z(1, 0).put_h(1, 1).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0, 1], 0, 2)
     assert subgraph == graph
 
-    first_row = GraphBuilder().add_x(0, 0).add_y(0, 1).build()
+    first_row = GraphBuilder().put_x(0, 0).put_y(0, 1).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
     assert subgraph == first_row
 
-    second_row = GraphBuilder().add_z(0, 0).add_h(0, 1).build()
+    second_row = GraphBuilder().put_z(0, 0).put_h(0, 1).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [1], 0, 2)
     assert subgraph == second_row
 
-    first_column = GraphBuilder().add_x(0, 0).add_z(1, 0).build()
+    first_column = GraphBuilder().put_x(0, 0).put_z(1, 0).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0, 1], 0, 1)
     assert subgraph == first_column
 
-    second_column = GraphBuilder().add_y(0, 0).add_h(1, 0).build()
+    second_column = GraphBuilder().put_y(0, 0).put_h(1, 0).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0, 1], 1, 1)
     assert subgraph == second_column
@@ -117,10 +117,10 @@ def test_extract_subgraph_two_qubits():
 def test_extract_subgraph_keeps_data():
     graph = (
         GraphBuilder()
-        .add_rx(0.75, 0, 0)
-        .add_ry(0.5, 0, 1)
-        .add_rz(0.25, 0, 2)
-        .add_measure(0, 3, 3)
+        .put_rx(0.75, 0, 0)
+        .put_ry(0.5, 0, 1)
+        .put_rz(0.25, 0, 2)
+        .put_measure(0, 3, 3)
         .build()
     )
 
@@ -129,41 +129,41 @@ def test_extract_subgraph_keeps_data():
 
 
 def test_extract_subgraph_keeps_edges():
-    graph = GraphBuilder().add_cswap(0, 1, 2, 0).add_ccx(1, 2, 0, 1).build()
+    graph = GraphBuilder().put_cswap(0, 1, 2, 0).put_ccx(1, 2, 0, 1).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0, 1, 2], 0, 2)
     assert subgraph == graph
 
 
 def test_extract_subgraph_in_other_order():
-    graph = GraphBuilder().add_x(0, 0).add_y(1, 0).add_cx(2, 3, 0).build()
+    graph = GraphBuilder().put_x(0, 0).put_y(1, 0).put_cx(2, 3, 0).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [2, 1, 3, 0], 0, 1)
 
-    expected = GraphBuilder().add_cx(0, 2, 0).add_y(1, 0).add_x(3, 0).build()
+    expected = GraphBuilder().put_cx(0, 2, 0).put_y(1, 0).put_x(3, 0).build()
 
     assert subgraph == expected
 
 
 def test_extract_subgraph_skips_identities():
-    graph = GraphBuilder().add_x(0, 1).add_y(0, 5).build()
+    graph = GraphBuilder().put_x(0, 1).put_y(0, 5).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
 
-    expected = GraphBuilder().add_x(0, 0).add_y(0, 1).build()
+    expected = GraphBuilder().put_x(0, 0).put_y(0, 1).build()
 
     assert subgraph == expected
 
 
 def test_extract_subgraph_fails_outside():
-    graph = GraphBuilder().add_y(0, 5).build()
+    graph = GraphBuilder().put_y(0, 5).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 2)
     assert subgraph is None
 
 
 def test_extract_subgraph_doesnt_break_edges():
-    graph = GraphBuilder().add_cx(0, 1, 0).build()
+    graph = GraphBuilder().put_cx(0, 1, 0).build()
 
     subgraph, _ = simplifier.extract_subgraph(graph, [0], 0, 1)
     assert subgraph is None
@@ -173,9 +173,9 @@ def test_extract_subgraph_doesnt_break_edges():
 
 
 def test_find_pattern_in_same_pattern():
-    pattern = GraphBuilder().add_h(0, 0).add_h(0, 1).build()
+    pattern = GraphBuilder().put_h(0, 0).put_h(0, 1).build()
 
-    graph = GraphBuilder().add_h(0, 0).add_h(0, 1).build()
+    graph = GraphBuilder().put_h(0, 0).put_h(0, 1).build()
 
     mappings = simplifier.find_pattern(graph, pattern)
 
@@ -185,9 +185,9 @@ def test_find_pattern_in_same_pattern():
 
 
 def test_find_pattern_in_same_two_qubit_pattern():
-    pattern = GraphBuilder().add_x(0, 0).add_y(1, 0).add_z(0, 1).add_h(1, 1).build()
+    pattern = GraphBuilder().put_x(0, 0).put_y(1, 0).put_z(0, 1).put_h(1, 1).build()
 
-    graph = GraphBuilder().add_x(0, 0).add_y(1, 0).add_z(0, 1).add_h(1, 1).build()
+    graph = GraphBuilder().put_x(0, 0).put_y(1, 0).put_z(0, 1).put_h(1, 1).build()
 
     mappings = simplifier.find_pattern(graph, pattern)
 
@@ -200,9 +200,9 @@ def test_find_pattern_in_same_two_qubit_pattern():
 
 
 def test_find_inverted_two_qubit_pattern():
-    pattern = GraphBuilder().add_x(0, 0).add_y(1, 0).add_z(0, 1).add_h(1, 1).build()
+    pattern = GraphBuilder().put_x(0, 0).put_y(1, 0).put_z(0, 1).put_h(1, 1).build()
 
-    graph = GraphBuilder().add_y(0, 0).add_x(1, 0).add_h(0, 1).add_z(1, 1).build()
+    graph = GraphBuilder().put_y(0, 0).put_x(1, 0).put_h(0, 1).put_z(1, 1).build()
 
     mappings = simplifier.find_pattern(graph, pattern)
 
@@ -217,9 +217,9 @@ def test_find_inverted_two_qubit_pattern():
 
 
 def test_find_same_controlled_pattern():
-    pattern = GraphBuilder().add_cx(0, 1, 0).build()
+    pattern = GraphBuilder().put_cx(0, 1, 0).build()
 
-    graph = GraphBuilder().add_cx(0, 1, 0).build()
+    graph = GraphBuilder().put_cx(0, 1, 0).build()
 
     mappings = simplifier.find_pattern(graph, pattern)
 
@@ -229,9 +229,9 @@ def test_find_same_controlled_pattern():
 
 
 def test_find_same_mixed_pattern():
-    pattern = GraphBuilder().add_cx(0, 1, 0).add_h(0, 1).add_z(1, 1).add_cx(1, 0, 2).build()
+    pattern = GraphBuilder().put_cx(0, 1, 0).put_h(0, 1).put_z(1, 1).put_cx(1, 0, 2).build()
 
-    graph = GraphBuilder().add_cx(0, 1, 0).add_h(0, 1).add_z(1, 1).add_cx(1, 0, 2).build()
+    graph = GraphBuilder().put_cx(0, 1, 0).put_h(0, 1).put_z(1, 1).put_cx(1, 0, 2).build()
 
     mappings = simplifier.find_pattern(graph, pattern)
 
@@ -251,9 +251,9 @@ def test_find_same_mixed_pattern():
 
 
 def test_find_same_mixed_pattern_with_mask():
-    pattern = GraphBuilder().add_cx(0, 1, 0).add_h(0, 1).add_cx(1, 0, 2).add_z(1, 3).build()
+    pattern = GraphBuilder().put_cx(0, 1, 0).put_h(0, 1).put_cx(1, 0, 2).put_z(1, 3).build()
 
-    graph = GraphBuilder().add_cx(0, 1, 0).add_h(0, 1).add_cx(1, 0, 2).add_z(1, 3).build()
+    graph = GraphBuilder().put_cx(0, 1, 0).put_h(0, 1).put_cx(1, 0, 2).put_z(1, 3).build()
 
     mask = {
         Position(0, 0): True,
@@ -285,9 +285,9 @@ def test_find_same_mixed_pattern_with_mask():
 
 
 def test_find_inverted_pattern_with_mask():
-    pattern = GraphBuilder().add_cx(0, 1, 0).add_h(0, 1).add_cx(1, 0, 2).add_z(1, 3).build()
+    pattern = GraphBuilder().put_cx(0, 1, 0).put_h(0, 1).put_cx(1, 0, 2).put_z(1, 3).build()
 
-    graph = GraphBuilder().add_cx(1, 0, 0).add_h(1, 1).add_cx(0, 1, 2).add_z(0, 3).build()
+    graph = GraphBuilder().put_cx(1, 0, 0).put_h(1, 1).put_cx(0, 1, 2).put_z(0, 3).build()
 
     mask = {
         Position(0, 0): True,
@@ -316,9 +316,9 @@ def test_find_inverted_pattern_with_mask():
 
 
 def test_find_symmetrical_mappings():
-    pattern = GraphBuilder().add_h(0, 0).add_x(1, 0).add_cz(0, 1, 1).add_swap(1, 0, 2).build()
+    pattern = GraphBuilder().put_h(0, 0).put_x(1, 0).put_cz(0, 1, 1).put_swap(1, 0, 2).build()
 
-    graph = GraphBuilder().add_h(0, 0).add_x(1, 0).add_cz(1, 0, 1).add_swap(0, 1, 2).build()
+    graph = GraphBuilder().put_h(0, 0).put_x(1, 0).put_cz(1, 0, 1).put_swap(0, 1, 2).build()
 
     mappings = simplifier.find_pattern(graph, pattern)
 
@@ -338,37 +338,37 @@ def test_find_symmetrical_mappings():
 
 
 def test_find_three_qubit_permutations():
-    pattern = GraphBuilder().add_h(0, 0).add_x(1, 0).build()
+    pattern = GraphBuilder().put_h(0, 0).put_x(1, 0).build()
 
-    graph = GraphBuilder().add_h(0, 0).add_x(1, 0).build()
+    graph = GraphBuilder().put_h(0, 0).put_x(1, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {position: position for position in [Position(0, 0), Position(1, 0)]}
 
-    graph = GraphBuilder().add_h(1, 0).add_x(0, 0).build()
+    graph = GraphBuilder().put_h(1, 0).put_x(0, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(0, 0): Position(1, 0), Position(1, 0): Position(0, 0)}
 
-    graph = GraphBuilder().add_h(0, 0).add_x(2, 0).build(clean_up=False)
+    graph = GraphBuilder().put_h(0, 0).put_x(2, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(0, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
-    graph = GraphBuilder().add_h(2, 0).add_x(0, 0).build(clean_up=False)
+    graph = GraphBuilder().put_h(2, 0).put_x(0, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(0, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 
-    graph = GraphBuilder().add_h(1, 0).add_x(2, 0).build(clean_up=False)
+    graph = GraphBuilder().put_h(1, 0).put_x(2, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(1, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
-    graph = GraphBuilder().add_h(2, 0).add_x(1, 0).build(clean_up=False)
+    graph = GraphBuilder().put_h(2, 0).put_x(1, 0).build(clean_up=False)
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(1, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 
 
 def test_find_same_with_parameters():
-    pattern = GraphBuilder().add_rx(0.5, 0, 0).add_measure(0, 0, 1).build()
+    pattern = GraphBuilder().put_rx(0.5, 0, 0).put_measure(0, 0, 1).build()
 
-    graph = GraphBuilder().add_rx(0.5, 0, 0).add_measure(0, 0, 1).build()
+    graph = GraphBuilder().put_rx(0.5, 0, 0).put_measure(0, 0, 1).build()
 
     mappings = simplifier.find_pattern(graph, pattern)
 
@@ -378,29 +378,29 @@ def test_find_same_with_parameters():
 
 
 def test_find_fails_if_parameters_dont_match():
-    pattern = GraphBuilder().add_rx(0.5, 0, 0).add_measure(0, 0, 1).build()
+    pattern = GraphBuilder().put_rx(0.5, 0, 0).put_measure(0, 0, 1).build()
 
-    graph = GraphBuilder().add_rx(0.25, 0, 0).add_measure(0, 0, 1).build()
+    graph = GraphBuilder().put_rx(0.25, 0, 0).put_measure(0, 0, 1).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings is None
 
-    graph = GraphBuilder().add_rx(0.5, 0, 0).add_measure(0, 1, 1).build()
+    graph = GraphBuilder().put_rx(0.5, 0, 0).put_measure(0, 1, 1).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings is None
 
 
 def test_find_on_second_column():
-    pattern = GraphBuilder().add_x(0, 0).add_z(0, 1).build()
+    pattern = GraphBuilder().put_x(0, 0).put_z(0, 1).build()
 
-    graph = GraphBuilder().add_h(0, 0).add_x(0, 1).add_z(0, 2).build()
+    graph = GraphBuilder().put_h(0, 0).put_x(0, 1).put_z(0, 2).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {Position(0, 1): Position(0, 0), Position(0, 2): Position(0, 1)}
 
 
 def test_find_uneven():
-    pattern = GraphBuilder().add_x(0, 0).add_y(0, 1).add_z(1, 0).add_h(1, 1).build()
+    pattern = GraphBuilder().put_x(0, 0).put_y(0, 1).put_z(1, 0).put_h(1, 1).build()
 
-    graph = GraphBuilder().add_x(0, 0).add_y(0, 1).add_z(1, 1).add_h(1, 2).build()
+    graph = GraphBuilder().put_x(0, 0).put_y(0, 1).put_z(1, 1).put_h(1, 2).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings == {
         Position(0, 0): Position(0, 0),
@@ -411,9 +411,9 @@ def test_find_uneven():
 
 
 def test_replace_single_qubit_gates():
-    replacement = GraphBuilder().add_x(0, 0).add_y(1, 0).add_z(0, 1).build()
+    replacement = GraphBuilder().put_x(0, 0).put_y(1, 0).put_z(0, 1).build()
 
-    graph = GraphBuilder().add_h(0, 0).add_h(0, 1).add_h(1, 0).add_h(1, 1).build()
+    graph = GraphBuilder().put_h(0, 0).put_h(0, 1).put_h(1, 0).put_h(1, 1).build()
 
     mappings = {
         Position(0, 0): Position(0, 1),
@@ -422,15 +422,15 @@ def test_replace_single_qubit_gates():
     }
 
     simplifier.replace_pattern(graph, replacement, mappings)
-    expected_graph = GraphBuilder().add_z(0, 0).add_h(0, 1).add_x(1, 0).add_y(1, 1).build()
+    expected_graph = GraphBuilder().put_z(0, 0).put_h(0, 1).put_x(1, 0).put_y(1, 1).build()
 
     assert graph == expected_graph
 
 
 def test_replace_with_parameters():
-    replacement = GraphBuilder().add_rx(0.25, 0, 0).add_ry(0.1, 1, 0).add_measure(0, 0, 1).build()
+    replacement = GraphBuilder().put_rx(0.25, 0, 0).put_ry(0.1, 1, 0).put_measure(0, 0, 1).build()
 
-    graph = GraphBuilder().add_h(0, 0).add_h(0, 1).add_h(1, 0).add_h(1, 1).build()
+    graph = GraphBuilder().put_h(0, 0).put_h(0, 1).put_h(1, 0).put_h(1, 1).build()
 
     mappings = {
         Position(0, 0): Position(0, 1),
@@ -440,16 +440,16 @@ def test_replace_with_parameters():
 
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = (
-        GraphBuilder().add_measure(0, 0, 0).add_h(0, 1).add_rx(0.25, 1, 0).add_ry(0.1, 1, 1).build()
+        GraphBuilder().put_measure(0, 0, 0).put_h(0, 1).put_rx(0.25, 1, 0).put_ry(0.1, 1, 1).build()
     )
 
     assert graph == expected_graph
 
 
 def test_replace_controlled_gates():
-    replacement = GraphBuilder().add_cx(0, 1, 0).add_cx(1, 0, 1).build()
+    replacement = GraphBuilder().put_cx(0, 1, 0).put_cx(1, 0, 1).build()
 
-    graph = GraphBuilder().add_id(0, 0).add_id(0, 1).add_id(1, 0).add_id(1, 1).build()
+    graph = GraphBuilder().put_id(0, 0).put_id(0, 1).put_id(1, 0).put_id(1, 1).build()
 
     mappings = {
         Position(0, 0): Position(0, 1),
@@ -459,22 +459,22 @@ def test_replace_controlled_gates():
     }
 
     simplifier.replace_pattern(graph, replacement, mappings)
-    expected_graph = GraphBuilder().add_cx(1, 0, 0).add_cx(1, 0, 1).build()
+    expected_graph = GraphBuilder().put_cx(1, 0, 0).put_cx(1, 0, 1).build()
 
     assert graph == expected_graph
 
 
 def test_replace_uneven():
-    replacement = GraphBuilder().add_x(0, 0).add_y(0, 1).add_z(1, 0).add_x(1, 1).build()
+    replacement = GraphBuilder().put_x(0, 0).put_y(0, 1).put_z(1, 0).put_x(1, 1).build()
 
     graph = (
         GraphBuilder()
-        .add_h(0, 0)
-        .add_h(0, 1)
-        .add_h(0, 2)
-        .add_h(1, 0)
-        .add_h(1, 1)
-        .add_h(1, 2)
+        .put_h(0, 0)
+        .put_h(0, 1)
+        .put_h(0, 2)
+        .put_h(1, 0)
+        .put_h(1, 1)
+        .put_h(1, 2)
         .build()
     )
     mappings = {
@@ -487,12 +487,12 @@ def test_replace_uneven():
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = (
         GraphBuilder()
-        .add_x(0, 0)
-        .add_y(0, 1)
-        .add_h(0, 2)
-        .add_h(1, 0)
-        .add_z(1, 1)
-        .add_x(1, 2)
+        .put_x(0, 0)
+        .put_y(0, 1)
+        .put_h(0, 2)
+        .put_h(1, 0)
+        .put_z(1, 1)
+        .put_x(1, 2)
         .build()
     )
 
@@ -500,17 +500,17 @@ def test_replace_uneven():
 
 
 def test_replace_adds_identities():
-    replacement = GraphBuilder().add_cz(0, 1, 0).build()
+    replacement = GraphBuilder().put_cz(0, 1, 0).build()
 
     graph = (
         GraphBuilder()
-        .add_y(0, 0)
-        .add_y(0, 1)
-        .add_z(1, 0)
-        .add_h(1, 1)
-        .add_cx(0, 1, 2)
-        .add_z(0, 3)
-        .add_h(1, 4)
+        .put_y(0, 0)
+        .put_y(0, 1)
+        .put_z(1, 0)
+        .put_h(1, 1)
+        .put_cx(0, 1, 2)
+        .put_z(0, 3)
+        .put_h(1, 4)
         .build()
     )
     mappings = {
@@ -522,7 +522,7 @@ def test_replace_adds_identities():
 
     simplifier.replace_pattern(graph, replacement, mappings)
     expected_graph = (
-        GraphBuilder().add_y(0, 0).add_y(0, 1).add_z(1, 0).add_cz(0, 1, 2).add_z(0, 3).build()
+        GraphBuilder().put_y(0, 0).put_y(0, 1).put_z(1, 0).put_cz(0, 1, 2).put_z(0, 3).build()
     )
 
     assert graph == expected_graph

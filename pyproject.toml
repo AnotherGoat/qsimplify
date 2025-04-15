@@ -29,7 +29,7 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-    "E4", "E7", "E9", "F", "ERA", "ANN", "S", "B", "A", "C4", "FIX", "FA", "LOG", "G", "INP", "PIE", "PT", "RET", "SLF",
+    "E4", "E7", "E9", "F", "ERA", "ANN", "S", "B", "A", "C4", "FIX", "FA", "LOG", "G", "INP", "PIE", "PT", "RSE", "RET", "SLF",
     "SIM", "ARG", "PTH", "FLY", "C90", "N", "PERF", "PLC", "PLE", "FURB", "RUF"
 ]
 ignore = ["PLC0414"]

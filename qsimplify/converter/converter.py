@@ -153,7 +153,7 @@ class Converter:
             data.column,
         )
         self._logger.debug("Placing single-qubit gate on qubit %s on column %s", qubits[0], column)
-        builder.add_single(gate_name, qubits[0], column)
+        builder.put_single(gate_name, qubits[0], column)
 
     def _add_rotation_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, gate_name, qubits, params, column = (
@@ -169,7 +169,7 @@ class Converter:
             qubits[0],
             column,
         )
-        builder.add_rotation(gate_name, params[0], qubits[0], column)
+        builder.put_rotation(gate_name, params[0], qubits[0], column)
 
     def _add_measure_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, bits, column = (
@@ -184,7 +184,7 @@ class Converter:
             bits[0],
             column,
         )
-        builder.add_measure(qubits[0], bits[0], column)
+        builder.put_measure(qubits[0], bits[0], column)
 
     def _add_swap_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
@@ -194,7 +194,7 @@ class Converter:
             qubits[1],
             column,
         )
-        builder.add_swap(qubits[0], qubits[1], column)
+        builder.put_swap(qubits[0], qubits[1], column)
 
     def _add_cz_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
@@ -204,7 +204,7 @@ class Converter:
             qubits[1],
             column,
         )
-        builder.add_cz(qubits[0], qubits[1], column)
+        builder.put_cz(qubits[0], qubits[1], column)
 
     def _add_cswap_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
@@ -215,7 +215,7 @@ class Converter:
             qubits[2],
             column,
         )
-        builder.add_cswap(qubits[0], qubits[1], qubits[2], column)
+        builder.put_cswap(qubits[0], qubits[1], qubits[2], column)
 
     def _add_controlled_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, gate_name, qubits, column = (
@@ -230,7 +230,7 @@ class Converter:
             qubits[1],
             column,
         )
-        builder.add_control(gate_name, qubits[0], qubits[1], column)
+        builder.put_control(gate_name, qubits[0], qubits[1], column)
 
     def _add_ccx_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, qubits, column = data.builder, data.qubits, data.column
@@ -241,7 +241,7 @@ class Converter:
             qubits[2],
             column,
         )
-        builder.add_ccx(qubits[0], qubits[1], qubits[2], column)
+        builder.put_ccx(qubits[0], qubits[1], qubits[2], column)
 
     def graph_to_circuit(
         self,

@@ -30,14 +30,14 @@ def test_one_qubit_nodes():
 
     expected = (
         GraphBuilder()
-        .add_h(0, 0)
-        .add_x(0, 1)
-        .add_y(0, 2)
-        .add_z(0, 3)
-        .add_x(0, 4)
-        .add_z(0, 5)
-        .add_h(0, 6)
-        .add_y(0, 7)
+        .put_h(0, 0)
+        .put_x(0, 1)
+        .put_y(0, 2)
+        .put_z(0, 3)
+        .put_x(0, 4)
+        .put_z(0, 5)
+        .put_h(0, 6)
+        .put_y(0, 7)
         .build()
     )
 
@@ -60,14 +60,14 @@ def test_two_qubit_nodes():
 
     expected = (
         GraphBuilder()
-        .add_h(0, 0)
-        .add_x(1, 0)
-        .add_y(0, 1)
-        .add_z(1, 1)
-        .add_x(0, 2)
-        .add_z(1, 2)
-        .add_h(0, 3)
-        .add_y(1, 3)
+        .put_h(0, 0)
+        .put_x(1, 0)
+        .put_y(0, 1)
+        .put_z(1, 1)
+        .put_x(0, 2)
+        .put_z(1, 2)
+        .put_h(0, 3)
+        .put_y(1, 3)
         .build()
     )
 
@@ -88,7 +88,7 @@ def test_skip_identity_nodes():
 
     graph = converter.circuit_to_graph(circuit)
 
-    expected = GraphBuilder().add_h(0, 0).add_y(0, 1).add_z(0, 2).add_x(0, 3).build()
+    expected = GraphBuilder().put_h(0, 0).put_y(0, 1).put_z(0, 2).put_x(0, 3).build()
 
     assert graph == expected
 
@@ -104,7 +104,7 @@ def test_skip_barriers():
 
     graph = converter.circuit_to_graph(circuit)
 
-    expected = GraphBuilder().add_z(0, 0).add_y(1, 0).add_x(2, 0).build()
+    expected = GraphBuilder().put_z(0, 0).put_y(1, 0).put_x(2, 0).build()
 
     assert graph == expected
 
@@ -118,7 +118,7 @@ def test_rotation_nodes():
 
     graph = converter.circuit_to_graph(circuit)
 
-    expected = GraphBuilder().add_rx(0.75, 0, 0).add_ry(0.5, 0, 1).add_rz(0.25, 0, 2).build()
+    expected = GraphBuilder().put_rx(0.75, 0, 0).put_ry(0.5, 0, 1).put_rz(0.25, 0, 2).build()
 
     assert graph == expected
 
@@ -138,13 +138,13 @@ def test_measurement_nodes():
 
     expected = (
         GraphBuilder()
-        .add_h(0, 0)
-        .add_measure(0, 2, 1)
-        .add_h(1, 0)
-        .add_h(1, 1)
-        .add_measure(1, 1, 2)
-        .add_h(2, 0)
-        .add_measure(2, 0, 1)
+        .put_h(0, 0)
+        .put_measure(0, 2, 1)
+        .put_h(1, 0)
+        .put_h(1, 1)
+        .put_measure(1, 1, 2)
+        .put_h(2, 0)
+        .put_measure(2, 0, 1)
         .build()
     )
 
@@ -159,7 +159,7 @@ def test_control_edge_data():
 
     graph = converter.circuit_to_graph(circuit)
 
-    expected = GraphBuilder().add_cx(1, 0, 0).add_ccx(1, 2, 0, 1).build()
+    expected = GraphBuilder().push_cx(1, 0).push_ccx(1, 2, 0).build()
 
     assert graph == expected
 
@@ -171,7 +171,7 @@ def test_cz_edge_data():
 
     graph = converter.circuit_to_graph(circuit)
 
-    expected = GraphBuilder().add_cz(1, 0, 0).build()
+    expected = GraphBuilder().put_cz(1, 0, 0).build()
 
     assert graph == expected
 
@@ -184,7 +184,7 @@ def test_swap_edge_data():
 
     graph = converter.circuit_to_graph(circuit)
 
-    expected = GraphBuilder().add_swap(1, 2, 0).add_cswap(0, 1, 2, 1).build()
+    expected = GraphBuilder().put_swap(1, 2, 0).put_cswap(0, 1, 2, 1).build()
 
     assert graph == expected
 
@@ -208,17 +208,17 @@ def test_qubit_placement():
 
     expected = (
         GraphBuilder()
-        .add_cx(0, 1, 0)
-        .add_h(0, 1)
-        .add_x(0, 2)
-        .add_y(1, 1)
-        .add_z(2, 0)
-        .add_h(0, 3)
-        .add_h(0, 4)
-        .add_ccx(0, 1, 2, 5)
-        .add_x(0, 6)
-        .add_y(1, 6)
-        .add_z(2, 6)
+        .put_cx(0, 1, 0)
+        .put_h(0, 1)
+        .put_x(0, 2)
+        .put_y(1, 1)
+        .put_z(2, 0)
+        .put_h(0, 3)
+        .put_h(0, 4)
+        .put_ccx(0, 1, 2, 5)
+        .put_x(0, 6)
+        .put_y(1, 6)
+        .put_z(2, 6)
         .build()
     )
 

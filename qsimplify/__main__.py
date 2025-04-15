@@ -3,7 +3,7 @@ from pathlib import Path
 
 from qiskit import QuantumCircuit
 
-from qsimplify.analyzer import Analyzer
+from qsimplify.analyzer import analyzer
 from qsimplify.converter import Converter
 from qsimplify.drawer import Drawer
 from qsimplify.simplifier import Simplifier
@@ -30,8 +30,7 @@ def _run_demo() -> None:
     print("\n===== Original graph =====")
     print(graph)
 
-    analyzer = Analyzer(converter)
-    metrics = analyzer.calculate_metrics(circuit)
+    metrics = analyzer.calculate_metrics(graph)
 
     print("\n===== Original metrics =====")
     print(metrics)

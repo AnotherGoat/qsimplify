@@ -5,6 +5,7 @@ from enum import Enum
 
 class GateName(Enum):
     """The types of quantum gates supported by this library."""
+
     ID = "id"
     H = "h"
     X = "x"
@@ -52,7 +53,6 @@ class GateName(Enum):
         """Check whether this gate type has control and target qubits or not."""
         return self.control_qubit_count() > 0
 
-
     def control_qubit_count(self) -> int:
         """Get the number of control qubits used by this type of gate."""
         match self:
@@ -79,4 +79,3 @@ class GateName(Enum):
                 return 2
             case _:
                 return 1
-
