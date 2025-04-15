@@ -47,7 +47,7 @@ def _run_demo() -> None:
     print("\n===== Simplified build steps =====")
     print(build_steps)
 
-    simplified_metrics = analyzer.calculate_metrics(simplified_circuit)
+    simplified_metrics = analyzer.calculate_metrics(simplified_graph)
     print("\n===== Simplified metrics =====")
     print(simplified_metrics)
 
