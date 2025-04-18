@@ -37,16 +37,7 @@ def test_depth():
     metrics = analyzer.calculate_metrics(graph)
     assert metrics.depth == 2
 
-    graph = (
-        GraphBuilder()
-        .push_x(0)
-        .push_x(0)
-        .push_x(0)
-        .push_x(0)
-        .push_x(0)
-        .push_x(0)
-        .build()
-    )
+    graph = GraphBuilder().push_x(0).push_x(0).push_x(0).push_x(0).push_x(0).push_x(0).build()
 
     metrics = analyzer.calculate_metrics(graph)
     assert metrics.depth == 6
@@ -134,16 +125,7 @@ def test_empty_x_count():
 
 
 def test_x_count():
-    graph = (
-        GraphBuilder()
-        .push_x(0)
-        .push_y(0)
-        .push_z(1)
-        .push_x(0)
-        .push_h(1)
-        .push_x(1)
-        .build()
-    )
+    graph = GraphBuilder().push_x(0).push_y(0).push_z(1).push_x(0).push_h(1).push_x(1).build()
 
     metrics = analyzer.calculate_metrics(graph)
     assert metrics.x_count == 3
@@ -156,16 +138,7 @@ def test_empty_y_count():
 
 
 def test_y_count():
-    graph = (
-        GraphBuilder()
-        .push_x(0)
-        .push_y(0)
-        .push_z(1)
-        .push_x(0)
-        .push_y(1)
-        .push_h(1)
-        .build()
-    )
+    graph = GraphBuilder().push_x(0).push_y(0).push_z(1).push_x(0).push_y(1).push_h(1).build()
 
     metrics = analyzer.calculate_metrics(graph)
     assert metrics.y_count == 2
@@ -179,15 +152,7 @@ def test_empty_z_count():
 
 def test_z_count():
     graph = (
-        GraphBuilder()
-        .push_z(0)
-        .push_y(0)
-        .push_z(1)
-        .push_x(0)
-        .push_h(1)
-        .push_z(1)
-        .push_z(0)
-        .build()
+        GraphBuilder().push_z(0).push_y(0).push_z(1).push_x(0).push_h(1).push_z(1).push_z(0).build()
     )
 
     metrics = analyzer.calculate_metrics(graph)
@@ -619,7 +584,16 @@ def test_single_qubit_gate_percent():
     metrics = analyzer.calculate_metrics(graph)
     assert metrics.single_qubit_percent == 0.75
 
-    graph = GraphBuilder().push_x(0).push_h(1).push_h(2).push_cx(2, 3).push_cx(1, 0).push_cz(0, 2).build()
+    graph = (
+        GraphBuilder()
+        .push_x(0)
+        .push_h(1)
+        .push_h(2)
+        .push_cx(2, 3)
+        .push_cx(1, 0)
+        .push_cz(0, 2)
+        .build()
+    )
 
     metrics = analyzer.calculate_metrics(graph)
     assert metrics.single_qubit_percent == 0.5
@@ -632,7 +606,14 @@ def test_empty_measure_count():
 
 
 def test_measure_count():
-    graph = GraphBuilder().push_measure(0, 0).push_measure(1, 1).push_measure(2, 2).push_measure(3, 3).build()
+    graph = (
+        GraphBuilder()
+        .push_measure(0, 0)
+        .push_measure(1, 1)
+        .push_measure(2, 2)
+        .push_measure(3, 3)
+        .build()
+    )
 
     metrics = analyzer.calculate_metrics(graph)
     assert metrics.measure_count == 4

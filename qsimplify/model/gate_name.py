@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 
 
-class GateName(Enum):
+class GateName(str, Enum):
     """The types of quantum gates supported by this library."""
 
     ID = "id"
@@ -11,6 +11,7 @@ class GateName(Enum):
     X = "x"
     Y = "y"
     Z = "z"
+    # TODO: Add simplification rules for rotation gates with angles of 0 and 2pi
     RX = "rx"
     RY = "ry"
     RZ = "rz"

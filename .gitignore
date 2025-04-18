@@ -1,10 +1,22 @@
+# IDE configuration files
 .idea/
+
+# Caches
 .pytest_cache/
 .ruff_cache/
-.venv/
 **/__pycache__/
+
+# Virtual environments
+.venv/
+
+# Test coverage reports
+coverage/
+.coverage
+
+# Local configuration files
+.env
+
+# Files exported by the demo
 **/*.gv
 **/*.png
 **/*.svg
-coverage/
-.coverage

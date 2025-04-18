@@ -1,12 +1,16 @@
+import argparse
 import logging
 from logging import Logger
 
-_debug_mode = False
+
+def parse_debug_options() -> bool:
+    parser = argparse.ArgumentParser(description="Quantum circuit simplifier")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    args = parser.parse_args()
+    return args.debug
 
 
-def set_debug_mode(debug: bool) -> None:
-    global _debug_mode
-    _debug_mode = debug
+_debug_mode = parse_debug_options()
 
 
 def setup_logger(name: str) -> Logger:

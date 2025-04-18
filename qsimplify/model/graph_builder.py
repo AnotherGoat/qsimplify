@@ -45,22 +45,38 @@ class GraphBuilder:
         return self.put_measure(qubit, bit, self._find_push_column([qubit]))
 
     def push_swap(self, qubit1: int, qubit2: int) -> GraphBuilder:
-        return  self.put_swap(qubit1, qubit2, self._find_push_column([qubit1, qubit2]))
+        return self.put_swap(qubit1, qubit2, self._find_push_column([qubit1, qubit2]))
 
     def push_ch(self, control_qubit: int, target_qubit: int) -> GraphBuilder:
-        return self.put_ch(control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit]))
+        return self.put_ch(
+            control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit])
+        )
 
     def push_cx(self, control_qubit: int, target_qubit: int) -> GraphBuilder:
-        return self.put_cx(control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit]))
+        return self.put_cx(
+            control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit])
+        )
 
     def push_cz(self, qubit1: int, qubit2: int) -> GraphBuilder:
         return self.put_cz(qubit1, qubit2, self._find_push_column([qubit1, qubit2]))
 
-    def push_cswap(self, control_qubit: int, target_qubit1: int, target_qubit2: int) -> GraphBuilder:
-        return self.put_cswap(control_qubit, target_qubit1, target_qubit2, self._find_push_column([control_qubit, target_qubit1, target_qubit2]))
+    def push_cswap(
+        self, control_qubit: int, target_qubit1: int, target_qubit2: int
+    ) -> GraphBuilder:
+        return self.put_cswap(
+            control_qubit,
+            target_qubit1,
+            target_qubit2,
+            self._find_push_column([control_qubit, target_qubit1, target_qubit2]),
+        )
 
     def push_ccx(self, control_qubit1: int, control_qubit2: int, target_qubit: int) -> GraphBuilder:
-        return self.put_ccx(control_qubit1, control_qubit2, target_qubit, self._find_push_column([control_qubit1, control_qubit2, target_qubit]))
+        return self.put_ccx(
+            control_qubit1,
+            control_qubit2,
+            target_qubit,
+            self._find_push_column([control_qubit1, control_qubit2, target_qubit]),
+        )
 
     def put_id(self, qubit: int, column: int) -> GraphBuilder:
         return self.put_single(GateName.ID, qubit, column)

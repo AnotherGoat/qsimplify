@@ -48,16 +48,28 @@ uv run ruff check --fix --select I && uv run ruff format
 uv run pyright
 ```
 
-- Run demo
+- Run demo (doesn't start a server)
 
 ```shell
-uv run python -m qsimplify
+uv run python -m qsimplify.demo
 ```
 
-- Run demo in debug mode
+- Run demo in debug mode (doesn't start a server)
 
 ```shell
-uv run python -m qsimplify --debug
+uv run python -m qsimplify.demo --debug
+```
+
+- Start as a Flask server
+
+```shell
+uv run python -m qsimplify.app
+```
+
+- Start as a Flask server in debug mode
+
+```shell
+uv run python -m qsimplify.app --debug
 ```
 
 - Build the Docker image
