@@ -1,1 +1,3 @@
-from .converter import Converter as Converter
+from qsimplify.converter.graph_converter import GraphConverter as GraphConverter
+from qsimplify.converter.dto_converter import DtoConverter as DtoConverter
+from qsimplify.converter.qiskit_converter import QiskitConverter as QiskitConverter

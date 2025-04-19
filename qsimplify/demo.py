@@ -3,7 +3,7 @@ from pathlib import Path
 from qiskit import QuantumCircuit
 
 from qsimplify.analyzer import analyzer
-from qsimplify.converter import Converter
+from qsimplify.converter import QiskitConverter
 from qsimplify.drawer import Drawer
 from qsimplify.simplifier import Simplifier
 
@@ -19,8 +19,8 @@ def _run_demo() -> None:
     print("\n===== Original circuit =====")
     print(circuit.draw())
 
-    converter = Converter()
-    graph = converter.circuit_to_graph(circuit)
+    converter = QiskitConverter()
+    graph = converter.to_graph(circuit)
 
     print("\n===== Original grid =====")
     print(graph.draw_grid())

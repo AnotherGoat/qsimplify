@@ -1,9 +1,6 @@
 import itertools
 from pathlib import Path
 
-from qiskit import QuantumCircuit
-
-from qsimplify.converter import Converter
 from qsimplify.model import GateName, GraphNode, Position, QuantumGraph, graph_cleaner
 from qsimplify.simplifier.graph_mappings import GraphMappings
 from qsimplify.simplifier.rule_parser import RuleParser
@@ -14,27 +11,14 @@ from qsimplify.utils import setup_logger
 class Simplifier:
     _default_rules: list[SimplificationRule]
 
-    def __init__(self, converter: Converter) -> None:
+    def __init__(self) -> None:
         self._logger = setup_logger("Simplifier")
-        self._converter = converter
 
         parser = RuleParser()
         script_path = Path(__file__).parent
         default_rules_path = script_path / "default_rules.json5"
 
         self._default_rules = parser.load_rules_from_file(default_rules_path)
-
-    def simplify_circuit(
-        self,
-        circuit: QuantumCircuit,
-        add_build_steps: bool = False,
-        circuit_name: str = "circuit",
-    ) -> QuantumCircuit | tuple[QuantumCircuit, str]:
-        graph = self._converter.circuit_to_graph(circuit)
-        simplified_graph = self.simplify_graph(graph)
-        return self._converter.graph_to_circuit(
-            simplified_graph, add_build_steps=add_build_steps, circuit_name=circuit_name
-        )
 
     def simplify_graph(
         self, graph: QuantumGraph, rules: list[SimplificationRule] | None = None
@@ -161,7 +145,7 @@ class Simplifier:
         width: int,
         mask: dict[Position, bool] | None = None,
     ) -> tuple[QuantumGraph | None, GraphMappings | None]:
-        if len(rows) == 0 or width <= 0 or len(graph) == 0:
+        if len(rows) == 0 or width <= 0 or graph.is_empty():
             raise ValueError("The graph, rows or width are invalid")
 
         if mask is None:

@@ -33,10 +33,11 @@ class CircuitPlacingData(NamedTuple):
     start: Position
 
 
-class Converter:
+# TODO: Make this converter implement the abstract base class properly
+class QiskitConverter:
     def __init__(self) -> None:
-        self._logger = setup_logger("Converter")
-        self._circuit_to_graph_handlers: dict[GateName, Callable[[GraphPlacingData], None]] = {
+        self._logger = setup_logger("QiskitConverter")
+        self._to_graph_handlers: dict[GateName, Callable[[GraphPlacingData], None]] = {
             GateName.H: self._add_single_gate_to_graph,
             GateName.X: self._add_single_gate_to_graph,
             GateName.Y: self._add_single_gate_to_graph,
@@ -69,7 +70,7 @@ class Converter:
             GateName.CCX: self._add_ccx_gate_to_circuit,
         }
 
-    def circuit_to_graph(self, circuit: QuantumCircuit) -> QuantumGraph:
+    def to_graph(self, circuit: QuantumCircuit) -> QuantumGraph:
         self._logger.debug("Converting circuit to graph\n%s", circuit.draw())
         builder = GraphBuilder()
 
@@ -143,7 +144,7 @@ class Converter:
         return bits
 
     def _add_instruction_to_graph(self, data: GraphPlacingData) -> None:
-        self._circuit_to_graph_handlers[data.gate_name](data)
+        self._to_graph_handlers[data.gate_name](data)
 
     def _add_single_gate_to_graph(self, data: GraphPlacingData) -> None:
         builder, gate_name, qubits, column = (

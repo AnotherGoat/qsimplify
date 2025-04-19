@@ -1,17 +1,17 @@
 from qiskit import QuantumCircuit
 
-from qsimplify.converter import Converter
+from qsimplify.converter import QiskitConverter
 from qsimplify.model import GraphBuilder, Position
 from qsimplify.simplifier import Simplifier
 
-converter = Converter()
-simplifier = Simplifier(converter)
+converter = QiskitConverter()
+simplifier = Simplifier()
 
 
 def test_simplified_graph_is_new_instance():
     circuit = QuantumCircuit(2)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
     simplified_graph = simplifier.simplify_graph(graph)
 
     assert simplified_graph is not graph

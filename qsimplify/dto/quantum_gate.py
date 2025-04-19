@@ -40,6 +40,7 @@ def _format_fields(fields: list[str]) -> str:
 
 
 class BaseGate(BaseModel):
+    name: GateName
     model_config = ConfigDict(extra="forbid")
 
 

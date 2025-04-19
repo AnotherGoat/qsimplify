@@ -28,7 +28,7 @@ class QuantumGraph:
     @property
     def width(self) -> int:
         """The number of columns in the graph."""
-        if len(self) == 0:
+        if self.is_empty():
             return 0
 
         return max(position.column for position in self._get_positions()) + 1
@@ -36,7 +36,7 @@ class QuantumGraph:
     @property
     def height(self) -> int:
         """The number of rows (qubits) in the graph."""
-        if len(self) == 0:
+        if self.is_empty():
             return 0
 
         return max(position.row for position in self._get_positions()) + 1
@@ -44,6 +44,10 @@ class QuantumGraph:
     def _get_positions(self) -> Iterator[Position]:
         for position in self._network.nodes:
             yield position
+
+    def is_empty(self) -> bool:
+        """Check whether this graph is empty (has no gates) or not."""
+        return len(self) == 0
 
     def add_node(self, node: GraphNode) -> None:
         """Add an existing GraphNode to the graph."""
@@ -253,7 +257,7 @@ class QuantumGraph:
 
     def insert_column(self, column_index: int) -> None:
         """Insert an empty column at the given index by shifting all columns at or to the right of it rightward by one."""
-        if len(self) == 0:
+        if self.is_empty():
             raise ValueError("It's not possible to insert a column on an empty graph")
 
         if column_index < 0 or column_index > self.width:

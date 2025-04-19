@@ -1,14 +1,14 @@
 from qiskit import QuantumCircuit
 
-from qsimplify.converter import Converter
+from qsimplify.converter import QiskitConverter
 from qsimplify.model import GraphBuilder
 
-converter = Converter()
+converter = QiskitConverter()
 
 
-def test_empty_circuit_to_graph():
+def test_empty_to_graph():
     circuit = QuantumCircuit(2)
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     assert graph.width == 0
     assert graph.height == 0
@@ -26,7 +26,7 @@ def test_one_qubit_nodes():
     circuit.h(0)
     circuit.y(0)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = (
         GraphBuilder()
@@ -56,7 +56,7 @@ def test_two_qubit_nodes():
     circuit.h(0)
     circuit.y(1)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = (
         GraphBuilder()
@@ -86,7 +86,7 @@ def test_skip_identity_nodes():
     circuit.x(0)
     circuit.id(0)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = GraphBuilder().put_h(0, 0).put_y(0, 1).put_z(0, 2).put_x(0, 3).build()
 
@@ -102,7 +102,7 @@ def test_skip_barriers():
     circuit.barrier()
     circuit.y(1)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = GraphBuilder().put_z(0, 0).put_y(1, 0).put_x(2, 0).build()
 
@@ -116,7 +116,7 @@ def test_rotation_nodes():
     circuit.ry(0.5, 0)
     circuit.rz(0.25, 0)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = GraphBuilder().put_rx(0.75, 0, 0).put_ry(0.5, 0, 1).put_rz(0.25, 0, 2).build()
 
@@ -134,7 +134,7 @@ def test_measurement_nodes():
     circuit.h(2)
     circuit.measure(2, 0)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = (
         GraphBuilder()
@@ -157,7 +157,7 @@ def test_control_edge_data():
     circuit.cx(1, 0)
     circuit.ccx(1, 2, 0)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = GraphBuilder().push_cx(1, 0).push_ccx(1, 2, 0).build()
 
@@ -169,7 +169,7 @@ def test_cz_edge_data():
 
     circuit.cz(1, 0)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = GraphBuilder().put_cz(1, 0, 0).build()
 
@@ -182,7 +182,7 @@ def test_swap_edge_data():
     circuit.swap(1, 2)
     circuit.cswap(0, 1, 2)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = GraphBuilder().put_swap(1, 2, 0).put_cswap(0, 1, 2, 1).build()
 
@@ -204,7 +204,7 @@ def test_qubit_placement():
     circuit.y(1)
     circuit.z(2)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
 
     expected = (
         GraphBuilder()
@@ -237,7 +237,7 @@ def test_one_qubit_to_circuit():
     circuit.h(0)
     circuit.y(0)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
     converted_circuit = converter.graph_to_circuit(graph)
 
     assert circuit.data == converted_circuit.data
@@ -254,7 +254,7 @@ def test_two_qubits_to_circuit():
     circuit.y(0)
     circuit.z(1)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
     converted_circuit = converter.graph_to_circuit(graph)
 
     assert circuit.data == converted_circuit.data
@@ -267,7 +267,7 @@ def test_removed_identities():
     circuit.id(1)
     circuit.id(2)
 
-    graph = converter.circuit_to_graph(circuit)
+    graph = converter.to_graph(circuit)
     converted_circuit = converter.graph_to_circuit(graph)
 
     assert circuit.data != converted_circuit.data

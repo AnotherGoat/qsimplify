@@ -20,7 +20,7 @@ def calculate_metrics(graph: QuantumGraph) -> QuantumMetrics:
     toffoli_count = _count_gates(graph, GateName.CCX)
     single_qubit_percent = 0 if gate_count == 0 else single_gate_count / gate_count
     measure_count = _count_measured_qubits(graph)
-    measure_percent = 0 if len(graph) == 0 else measure_count / graph.height
+    measure_percent = 0 if graph.is_empty() else measure_count / graph.height
 
     return QuantumMetrics(
         width=graph.height,
@@ -39,11 +39,11 @@ def calculate_metrics(graph: QuantumGraph) -> QuantumMetrics:
         swap_count=_count_gates(graph, GateName.SWAP),
         cnot_count=cnot_count,
         cnot_qubit_percent=_calculate_cnot_qubit_percent(graph),
-        average_cnot=0 if len(graph) == 0 else cnot_count / graph.height,
+        average_cnot=0 if graph.is_empty() else cnot_count / graph.height,
         max_cnot=_count_max_cnot(graph),
         toffoli_count=toffoli_count,
         toffoli_qubit_percent=_calculate_toffoli_qubit_percent(graph),
-        average_toffoli=0 if len(graph) == 0 else toffoli_count / graph.height,
+        average_toffoli=0 if graph.is_empty() else toffoli_count / graph.height,
         max_toffoli=_count_max_toffoli(graph),
         gate_count=gate_count,
         controlled_gate_count=_count_controlled_gates(graph),
@@ -55,7 +55,7 @@ def calculate_metrics(graph: QuantumGraph) -> QuantumMetrics:
 
 
 def _count_total_gates(graph: QuantumGraph) -> int:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     return sum(_count_gates(graph, gate_name) for gate_name in GateName)
@@ -69,7 +69,7 @@ def _count_gates(nodes: Iterable[GraphNode], gate_name: GateName) -> int:
 
 
 def _calculate_superposition_percent(graph: QuantumGraph) -> float:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     first_column = _get_column(graph, 0)
@@ -113,7 +113,7 @@ def _get_column(graph: QuantumGraph, column_index: int) -> list[GraphNode]:
 
 
 def _calculate_average_density(graph: QuantumGraph) -> float:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     densities = [_calculate_column_density(graph, column) for column in range(graph.width)]
@@ -129,7 +129,7 @@ def _count_controlled_gates(graph: QuantumGraph) -> int:
 
 
 def _calculate_cnot_qubit_percent(graph: QuantumGraph) -> float:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     rows_with_cnot = {node.position.row for node in graph if node.name == GateName.CX}
@@ -137,7 +137,7 @@ def _calculate_cnot_qubit_percent(graph: QuantumGraph) -> float:
 
 
 def _count_max_cnot(graph: QuantumGraph) -> int:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     counts: dict[int, int] = {}
@@ -164,7 +164,7 @@ def _count_max_cnot(graph: QuantumGraph) -> int:
 
 
 def _calculate_toffoli_qubit_percent(graph: QuantumGraph) -> float:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     rows_with_toffoli = {node.position.row for node in graph if node.name == GateName.CCX}
@@ -172,7 +172,7 @@ def _calculate_toffoli_qubit_percent(graph: QuantumGraph) -> float:
 
 
 def _count_max_toffoli(graph: QuantumGraph) -> int:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     counts: dict[int, int] = {}
@@ -199,7 +199,7 @@ def _count_max_toffoli(graph: QuantumGraph) -> int:
 
 
 def _count_measured_qubits(graph: QuantumGraph) -> int:
-    if len(graph) == 0:
+    if graph.is_empty():
         return 0
 
     measured_rows = {node.position.row for node in graph if node.name == GateName.MEASURE}

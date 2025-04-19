@@ -11,7 +11,6 @@ class GateName(str, Enum):
     X = "x"
     Y = "y"
     Z = "z"
-    # TODO: Add simplification rules for rotation gates with angles of 0 and 2pi
     RX = "rx"
     RY = "ry"
     RZ = "rz"

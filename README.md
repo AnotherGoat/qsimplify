@@ -92,7 +92,7 @@ sudo docker run -it --rm -v "$(pwd)/out:/app/out" qsimplify
 ```python
 import numpy
 from qiskit import QuantumCircuit
-from qsimplify.converter import Converter
+from qsimplify.converter import QiskitConverter
 from qsimplify.drawer import Drawer
 
 circuit = QuantumCircuit(3, 1)
@@ -111,7 +111,7 @@ circuit.ry(numpy.pi / 2, 1)
 circuit.rz(numpy.pi / 4, 2)
 circuit.measure(0, 0)
 
-converter = Converter()
+converter = QiskitConverter()
 graph = converter.circuit_to_graph(circuit)
 
 drawer = Drawer(view=True)
