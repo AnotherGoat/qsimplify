@@ -1,5 +1,8 @@
+from io import BytesIO
+
 import graphviz
 from graphviz import Digraph
+from matplotlib import pyplot
 from qiskit import QuantumCircuit
 
 from qsimplify.model import EdgeName, GateName, GraphEdge, GraphNode, QuantumGraph
@@ -28,6 +31,15 @@ class Drawer:
         figure = circuit.draw("mpl")
         figure.savefig(f"{file_name}.png")
 
+    @staticmethod
+    def save_circuit_to_buffer(circuit: QuantumCircuit) -> BytesIO:
+        figure = circuit.draw(output="mpl")
+        buffer = BytesIO()
+        figure.savefig(buffer, format="png", bbox_inches="tight")
+        pyplot.close(figure)
+        buffer.seek(0)
+        return buffer
+
     def save_graph_png(self, graph: QuantumGraph, file_name: str) -> None:
         self._logger.info("Saving graph to file %s.png", file_name)
         self._save_graph(graph, file_name, "png", dpi=str(150))
@@ -35,6 +47,18 @@ class Drawer:
     def save_graph_svg(self, graph: QuantumGraph, file_name: str) -> None:
         self._logger.info("Saving graph to file %s.svg", file_name)
         self._save_graph(graph, file_name, "svg")
+
+    def save_graph_to_buffer(self, graph: QuantumGraph, extension: str, **kwargs: str) -> BytesIO:
+        image = graphviz.Digraph(format=extension)
+        image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", **kwargs)
+
+        self._draw_nodes(graph, image)
+        self._draw_edges(graph, image)
+
+        data = image.pipe(engine="neato")
+        buffer = BytesIO(data)
+        buffer.seek(0)
+        return buffer
 
     def _save_graph(
         self, graph: QuantumGraph, file_name: str, extension: str, **kwargs: str
