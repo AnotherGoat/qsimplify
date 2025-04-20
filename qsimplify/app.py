@@ -1,35 +1,19 @@
 import os
-from typing import Any
 
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, Response
 from dotenv import load_dotenv
 
-from qsimplify.controller import validator
+from qsimplify.controller.circuit_controller import circuit_controller
 
 load_dotenv()
 app = Flask(__name__)
 
 
-@app.route("/")
-def index() -> Response:
-    data = []
-    return jsonify([gate.dict() for gate in data])
+@app.route("/api")
+def _index() -> tuple[Response | None, int]:
+    return jsonify({"message": "Welcome to QSimplify API"}), 200
 
-
-@app.post("/circuit/check")
-def check_circuit() -> tuple[Response | None, int]:
-    gates_data = request.get_json()
-
-    if not isinstance(gates_data, list):
-        return jsonify({"errors": {"non_field": ["Expected a list of gates"]}}), 400
-
-    validation_errors = validator.validate_gates(gates_data)
-
-    if validation_errors:
-        return jsonify({"errors": validation_errors}), 400
-
-    return Response(), 204
-
+app.register_blueprint(circuit_controller, url_prefix="/api")
 
 if __name__ == "__main__":
     app.run(debug=os.getenv("FLASK_DEBUG", False))

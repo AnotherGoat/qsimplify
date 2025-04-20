@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import Literal, Union, Annotated, Self, Any
+
 import math
 from pydantic import BaseModel, Field, ConfigDict, field_validator, TypeAdapter, model_validator
-from typing import Literal, Union, Annotated, Self
 
 from qsimplify.model import GateName
 
@@ -54,23 +55,23 @@ class SingleGate(BaseGate):
 
 
 class IdGate(SingleGate):
-    name: Literal[GateName.ID]
+    name: Literal[GateName.ID] = GateName.ID
 
 
 class HGate(SingleGate):
-    name: Literal[GateName.H]
+    name: Literal[GateName.H] = GateName.H
 
 
 class XGate(SingleGate):
-    name: Literal[GateName.X]
+    name: Literal[GateName.X] = GateName.X
 
 
 class YGate(SingleGate):
-    name: Literal[GateName.Y]
+    name: Literal[GateName.Y] = GateName.Y
 
 
 class ZGate(SingleGate):
-    name: Literal[GateName.Z]
+    name: Literal[GateName.Z] = GateName.Z
 
 
 class RotationGate(SingleGate):
@@ -83,19 +84,19 @@ class RotationGate(SingleGate):
 
 
 class RxGate(RotationGate):
-    name: Literal[GateName.RX]
+    name: Literal[GateName.RX] = GateName.RX
 
 
 class RyGate(RotationGate):
-    name: Literal[GateName.RY]
+    name: Literal[GateName.RY] = GateName.RY
 
 
 class RzGate(RotationGate):
-    name: Literal[GateName.RZ]
+    name: Literal[GateName.RZ] = GateName.RZ
 
 
 class MeasureGate(SingleGate):
-    name: Literal[GateName.MEASURE]
+    name: Literal[GateName.MEASURE] = GateName.MEASURE
     bit: int
 
     @field_validator("bit")
@@ -125,7 +126,7 @@ class TwoQubitGate(BaseGate):
 
 
 class SwapGate(TwoQubitGate):
-    name: Literal[GateName.SWAP]
+    name: Literal[GateName.SWAP] = GateName.SWAP
 
 
 class SingleControlledGate(BaseGate):
@@ -149,19 +150,19 @@ class SingleControlledGate(BaseGate):
 
 
 class ChGate(SingleControlledGate):
-    name: Literal[GateName.CH]
+    name: Literal[GateName.CH] = GateName.CH
 
 
 class CxGate(SingleControlledGate):
-    name: Literal[GateName.CX]
+    name: Literal[GateName.CX] = GateName.CX
 
 
 class CzGate(TwoQubitGate):
-    name: Literal[GateName.CZ]
+    name: Literal[GateName.CZ] = GateName.CZ
 
 
 class CswapGate(BaseGate):
-    name: Literal[GateName.CSWAP]
+    name: Literal[GateName.CSWAP] = GateName.CSWAP
     control_qubit: int
     target_qubit: int
     target_qubit2: int
@@ -191,7 +192,7 @@ class CswapGate(BaseGate):
 
 
 class CcxGate(BaseGate):
-    name: Literal[GateName.CCX]
+    name: Literal[GateName.CCX] = GateName.CCX
     control_qubit: int
     control_qubit2: int
     target_qubit: int
@@ -222,6 +223,7 @@ class CcxGate(BaseGate):
 
 QuantumGate = Annotated[
     Union[
+        IdGate,
         HGate,
         XGate,
         YGate,
@@ -240,7 +242,11 @@ QuantumGate = Annotated[
     Field(discriminator="name"),
 ]
 
-"""
-Validator responsible for checking that a gate is provided properly.
-"""
-QuantumGateAdapter = TypeAdapter(QuantumGate)
+_gate_adapter = TypeAdapter(QuantumGate)
+_gate_list_adapter = TypeAdapter(list[QuantumGate])
+
+def parse_gate(json: Any) -> QuantumGate:
+    return _gate_adapter.validate_python(json)
+
+def parse_gates(json: Any) -> list[QuantumGate]:
+    return _gate_list_adapter.validate_python(json)

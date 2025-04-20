@@ -14,5 +14,4 @@ from qsimplify.dto.quantum_gate import (
     CzGate as CzGate,
     CswapGate as CswapGate,
     CcxGate as CcxGate,
-    QuantumGateAdapter as QuantumGateAdapter,
 )
