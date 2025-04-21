@@ -72,17 +72,31 @@ uv run python -m qsimplify.app
 uv run python -m qsimplify.app --debug
 ```
 
-- Build the Docker image
+- Build the demo Docker image
 
 ```shell
-sudo docker build -t qsimplify .
+sudo docker rmi qsimplify_demo
+sudo docker build -t qsimplify_demo -f Dockerfile.demo .
 ```
 
-- Run the Docker image and keep the output files in the "out" subdirectory
+- Run the demo Docker image and keep the output files in the "out" subdirectory
 
 ```shell
 mkdir out
-sudo docker run -it --rm -v "$(pwd)/out:/app/out" qsimplify
+sudo docker run -it --rm -v "$(pwd)/out:/app/out" qsimplify_demo
+```
+
+- Build the Flask server Docker image
+
+```shell
+sudo docker rmi qsimplify
+sudo docker build -t qsimplify .
+```
+
+- Run the Flask server Docker image and expose it in port 5000
+
+```shell
+sudo docker run -it --rm -p 5000:5000 qsimplify
 ```
 
 ## Examples

@@ -16,10 +16,5 @@ WORKDIR /app
 COPY . ./
 RUN uv sync --frozen
 
-# Set Flask environment variables
-ENV FLASK_ENV=development
-ENV FLASK_DEBUG=1
-ENV FLASK_RUN_PORT=5000
-
-CMD ["uv", "run", "python", "-m", "qsimplify.app"]
+CMD ["uv", "run", "python", "-m", "qsimplify.demo"]
 ENTRYPOINT ["uv", "run"]

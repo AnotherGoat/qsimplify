@@ -19,7 +19,7 @@ simplifier = Simplifier()
 drawer = Drawer()
 qiskit_generator = QiskitGenerator()
 
-@circuit_controller.post("/circuit/simplify")
+@circuit_controller.post("/simplify")
 def _simplify_circuit() -> tuple[Response | None, int]:
     gates_json = request.get_json()
     validation_result = _validate_request(gates_json)
@@ -71,7 +71,7 @@ def _format_error_message(error: ErrorDetails) -> str:
     return f"{location}: {message}"
 
 
-@circuit_controller.post("/circuit/plot")
+@circuit_controller.post("/plot")
 def _plot_circuit() -> tuple[Response | None, int]:
     gates_json = request.get_json()
     validation_result = _validate_request(gates_json)
@@ -86,7 +86,7 @@ def _plot_circuit() -> tuple[Response | None, int]:
     buffer = drawer.save_circuit_to_buffer(qiskit_circuit)
     return send_file(buffer, mimetype="image/png"), 200
 
-@circuit_controller.post("/circuit/plot_graph")
+@circuit_controller.post("/plot_graph")
 def _plot_graph() -> tuple[Response | None, int]:
     gates_json = request.get_json()
     validation_result = _validate_request(gates_json)
@@ -100,7 +100,7 @@ def _plot_graph() -> tuple[Response | None, int]:
     buffer = drawer.save_graph_to_buffer(graph, "png", dpi=str(100))
     return send_file(buffer, mimetype="image/png"), 200
 
-@circuit_controller.post("/circuit/code")
+@circuit_controller.post("/code")
 def _code_graph() -> tuple[Response | None, int]:
     gates_json = request.get_json()
     validation_result = _validate_request(gates_json)
