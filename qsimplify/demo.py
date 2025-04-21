@@ -5,6 +5,7 @@ from qiskit import QuantumCircuit
 from qsimplify.analyzer import analyzer
 from qsimplify.converter import QiskitConverter
 from qsimplify.drawer import Drawer
+from qsimplify.generator.qiskit_generator import QiskitGenerator
 from qsimplify.simplifier import Simplifier
 
 
@@ -19,8 +20,8 @@ def _run_demo() -> None:
     print("\n===== Original circuit =====")
     print(circuit.draw())
 
-    converter = QiskitConverter()
-    graph = converter.to_graph(circuit)
+    qiskit_converter = QiskitConverter()
+    graph = qiskit_converter.to_graph(circuit)
 
     print("\n===== Original grid =====")
     print(graph.draw_grid())
@@ -33,14 +34,15 @@ def _run_demo() -> None:
     print("\n===== Original metrics =====")
     print(metrics)
 
-    simplifier = Simplifier(converter)
+    simplifier = Simplifier()
     simplified_graph = simplifier.simplify_graph(graph)
-    simplified_circuit, build_steps = converter.graph_to_circuit(
-        simplified_graph, add_build_steps=True
-    )
+    simplified_circuit = qiskit_converter.from_graph(simplified_graph)
 
     print("\n===== Simplified circuit =====")
     print(simplified_circuit.draw())
+
+    qiskit_generator = QiskitGenerator()
+    build_steps = qiskit_generator.generate(simplified_graph)
 
     print("\n===== Simplified build steps =====")
     print(build_steps)

@@ -238,7 +238,7 @@ def test_one_qubit_to_circuit():
     circuit.y(0)
 
     graph = converter.to_graph(circuit)
-    converted_circuit = converter.graph_to_circuit(graph)
+    converted_circuit = converter.from_graph(graph)
 
     assert circuit.data == converted_circuit.data
 
@@ -255,7 +255,7 @@ def test_two_qubits_to_circuit():
     circuit.z(1)
 
     graph = converter.to_graph(circuit)
-    converted_circuit = converter.graph_to_circuit(graph)
+    converted_circuit = converter.from_graph(graph)
 
     assert circuit.data == converted_circuit.data
 
@@ -268,7 +268,7 @@ def test_removed_identities():
     circuit.id(2)
 
     graph = converter.to_graph(circuit)
-    converted_circuit = converter.graph_to_circuit(graph)
+    converted_circuit = converter.from_graph(graph)
 
     assert circuit.data != converted_circuit.data
     assert len(converted_circuit.data) == 0

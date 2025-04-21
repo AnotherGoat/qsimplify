@@ -5,6 +5,7 @@ from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.quantumcircuit import BitLocations
 from typing_extensions import NamedTuple
 
+from qsimplify.converter import GraphConverter
 from qsimplify.model import (
     CircuitBuilder,
     GateName,
@@ -14,7 +15,6 @@ from qsimplify.model import (
     QuantumGraph,
 )
 from qsimplify.utils import setup_logger
-
 
 class GraphPlacingData(NamedTuple):
     builder: GraphBuilder
@@ -26,7 +26,7 @@ class GraphPlacingData(NamedTuple):
 
 
 class CircuitPlacingData(NamedTuple):
-    builder: CircuitBuilder
+    circuit: CircuitBuilder
     graph: QuantumGraph
     graph_node: GraphNode
     explored: set[Position]
@@ -34,7 +34,7 @@ class CircuitPlacingData(NamedTuple):
 
 
 # TODO: Make this converter implement the abstract base class properly
-class QiskitConverter:
+class QiskitConverter(GraphConverter[QuantumCircuit]):
     def __init__(self) -> None:
         self._logger = setup_logger("QiskitConverter")
         self._to_graph_handlers: dict[GateName, Callable[[GraphPlacingData], None]] = {
@@ -53,7 +53,7 @@ class QiskitConverter:
             GateName.CSWAP: self._add_cswap_gate_to_graph,
             GateName.CCX: self._add_ccx_gate_to_graph,
         }
-        self._graph_to_circuit_handlers: dict[GateName, Callable[[CircuitPlacingData], None]] = {
+        self._from_graph_handlers: dict[GateName, Callable[[CircuitPlacingData], None]] = {
             GateName.H: self._add_single_gate_to_circuit,
             GateName.X: self._add_single_gate_to_circuit,
             GateName.Y: self._add_single_gate_to_circuit,
@@ -70,13 +70,13 @@ class QiskitConverter:
             GateName.CCX: self._add_ccx_gate_to_circuit,
         }
 
-    def to_graph(self, circuit: QuantumCircuit) -> QuantumGraph:
-        self._logger.debug("Converting circuit to graph\n%s", circuit.draw())
+    def to_graph(self, data: QuantumCircuit) -> QuantumGraph:
+        self._logger.debug("Converting circuit to graph\n%s", data.draw())
         builder = GraphBuilder()
 
-        last_columns = [0 for _ in range(circuit.num_qubits)]
+        last_columns = [0 for _ in range(data.num_qubits)]
 
-        for instruction in circuit.data:
+        for instruction in data.data:
             self._logger.debug("This is what the graph looks like now\n%s", builder)
 
             self._logger.debug("Processing instruction %s", instruction)
@@ -86,7 +86,7 @@ class QiskitConverter:
                 self._logger.debug("Skipping empty instruction")
                 continue
 
-            qubits = self._find_qubit_indexes(circuit, instruction)
+            qubits = self._find_qubit_indexes(data, instruction)
             self._logger.debug("Instruction qubit indexes are %s", qubits)
 
             columns = [last_columns[qubit] for qubit in qubits]
@@ -109,14 +109,14 @@ class QiskitConverter:
 
                 self._logger.debug("Last columns updated to %s", last_columns)
 
-            bits = self._find_bit_indexes(circuit, instruction)
+            bits = self._find_bit_indexes(data, instruction)
             params = instruction.operation.params
-            placing_data = GraphPlacingData(builder, gate_name, qubits, bits, params, target_column)
-            self._add_instruction_to_graph(placing_data)
+            context = GraphPlacingData(builder, gate_name, qubits, bits, params, target_column)
+            self._add_instruction_to_graph(context)
 
         graph = builder.build()
         self._logger.debug("After building the graph, this is the result\n%s", graph)
-        self._logger.debug("For comparison, this is the original circuit\n%s", circuit.draw())
+        self._logger.debug("For comparison, this is the original circuit\n%s", data.draw())
         return graph
 
     @staticmethod
@@ -244,14 +244,12 @@ class QiskitConverter:
         )
         builder.put_ccx(qubits[0], qubits[1], qubits[2], column)
 
-    def graph_to_circuit(
+    def from_graph(
         self,
         graph: QuantumGraph,
-        add_build_steps: bool = False,
-        circuit_name: str = "circuit",
     ) -> QuantumCircuit | tuple[QuantumCircuit, str]:
         self._logger.debug("Converting graph to circuit")
-        builder = CircuitBuilder(graph.height, name=circuit_name)
+        builder = CircuitBuilder(graph.height)
         explored: set[Position] = set()
 
         for column_index in range(graph.width):
@@ -259,7 +257,7 @@ class QiskitConverter:
                 position = Position(row_index, column_index)
                 self._add_to_circuit(builder, graph, explored, position)
 
-        return builder.build(add_build_steps)
+        return builder.build()
 
     def _add_to_circuit(
         self,
@@ -281,27 +279,27 @@ class QiskitConverter:
         self._add_instruction_to_circuit(placing_data)
 
     def _add_instruction_to_circuit(self, data: CircuitPlacingData) -> None:
-        self._graph_to_circuit_handlers[data.graph_node.name](data)
+        self._from_graph_handlers[data.graph_node.name](data)
 
     @staticmethod
     def _add_single_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph_node, start = data.builder, data.graph_node, data.start
+        builder, graph_node, start = data.circuit, data.graph_node, data.start
         builder.add_single(graph_node.name, start.row)
 
     @staticmethod
     def _add_rotation_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph_node, start = data.builder, data.graph_node, data.start
+        builder, graph_node, start = data.circuit, data.graph_node, data.start
         builder.add_rotation(graph_node.name, graph_node.rotation, start.row)
 
     @staticmethod
     def _add_measure_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph_node, start = data.builder, data.graph_node, data.start
+        builder, graph_node, start = data.circuit, data.graph_node, data.start
         builder.add_measure(start.row, graph_node.measure_to)
 
     @staticmethod
     def _add_swap_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
-            data.builder,
+            data.circuit,
             data.graph,
             data.explored,
             data.start,
@@ -314,7 +312,7 @@ class QiskitConverter:
     @staticmethod
     def _add_controlled_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, graph_node, explored, start = (
-            data.builder,
+            data.circuit,
             data.graph,
             data.graph_node,
             data.explored,
@@ -337,7 +335,7 @@ class QiskitConverter:
     @staticmethod
     def _add_cz_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
-            data.builder,
+            data.circuit,
             data.graph,
             data.explored,
             data.start,
@@ -350,7 +348,7 @@ class QiskitConverter:
     @staticmethod
     def _add_cswap_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
-            data.builder,
+            data.circuit,
             data.graph,
             data.explored,
             data.start,
@@ -375,7 +373,7 @@ class QiskitConverter:
     @staticmethod
     def _add_ccx_gate_to_circuit(data: CircuitPlacingData) -> None:
         builder, graph, explored, start = (
-            data.builder,
+            data.circuit,
             data.graph,
             data.explored,
             data.start,

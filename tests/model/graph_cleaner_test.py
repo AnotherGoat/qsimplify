@@ -57,3 +57,17 @@ def test_remove_empty_columns():
     graph_cleaner.clean_and_fill(graph)
 
     assert graph.width == 2
+
+
+def test_remove_unused_bits():
+    graph = QuantumGraph()
+
+    graph.add_new_node(MEASURE, Position(0, 0), measure_to=0)
+    graph.add_new_node(MEASURE, Position(1, 0), measure_to=1)
+    graph.add_new_node(MEASURE, Position(2, 0), measure_to=3)
+
+    assert graph.bits == 4
+
+    graph_cleaner.clean_and_fill(graph)
+
+    assert graph.bits == 3

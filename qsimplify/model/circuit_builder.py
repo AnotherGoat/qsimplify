@@ -9,11 +9,6 @@ class CircuitBuilder:
     def __init__(self, qubits: int, name: str = "circuit") -> None:
         self._name = name
         self._circuit = QuantumCircuit(qubits)
-        self._build_steps = [f"{self._name} = QuantumCircuit({qubits})"]
-
-    def _add_build_step(self, name: GateName, *params: int | float) -> None:
-        joined_params = ", ".join([str(param) for param in params])
-        self._build_steps.append(f"{self._name}.{name.value}({joined_params})")
 
     def add_id(self, qubit: int) -> CircuitBuilder:
         return self.add_single(GateName.ID, qubit)
@@ -46,7 +41,6 @@ class CircuitBuilder:
             case GateName.Z:
                 self._circuit.z(qubit)
 
-        self._add_build_step(name, qubit)
         return self
 
     def add_rx(self, theta: float, qubit: int) -> CircuitBuilder:
@@ -71,17 +65,14 @@ class CircuitBuilder:
                 self._circuit.rz(theta, qubit)
                 return self
 
-        self._add_build_step(name, theta, qubit)
         return self
 
     def add_measure(self, qubit: int, bit: int) -> CircuitBuilder:
         self._circuit.measure(qubit, bit)
-        self._add_build_step(GateName.MEASURE, qubit, bit)
         return self
 
     def add_swap(self, qubit1: int, qubit2: int) -> CircuitBuilder:
         self._circuit.swap(qubit1, qubit2)
-        self._add_build_step(GateName.SWAP, qubit1, qubit2)
         return self
 
     def add_ch(self, control_qubit: int, target_qubit: int) -> CircuitBuilder:
@@ -100,30 +91,23 @@ class CircuitBuilder:
             case GateName.CX:
                 self._circuit.cx(control_qubit, target_qubit)
 
-        self._add_build_step(name, control_qubit, target_qubit)
         return self
 
     def add_cz(self, qubit1: int, qubit2: int) -> CircuitBuilder:
         self._circuit.cz(qubit1, qubit2)
-        self._add_build_step(GateName.CZ, qubit1, qubit2)
         return self
 
     def add_cswap(
         self, control_qubit: int, target_qubit1: int, target_qubit2: int
     ) -> CircuitBuilder:
         self._circuit.cswap(control_qubit, target_qubit1, target_qubit2)
-        self._add_build_step(GateName.CSWAP, control_qubit, target_qubit1, target_qubit2)
         return self
 
     def add_ccx(
         self, control_qubit1: int, control_qubit2: int, target_qubit: int
     ) -> CircuitBuilder:
         self._circuit.ccx(control_qubit1, control_qubit2, target_qubit)
-        self._add_build_step(GateName.CCX, control_qubit1, control_qubit2, target_qubit)
         return self
 
-    def build(self, add_build_steps: bool = False) -> QuantumCircuit | tuple[QuantumCircuit, str]:
-        if add_build_steps:
-            return self._circuit, "\n".join(self._build_steps)
-
+    def build(self) -> QuantumCircuit:
         return self._circuit

@@ -23,7 +23,7 @@ def test_remove_filler_and_identities():
     )
 
     simplified_graph = simplifier.simplify_graph(graph)
-    simplified_circuit = converter.graph_to_circuit(simplified_graph)
+    simplified_circuit = converter.from_graph(simplified_graph)
 
     expected_circuit = QuantumCircuit(2)
     expected_circuit.cx(0, 1)
@@ -378,13 +378,13 @@ def test_find_same_with_parameters():
 
 
 def test_find_fails_if_parameters_dont_match():
-    pattern = GraphBuilder().put_rx(0.5, 0, 0).put_measure(0, 0, 1).build()
+    pattern = GraphBuilder().push_rx(0.5, 0).push_ry(0.5, 0).build()
 
-    graph = GraphBuilder().put_rx(0.25, 0, 0).put_measure(0, 0, 1).build()
+    graph = GraphBuilder().push_rx(0.25, 0).push_ry(0.5, 0).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings is None
 
-    graph = GraphBuilder().put_rx(0.5, 0, 0).put_measure(0, 1, 1).build()
+    graph = GraphBuilder().push_rx(0.5, 0).push_ry(0.75, 1).build()
     mappings = simplifier.find_pattern(graph, pattern)
     assert mappings is None
 

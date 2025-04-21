@@ -41,6 +41,17 @@ class QuantumGraph:
 
         return max(position.row for position in self._get_positions()) + 1
 
+    @property
+    def bits(self) -> int:
+        """The number of classical bits in the graph."""
+        measure_nodes = [node for node in self if node.name == GateName.MEASURE]
+
+        if len(measure_nodes) == 0:
+            return 0
+
+        highest_bit = max(node.measure_to for node in measure_nodes)
+        return highest_bit + 1
+
     def _get_positions(self) -> Iterator[Position]:
         for position in self._network.nodes:
             yield position
@@ -69,7 +80,7 @@ class QuantumGraph:
         )
 
     def remove_node(self, position: Position) -> None:
-        """Remove the GraphNode at the specified position and all its edges."""
+        """Remove the GraphNode at the specified position and all its edges. If no such node exists, nothing happens."""
         if self.has_node_at(position):
             self._network.remove_node(position)
 

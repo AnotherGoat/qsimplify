@@ -5,14 +5,15 @@ from qsimplify.model.edge_name import EdgeName
 
 
 def clean_and_fill(graph: QuantumGraph) -> None:
-    """Clean the provided graph, which removes empty rows and columns, and also fills up any empty spaces."""
+    """Clean the provided graph, which removes empty rows, columns, adjusts bit indices, and also fills up any empty spaces."""
     _remove_empty_rows(graph)
     _remove_empty_columns(graph)
+    _remove_unused_bits(graph)
     fill(graph)
 
 
 def fill(graph: QuantumGraph) -> None:
-    """Fill up empty spaces on the provided graph, without removing any empty rows or columns."""
+    """Fill up empty spaces on the provided graph, without removing any empty rows, columns, or adjusting bit indices."""
     _fill_empty_spaces(graph)
     _fix_positional_edges(graph)
 
@@ -97,6 +98,18 @@ def _find_empty_columns(graph: QuantumGraph) -> list[int]:
             empty_columns.append(column_index)
 
     return empty_columns
+
+
+def _remove_unused_bits(graph: QuantumGraph) -> None:
+    measure_nodes = [node for node in graph if node.name == GateName.MEASURE]
+    original_values = {node.measure_to for node in measure_nodes}
+    mappings = {original: new for new, original in enumerate(sorted(original_values))}
+
+    for node in measure_nodes:
+        position = node.position
+        new_bit = mappings[node.measure_to]
+        graph.remove_node(position)
+        graph.add_new_node(GateName.MEASURE, position, measure_to=new_bit)
 
 
 def _fill_empty_spaces(graph: QuantumGraph) -> None:
