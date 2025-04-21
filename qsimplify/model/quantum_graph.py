@@ -15,7 +15,7 @@ from qsimplify.model.position import Position
 
 class QuantumGraph:
     """
-    Represents a QuantumCircuit as a graph-grid hybrid.
+    Represents a quantum circuit as a graph-grid hybrid.
     Position tuples of the form (row, column) are used to index the graph's nodes.
     Each qubit is represented by a row in the grid.
     Single-qubit gates occupy a single GraphNode, while multi-qubit gates use multiple related GraphNodes (one for each qubit involved).

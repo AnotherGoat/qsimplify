@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from qsimplify.converter import DtoConverter
-from qsimplify.dto import QuantumGate
+from qsimplify.converter import GatesConverter
+from qsimplify.model import QuantumGate
 from qsimplify.generator.code_generator import CodeGenerator
 from qsimplify.model import QuantumGraph, GateName
 
 CIRCUIT_NAME = "circuit"
-dto_converter = DtoConverter()
+gates_converter = GatesConverter()
 
 @dataclass
 class GenerationContext:
@@ -20,7 +20,7 @@ class GenerationContext:
 
 class QiskitGenerator(CodeGenerator):
     def generate(self, graph: QuantumGraph) -> str:
-        gates = dto_converter.from_graph(graph)
+        gates = gates_converter.from_graph(graph)
         imports = ["from qiskit import QuantumCircuit"]
 
         if graph.bits == 0:

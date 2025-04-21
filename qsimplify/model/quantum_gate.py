@@ -243,10 +243,10 @@ QuantumGate = Annotated[
 ]
 
 _gate_adapter = TypeAdapter(QuantumGate)
-_gate_list_adapter = TypeAdapter(list[QuantumGate])
+_gates_adapter = TypeAdapter(list[QuantumGate])
 
 def parse_gate(json: Any) -> QuantumGate:
     return _gate_adapter.validate_python(json)
 
 def parse_gates(json: Any) -> list[QuantumGate]:
-    return _gate_list_adapter.validate_python(json)
+    return _gates_adapter.validate_python(json)

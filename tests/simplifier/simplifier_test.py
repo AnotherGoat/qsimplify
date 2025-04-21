@@ -1,5 +1,4 @@
 from qiskit import QuantumCircuit
-
 from qsimplify.converter import QiskitConverter
 from qsimplify.model import GraphBuilder, Position
 from qsimplify.simplifier import Simplifier

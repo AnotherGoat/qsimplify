@@ -4,16 +4,16 @@ from flask import Blueprint, request, jsonify, Response, send_file
 from pydantic import ValidationError
 from pydantic_core import ErrorDetails
 
-from qsimplify.converter import DtoConverter, QiskitConverter
+from qsimplify.converter import GatesConverter, QiskitConverter
 from qsimplify.drawer import Drawer
-from qsimplify.dto import quantum_gate
+from qsimplify.model import quantum_gate
 from qsimplify.generator.qiskit_generator import QiskitGenerator
 from qsimplify.simplifier import Simplifier
 
 type Errors = dict[int, list[str]]
 
 circuit_controller = Blueprint("circuit", __name__)
-dto_converter = DtoConverter()
+gates_converter = GatesConverter()
 qiskit_converter = QiskitConverter()
 simplifier = Simplifier()
 drawer = Drawer()
@@ -28,17 +28,17 @@ def _simplify_circuit() -> tuple[Response | None, int]:
         return validation_result
 
     gates = quantum_gate.parse_gates(gates_json)
-    graph = dto_converter.to_graph(gates)
+    graph = gates_converter.to_graph(gates)
     simplified_graph = simplifier.simplify_graph(graph)
-    simplified_gates = [gate.model_dump() for gate in dto_converter.from_graph(simplified_graph)]
+    simplified_gates = [gate.model_dump() for gate in gates_converter.from_graph(simplified_graph)]
     return jsonify(simplified_gates), 200
 
 
-def _validate_request(gates: Any) -> tuple[Response | None, int] | None:
-    if not isinstance(gates, list):
+def _validate_request(gates_json: Any) -> tuple[Response | None, int] | None:
+    if not isinstance(gates_json, list):
         return jsonify({"errors": {"non_field": ["Expected a list of gates"]}}), 400
 
-    validation_errors = _validate_gates(gates)
+    validation_errors = _validate_gates(gates_json)
 
     if validation_errors:
         return jsonify({"errors": validation_errors}), 400
@@ -65,7 +65,6 @@ def _extract_error_messages(validation_error: ValidationError) -> list[str]:
 
 
 def _format_error_message(error: ErrorDetails) -> str:
-    print(error)
     location = error["loc"][-1]
     message = error["msg"]
     return f"{location}: {message}"
@@ -80,7 +79,7 @@ def _plot_circuit() -> tuple[Response | None, int]:
         return validation_result
 
     gates = quantum_gate.parse_gates(gates_json)
-    graph = dto_converter.to_graph(gates)
+    graph = gates_converter.to_graph(gates)
     qiskit_circuit = qiskit_converter.from_graph(graph)
 
     buffer = drawer.save_circuit_to_buffer(qiskit_circuit)
@@ -95,7 +94,7 @@ def _plot_graph() -> tuple[Response | None, int]:
         return validation_result
 
     gates = quantum_gate.parse_gates(gates_json)
-    graph = dto_converter.to_graph(gates)
+    graph = gates_converter.to_graph(gates)
 
     buffer = drawer.save_graph_to_buffer(graph, "png", dpi=str(100))
     return send_file(buffer, mimetype="image/png"), 200
@@ -109,6 +108,6 @@ def _code_graph() -> tuple[Response | None, int]:
         return validation_result
 
     gates = quantum_gate.parse_gates(gates_json)
-    graph = dto_converter.to_graph(gates)
+    graph = gates_converter.to_graph(gates)
     build_steps = qiskit_generator.generate(graph)
     return jsonify({"code": build_steps}), 200

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from qsimplify.converter.graph_converter import GraphConverter
-from qsimplify.dto import (
+from qsimplify.model import (
     QuantumGate,
     HGate,
     XGate,
@@ -19,7 +19,7 @@ from qsimplify.dto import (
     CswapGate,
     CcxGate,
 )
-from qsimplify.dto.quantum_gate import IdGate
+from qsimplify.model.quantum_gate import IdGate
 from qsimplify.model import QuantumGraph, GraphBuilder, Position, GraphNode, GateName
 
 
@@ -34,7 +34,7 @@ class FromGraphContext:
         return self.graph, self.node, self.gates, self.skipped
 
 
-class DtoConverter(GraphConverter[list[QuantumGate]]):
+class GatesConverter(GraphConverter[list[QuantumGate]]):
     def to_graph(self, data: list[QuantumGate]) -> QuantumGraph:
         builder = GraphBuilder()
 
@@ -190,19 +190,19 @@ class DtoConverter(GraphConverter[list[QuantumGate]]):
 
     @staticmethod
     def _add_h_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_single_gate_from_graph(context, HGate)
+        GatesConverter._add_single_gate_from_graph(context, HGate)
 
     @staticmethod
     def _add_x_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_single_gate_from_graph(context, XGate)
+        GatesConverter._add_single_gate_from_graph(context, XGate)
 
     @staticmethod
     def _add_y_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_single_gate_from_graph(context, YGate)
+        GatesConverter._add_single_gate_from_graph(context, YGate)
 
     @staticmethod
     def _add_z_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_single_gate_from_graph(context, ZGate)
+        GatesConverter._add_single_gate_from_graph(context, ZGate)
 
     @staticmethod
     def _add_rotation_gate_from_graph(
@@ -215,15 +215,15 @@ class DtoConverter(GraphConverter[list[QuantumGate]]):
 
     @staticmethod
     def _add_rx_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_rotation_gate_from_graph(context, RxGate)
+        GatesConverter._add_rotation_gate_from_graph(context, RxGate)
 
     @staticmethod
     def _add_ry_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_rotation_gate_from_graph(context, RyGate)
+        GatesConverter._add_rotation_gate_from_graph(context, RyGate)
 
     @staticmethod
     def _add_rz_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_rotation_gate_from_graph(context, RzGate)
+        GatesConverter._add_rotation_gate_from_graph(context, RzGate)
 
     @staticmethod
     def _add_measure_from_graph(context: FromGraphContext) -> None:
@@ -264,11 +264,11 @@ class DtoConverter(GraphConverter[list[QuantumGate]]):
 
     @staticmethod
     def _add_ch_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_control_gate_from_graph(context, ChGate)
+        GatesConverter._add_control_gate_from_graph(context, ChGate)
 
     @staticmethod
     def _add_cx_from_graph(context: FromGraphContext) -> None:
-        DtoConverter._add_control_gate_from_graph(context, CxGate)
+        GatesConverter._add_control_gate_from_graph(context, CxGate)
 
     @staticmethod
     def _add_cz_from_graph(context: FromGraphContext) -> None:
