@@ -6,9 +6,9 @@ from flask import Flask, Response, jsonify
 from qsimplify.controller.circuit_controller import circuit_controller
 
 load_dotenv()
-FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "127.0.0.1")
-FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT", 5000)
-FLASK_DEBUG = os.getenv("FLASK_DEBUG", True)
+_FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "127.0.0.1")
+_FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT", 5000)
+_FLASK_DEBUG = os.getenv("FLASK_DEBUG", True)
 
 app = Flask(__name__)
 
@@ -21,4 +21,4 @@ def _index() -> tuple[Response | None, int]:
 app.register_blueprint(circuit_controller, url_prefix="/api/circuit")
 
 if __name__ == "__main__":
-    app.run(host=FLASK_RUN_HOST, port=FLASK_RUN_PORT, debug=FLASK_DEBUG)
+    app.run(host=_FLASK_RUN_HOST, port=_FLASK_RUN_PORT, debug=_FLASK_DEBUG)

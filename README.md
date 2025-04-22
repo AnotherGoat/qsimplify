@@ -60,22 +60,10 @@ uv run pyright
 uv run python -m qsimplify.demo
 ```
 
-- Run demo in debug mode (doesn't start a server)
-
-```shell
-uv run python -m qsimplify.demo --debug
-```
-
 - Start as a Flask server
 
 ```shell
 uv run python -m qsimplify.app
-```
-
-- Start as a Flask server in debug mode
-
-```shell
-uv run python -m qsimplify.app --debug
 ```
 
 - Build the demo Docker image

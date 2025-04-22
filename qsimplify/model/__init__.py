@@ -1,4 +1,3 @@
-from qsimplify.model.circuit_builder import CircuitBuilder as CircuitBuilder
 from qsimplify.model.edge_data import EdgeData as EdgeData
 from qsimplify.model.edge_name import EdgeName as EdgeName
 from qsimplify.model.gate_name import GateName as GateName
