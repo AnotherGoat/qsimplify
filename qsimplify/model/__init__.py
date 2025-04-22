@@ -25,6 +25,9 @@ from qsimplify.model.quantum_gate import (
     HGate as HGate,
 )
 from qsimplify.model.quantum_gate import (
+    IdGate as IdGate,
+)
+from qsimplify.model.quantum_gate import (
     MeasureGate as MeasureGate,
 )
 from qsimplify.model.quantum_gate import (

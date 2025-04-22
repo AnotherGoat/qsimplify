@@ -22,7 +22,7 @@ def _check_angle(value: float) -> float:
     return value
 
 
-def _check_indexes(fields: list[str], values: list[int]) -> None:
+def _check_indices(fields: list[str], values: list[int]) -> None:
     if len(set(values)) != len(values):
         raise ValueError(f"{_format_fields(fields)} must be different")
 
@@ -121,7 +121,7 @@ class TwoQubitGate(BaseGate):
 
     @model_validator(mode="after")
     def validate(self) -> Self:
-        _check_indexes(["qubit", "qubit2"], [self.qubit, self.qubit2])
+        _check_indices(["qubit", "qubit2"], [self.qubit, self.qubit2])
         return self
 
 
@@ -145,7 +145,7 @@ class SingleControlledGate(BaseGate):
 
     @model_validator(mode="after")
     def validate(self) -> Self:
-        _check_indexes(["control_qubit", "target_qubit"], [self.control_qubit, self.target_qubit])
+        _check_indices(["control_qubit", "target_qubit"], [self.control_qubit, self.target_qubit])
         return self
 
 
@@ -184,7 +184,7 @@ class CswapGate(BaseGate):
 
     @model_validator(mode="after")
     def validate(self) -> Self:
-        _check_indexes(
+        _check_indices(
             ["control_qubit", "target_qubit", "target_qubit2"],
             [self.control_qubit, self.target_qubit, self.target_qubit2],
         )
@@ -214,7 +214,7 @@ class CcxGate(BaseGate):
 
     @model_validator(mode="after")
     def validate(self) -> Self:
-        _check_indexes(
+        _check_indices(
             ["control_qubit", "control_qubit2", "target_qubit"],
             [self.control_qubit, self.control_qubit2, self.target_qubit],
         )

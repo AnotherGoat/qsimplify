@@ -21,7 +21,6 @@ class GateName(str, Enum):
     CZ = "cz"
     CSWAP = "cswap"
     CCX = "ccx"
-    BARRIER = "barrier"
 
     @classmethod
     def from_str(cls, name: str) -> GateName:
@@ -40,7 +39,7 @@ class GateName(str, Enum):
         Identity gates return 0 because they add no value to the circuit.
         """
         match self:
-            case GateName.ID | GateName.BARRIER:
+            case GateName.ID:
                 return 0
             case GateName.SWAP | GateName.CH | GateName.CX | GateName.CZ:
                 return 2
@@ -73,7 +72,7 @@ class GateName(str, Enum):
         Identity gates return 0 because they target a single qubit, but make no changes to it.
         """
         match self:
-            case GateName.ID | GateName.MEASURE | GateName.BARRIER:
+            case GateName.ID | GateName.MEASURE:
                 return 0
             case GateName.SWAP | GateName.CSWAP:
                 return 2

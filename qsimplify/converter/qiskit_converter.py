@@ -1,127 +1,58 @@
+from dataclasses import dataclass
 from typing import Callable
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.quantumcircuit import BitLocations
-from typing_extensions import NamedTuple
 
-from qsimplify.converter import GraphConverter
-from qsimplify.model import (
-    CircuitBuilder,
-    GateName,
-    GraphBuilder,
-    GraphNode,
-    Position,
-    QuantumGraph,
-)
-from qsimplify.utils import setup_logger
+from qsimplify.converter import GatesConverter, GraphConverter
+from qsimplify.model import GateName, GraphBuilder, QuantumGate, QuantumGraph
+
+GATES_CONVERTER = GatesConverter()
 
 
-class GraphPlacingData(NamedTuple):
+@dataclass
+class ToGraphContext:
     builder: GraphBuilder
     gate_name: GateName
     qubits: list[int]
     bits: list[int]
     params: list
-    column: int
+
+    def unpack(self) -> tuple[GraphBuilder, GateName, list[int], list[int], list]:
+        return self.builder, self.gate_name, self.qubits, self.bits, self.params
 
 
-class CircuitPlacingData(NamedTuple):
-    circuit: CircuitBuilder
-    graph: QuantumGraph
-    graph_node: GraphNode
-    explored: set[Position]
-    start: Position
+@dataclass
+class FromGraphContext:
+    circuit: QuantumCircuit
+    gate: QuantumGate
+
+    def unpack(self) -> tuple[QuantumCircuit, QuantumGate]:
+        return self.circuit, self.gate
 
 
-# TODO: Make this converter implement the abstract base class properly
 class QiskitConverter(GraphConverter[QuantumCircuit]):
-    def __init__(self) -> None:
-        self._logger = setup_logger("QiskitConverter")
-        self._to_graph_handlers: dict[GateName, Callable[[GraphPlacingData], None]] = {
-            GateName.H: self._add_single_gate_to_graph,
-            GateName.X: self._add_single_gate_to_graph,
-            GateName.Y: self._add_single_gate_to_graph,
-            GateName.Z: self._add_single_gate_to_graph,
-            GateName.RX: self._add_rotation_gate_to_graph,
-            GateName.RY: self._add_rotation_gate_to_graph,
-            GateName.RZ: self._add_rotation_gate_to_graph,
-            GateName.MEASURE: self._add_measure_gate_to_graph,
-            GateName.SWAP: self._add_swap_gate_to_graph,
-            GateName.CH: self._add_controlled_gate_to_graph,
-            GateName.CX: self._add_controlled_gate_to_graph,
-            GateName.CZ: self._add_cz_gate_to_graph,
-            GateName.CSWAP: self._add_cswap_gate_to_graph,
-            GateName.CCX: self._add_ccx_gate_to_graph,
-        }
-        self._from_graph_handlers: dict[GateName, Callable[[CircuitPlacingData], None]] = {
-            GateName.H: self._add_single_gate_to_circuit,
-            GateName.X: self._add_single_gate_to_circuit,
-            GateName.Y: self._add_single_gate_to_circuit,
-            GateName.Z: self._add_single_gate_to_circuit,
-            GateName.RX: self._add_rotation_gate_to_circuit,
-            GateName.RY: self._add_rotation_gate_to_circuit,
-            GateName.RZ: self._add_rotation_gate_to_circuit,
-            GateName.MEASURE: self._add_measure_gate_to_circuit,
-            GateName.SWAP: self._add_swap_gate_to_circuit,
-            GateName.CH: self._add_controlled_gate_to_circuit,
-            GateName.CX: self._add_controlled_gate_to_circuit,
-            GateName.CZ: self._add_cz_gate_to_circuit,
-            GateName.CSWAP: self._add_cswap_gate_to_circuit,
-            GateName.CCX: self._add_ccx_gate_to_circuit,
-        }
-
     def to_graph(self, data: QuantumCircuit) -> QuantumGraph:
-        self._logger.debug("Converting circuit to graph\n%s", data.draw())
         builder = GraphBuilder()
 
-        last_columns = [0 for _ in range(data.num_qubits)]
-
         for instruction in data.data:
-            self._logger.debug("This is what the graph looks like now\n%s", builder)
+            operation_name = instruction.operation.name
 
-            self._logger.debug("Processing instruction %s", instruction)
-            gate_name = GateName.from_str(instruction.operation.name)
-
-            if gate_name in (GateName.ID, GateName.BARRIER):
-                self._logger.debug("Skipping empty instruction")
+            if operation_name == "barrier":
                 continue
 
-            qubits = self._find_qubit_indexes(data, instruction)
-            self._logger.debug("Instruction qubit indexes are %s", qubits)
-
-            columns = [last_columns[qubit] for qubit in qubits]
-            self._logger.debug("Last columns for each qubit are %s", columns)
-
-            target_column = max(columns)
-            self._logger.debug("Column %s set as target", target_column)
-
-            target_is_occupied = any(builder.is_occupied(qubit, target_column) for qubit in qubits)
-
-            if target_is_occupied:
-                target_column += 1
-                self._logger.debug(
-                    "Rightmost slot is occupied, increasing target column by 1 %s",
-                    target_column,
-                )
-
-                for qubit in qubits:
-                    last_columns[qubit] = target_column
-
-                self._logger.debug("Last columns updated to %s", last_columns)
-
-            bits = self._find_bit_indexes(data, instruction)
+            gate_name = GateName.from_str(operation_name)
+            qubits = self._find_qubit_indices(data, instruction)
+            bits = self._find_bit_indices(data, instruction)
             params = instruction.operation.params
-            context = GraphPlacingData(builder, gate_name, qubits, bits, params, target_column)
-            self._add_instruction_to_graph(context)
+            context = ToGraphContext(builder, gate_name, qubits, bits, params)
+            self._add_to_graph(context)
 
-        graph = builder.build()
-        self._logger.debug("After building the graph, this is the result\n%s", graph)
-        self._logger.debug("For comparison, this is the original circuit\n%s", data.draw())
-        return graph
+        return builder.build()
 
     @staticmethod
-    def _find_qubit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+    def _find_qubit_indices(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
         qubits = []
 
         for qubit in instruction.qubits:
@@ -133,7 +64,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
         return qubits
 
     @staticmethod
-    def _find_bit_indexes(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
+    def _find_bit_indices(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:
         bits = []
 
         for bit in instruction.clbits:
@@ -144,259 +75,216 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
 
         return bits
 
-    def _add_instruction_to_graph(self, data: GraphPlacingData) -> None:
-        self._to_graph_handlers[data.gate_name](data)
+    def _add_to_graph(self, context: ToGraphContext) -> None:
+        handler = self._to_graph_handlers.get(context.gate_name)
 
-    def _add_single_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, gate_name, qubits, column = (
-            data.builder,
-            data.gate_name,
-            data.qubits,
-            data.column,
-        )
-        self._logger.debug("Placing single-qubit gate on qubit %s on column %s", qubits[0], column)
-        builder.put_single(gate_name, qubits[0], column)
-
-    def _add_rotation_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, gate_name, qubits, params, column = (
-            data.builder,
-            data.gate_name,
-            data.qubits,
-            data.params,
-            data.column,
-        )
-        self._logger.debug(
-            "Placing rotation gate with angle %s on qubit %s on column %s",
-            params[0],
-            qubits[0],
-            column,
-        )
-        builder.put_rotation(gate_name, params[0], qubits[0], column)
-
-    def _add_measure_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, qubits, bits, column = (
-            data.builder,
-            data.qubits,
-            data.bits,
-            data.column,
-        )
-        self._logger.debug(
-            "Placing measure gate on qubit %s to bit %s on column %s",
-            qubits[0],
-            bits[0],
-            column,
-        )
-        builder.put_measure(qubits[0], bits[0], column)
-
-    def _add_swap_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, qubits, column = data.builder, data.qubits, data.column
-        self._logger.debug(
-            "Placing swap gate on qubits %s and %s on column %s",
-            qubits[0],
-            qubits[1],
-            column,
-        )
-        builder.put_swap(qubits[0], qubits[1], column)
-
-    def _add_cz_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, qubits, column = data.builder, data.qubits, data.column
-        self._logger.debug(
-            "Placing cz gate on qubits %s and %s on column %s",
-            qubits[0],
-            qubits[1],
-            column,
-        )
-        builder.put_cz(qubits[0], qubits[1], column)
-
-    def _add_cswap_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, qubits, column = data.builder, data.qubits, data.column
-        self._logger.debug(
-            "Placing cswap gate on qubits %s (control), %s (target) and %s (target) on column %s",
-            qubits[0],
-            qubits[1],
-            qubits[2],
-            column,
-        )
-        builder.put_cswap(qubits[0], qubits[1], qubits[2], column)
-
-    def _add_controlled_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, gate_name, qubits, column = (
-            data.builder,
-            data.gate_name,
-            data.qubits,
-            data.column,
-        )
-        self._logger.debug(
-            "Placing controlled gate on qubits %s (control) and %s (target) on column %s",
-            qubits[0],
-            qubits[1],
-            column,
-        )
-        builder.put_control(gate_name, qubits[0], qubits[1], column)
-
-    def _add_ccx_gate_to_graph(self, data: GraphPlacingData) -> None:
-        builder, qubits, column = data.builder, data.qubits, data.column
-        self._logger.debug(
-            "Placing ccx gate on qubits %s (control), %s (control) and %s (target) on column %s",
-            qubits[0],
-            qubits[1],
-            qubits[2],
-            column,
-        )
-        builder.put_ccx(qubits[0], qubits[1], qubits[2], column)
-
-    def from_graph(
-        self,
-        graph: QuantumGraph,
-    ) -> QuantumCircuit | tuple[QuantumCircuit, str]:
-        self._logger.debug("Converting graph to circuit")
-        builder = CircuitBuilder(graph.height)
-        explored: set[Position] = set()
-
-        for column_index in range(graph.width):
-            for row_index in range(graph.height):
-                position = Position(row_index, column_index)
-                self._add_to_circuit(builder, graph, explored, position)
-
-        return builder.build()
-
-    def _add_to_circuit(
-        self,
-        builder: CircuitBuilder,
-        graph: QuantumGraph,
-        explored: set[Position],
-        position: Position,
-    ) -> None:
-        if position in explored:
-            return
-
-        explored.add(position)
-        graph_node = graph[position]
-
-        if graph_node is None or graph_node.name in (GateName.ID, GateName.BARRIER):
-            return
-
-        placing_data = CircuitPlacingData(builder, graph, graph_node, explored, position)
-        self._add_instruction_to_circuit(placing_data)
-
-    def _add_instruction_to_circuit(self, data: CircuitPlacingData) -> None:
-        self._from_graph_handlers[data.graph_node.name](data)
-
-    @staticmethod
-    def _add_single_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph_node, start = data.circuit, data.graph_node, data.start
-        builder.add_single(graph_node.name, start.row)
-
-    @staticmethod
-    def _add_rotation_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph_node, start = data.circuit, data.graph_node, data.start
-        builder.add_rotation(graph_node.name, graph_node.rotation, start.row)
-
-    @staticmethod
-    def _add_measure_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph_node, start = data.circuit, data.graph_node, data.start
-        builder.add_measure(start.row, graph_node.measure_to)
-
-    @staticmethod
-    def _add_swap_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph, explored, start = (
-            data.circuit,
-            data.graph,
-            data.explored,
-            data.start,
-        )
-        edges = graph.node_edge_data(start)
-        other_position = edges.swaps_with.position
-        builder.add_swap(start.row, other_position.row)
-        explored.add(other_position)
-
-    @staticmethod
-    def _add_controlled_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph, graph_node, explored, start = (
-            data.circuit,
-            data.graph,
-            data.graph_node,
-            data.explored,
-            data.start,
-        )
-        edges = graph.node_edge_data(start)
-        is_target = edges.targets == []
-
-        if is_target:
-            controller_position = edges.controlled_by[0].position
-            target_position = start
+        if handler:
+            handler(context)
         else:
-            controller_position = start
-            target_position = edges.targets[0].position
+            raise NotImplementedError(f"No to_graph handler for gate type {context.gate_name}")
 
-        builder.add_control(graph_node.name, controller_position.row, target_position.row)
-        explored.add(controller_position)
-        explored.add(target_position)
+    @property
+    def _to_graph_handlers(self) -> dict[GateName, Callable[[ToGraphContext], None]]:
+        return {
+            GateName.ID: self._add_id_to_graph,
+            GateName.H: self._add_h_to_graph,
+            GateName.X: self._add_x_to_graph,
+            GateName.Y: self._add_y_to_graph,
+            GateName.Z: self._add_z_to_graph,
+            GateName.RX: self._add_rx_to_graph,
+            GateName.RY: self._add_ry_to_graph,
+            GateName.RZ: self._add_rz_to_graph,
+            GateName.MEASURE: self._add_measure_to_graph,
+            GateName.SWAP: self._add_swap_to_graph,
+            GateName.CH: self._add_ch_to_graph,
+            GateName.CX: self._add_cx_to_graph,
+            GateName.CZ: self._add_cz_to_graph,
+            GateName.CSWAP: self._add_cswap_to_graph,
+            GateName.CCX: self._add_ccx_to_graph,
+        }
 
     @staticmethod
-    def _add_cz_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph, explored, start = (
-            data.circuit,
-            data.graph,
-            data.explored,
-            data.start,
-        )
-        edges = graph.node_edge_data(start)
-        other_position = edges.works_with[0].position
-        builder.add_cz(start.row, other_position.row)
-        explored.add(other_position)
+    def _add_id_to_graph(context: ToGraphContext) -> None:
+        pass
 
     @staticmethod
-    def _add_cswap_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph, explored, start = (
-            data.circuit,
-            data.graph,
-            data.explored,
-            data.start,
-        )
-        edges = graph.node_edge_data(start)
-        is_target = edges.targets == []
+    def _add_h_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_h(qubits[0])
 
-        if is_target:
-            controller_position = edges.controlled_by[0].position
-            first_position = start
-            second_position = edges.swaps_with.position
+    @staticmethod
+    def _add_x_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_x(qubits[0])
+
+    @staticmethod
+    def _add_y_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_y(qubits[0])
+
+    @staticmethod
+    def _add_z_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_z(qubits[0])
+
+    @staticmethod
+    def _add_rx_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_rx(params[0], qubits[0])
+
+    @staticmethod
+    def _add_ry_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_ry(params[0], qubits[0])
+
+    @staticmethod
+    def _add_rz_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_rz(params[0], qubits[0])
+
+    @staticmethod
+    def _add_measure_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_measure(qubits[0], bits[0])
+
+    @staticmethod
+    def _add_swap_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_swap(qubits[0], qubits[1])
+
+    @staticmethod
+    def _add_ch_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_ch(qubits[0], qubits[1])
+
+    @staticmethod
+    def _add_cx_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_cx(qubits[0], qubits[1])
+
+    @staticmethod
+    def _add_cz_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_cz(qubits[0], qubits[1])
+
+    @staticmethod
+    def _add_cswap_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_cswap(qubits[0], qubits[1], qubits[2])
+
+    @staticmethod
+    def _add_ccx_to_graph(context: ToGraphContext) -> None:
+        builder, gate_name, qubits, bits, params = context.unpack()
+        builder.push_ccx(qubits[0], qubits[1], qubits[2])
+
+    def from_graph(self, graph: QuantumGraph) -> QuantumCircuit:
+        circuit = QuantumCircuit(graph.height, graph.bits)
+        gates = GATES_CONVERTER.from_graph(graph)
+
+        for gate in gates:
+            context = FromGraphContext(circuit, gate)
+            self._add_from_graph(context)
+
+        return circuit
+
+    def _add_from_graph(self, context: FromGraphContext) -> None:
+        handler = self._from_graph_handlers.get(context.gate.name)
+
+        if handler:
+            handler(context)
         else:
-            controller_position = start
-            first_position = edges.targets[0].position
-            second_position = edges.targets[1].position
+            raise NotImplementedError(f"No from_graph handler for gate type {context.gate.name}")
 
-        builder.add_cswap(controller_position.row, first_position.row, second_position.row)
-        explored.add(controller_position)
-        explored.add(first_position)
-        explored.add(second_position)
+    @property
+    def _from_graph_handlers(self) -> dict[GateName, Callable[[FromGraphContext], None]]:
+        return {
+            GateName.ID: self._add_id_from_graph,
+            GateName.H: self._add_h_from_graph,
+            GateName.X: self._add_x_from_graph,
+            GateName.Y: self._add_y_from_graph,
+            GateName.Z: self._add_z_from_graph,
+            GateName.RX: self._add_rx_from_graph,
+            GateName.RY: self._add_ry_from_graph,
+            GateName.RZ: self._add_rz_from_graph,
+            GateName.MEASURE: self._add_measure_from_graph,
+            GateName.SWAP: self._add_swap_from_graph,
+            GateName.CH: self._add_ch_from_graph,
+            GateName.CX: self._add_cx_from_graph,
+            GateName.CZ: self._add_cz_from_graph,
+            GateName.CSWAP: self._add_cswap_from_graph,
+            GateName.CCX: self._add_ccx_from_graph,
+        }
 
     @staticmethod
-    def _add_ccx_gate_to_circuit(data: CircuitPlacingData) -> None:
-        builder, graph, explored, start = (
-            data.circuit,
-            data.graph,
-            data.explored,
-            data.start,
-        )
+    def _add_id_from_graph(context: FromGraphContext) -> None:
+        pass
 
-        edges = graph.node_edge_data(start)
-        is_target = edges.targets == []
+    @staticmethod
+    def _add_h_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.h(gate.qubit)
 
-        if is_target:
-            first_controller_position = edges.controlled_by[0].position
-            second_controller_position = edges.controlled_by[1].position
-            target_position = start
-        else:
-            first_controller_position = start
-            second_controller_position = edges.works_with[0].position
-            target_position = edges.targets[0].position
+    @staticmethod
+    def _add_x_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.x(gate.qubit)
 
-        builder.add_ccx(
-            first_controller_position.row,
-            second_controller_position.row,
-            target_position.row,
-        )
-        explored.add(first_controller_position)
-        explored.add(second_controller_position)
-        explored.add(target_position)
+    @staticmethod
+    def _add_y_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.y(gate.qubit)
+
+    @staticmethod
+    def _add_z_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.z(gate.qubit)
+
+    @staticmethod
+    def _add_rx_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.rx(gate.angle, gate.qubit)
+
+    @staticmethod
+    def _add_ry_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.ry(gate.angle, gate.qubit)
+
+    @staticmethod
+    def _add_rz_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.rz(gate.angle, gate.qubit)
+
+    @staticmethod
+    def _add_measure_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.measure(gate.qubit, gate.bit)
+
+    @staticmethod
+    def _add_swap_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.swap(gate.qubit, gate.qubit2)
+
+    @staticmethod
+    def _add_ch_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.ch(gate.control_qubit, gate.target_qubit)
+
+    @staticmethod
+    def _add_cx_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.cx(gate.control_qubit, gate.target_qubit)
+
+    @staticmethod
+    def _add_cz_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.cz(gate.qubit, gate.qubit2)
+
+    @staticmethod
+    def _add_cswap_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.cswap(gate.control_qubit, gate.target_qubit, gate.target_qubit2)
+
+    @staticmethod
+    def _add_ccx_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.ccx(gate.control_qubit, gate.control_qubit2, gate.target_qubit)

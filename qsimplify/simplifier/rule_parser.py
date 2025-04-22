@@ -77,7 +77,7 @@ class RuleParser:
                 f"The gate {gate_name}'s extra data {gate_data} must only have numbers"
             )
 
-        if gate_name in (GateName.ID, GateName.BARRIER):
+        if gate_name == GateName.ID:
             return
 
         placing_data = GatePlacingData(builder, gate_name, gate_data)
