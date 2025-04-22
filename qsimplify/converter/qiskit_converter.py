@@ -16,6 +16,7 @@ from qsimplify.model import (
 )
 from qsimplify.utils import setup_logger
 
+
 class GraphPlacingData(NamedTuple):
     builder: GraphBuilder
     gate_name: GateName

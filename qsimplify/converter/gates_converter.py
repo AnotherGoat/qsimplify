@@ -3,24 +3,28 @@ from typing import Callable
 
 from qsimplify.converter.graph_converter import GraphConverter
 from qsimplify.model import (
-    QuantumGate,
+    CcxGate,
+    ChGate,
+    CswapGate,
+    CxGate,
+    CzGate,
+    GateName,
+    GraphBuilder,
+    GraphNode,
     HGate,
-    XGate,
-    YGate,
-    ZGate,
+    MeasureGate,
+    Position,
+    QuantumGate,
+    QuantumGraph,
     RxGate,
     RyGate,
     RzGate,
-    MeasureGate,
     SwapGate,
-    ChGate,
-    CxGate,
-    CzGate,
-    CswapGate,
-    CcxGate,
+    XGate,
+    YGate,
+    ZGate,
 )
 from qsimplify.model.quantum_gate import IdGate
-from qsimplify.model import QuantumGraph, GraphBuilder, Position, GraphNode, GateName
 
 
 @dataclass

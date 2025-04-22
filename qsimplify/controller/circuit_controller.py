@@ -1,13 +1,13 @@
 from typing import Any
 
-from flask import Blueprint, request, jsonify, Response, send_file
+from flask import Blueprint, Response, jsonify, request, send_file
 from pydantic import ValidationError
 from pydantic_core import ErrorDetails
 
 from qsimplify.converter import GatesConverter, QiskitConverter
 from qsimplify.drawer import Drawer
-from qsimplify.model import quantum_gate
 from qsimplify.generator.qiskit_generator import QiskitGenerator
+from qsimplify.model import quantum_gate
 from qsimplify.simplifier import Simplifier
 
 type Errors = dict[int, list[str]]
@@ -18,6 +18,7 @@ qiskit_converter = QiskitConverter()
 simplifier = Simplifier()
 drawer = Drawer()
 qiskit_generator = QiskitGenerator()
+
 
 @circuit_controller.post("/simplify")
 def _simplify_circuit() -> tuple[Response | None, int]:
@@ -85,6 +86,7 @@ def _plot_circuit() -> tuple[Response | None, int]:
     buffer = drawer.save_circuit_to_buffer(qiskit_circuit)
     return send_file(buffer, mimetype="image/png"), 200
 
+
 @circuit_controller.post("/plot_graph")
 def _plot_graph() -> tuple[Response | None, int]:
     gates_json = request.get_json()
@@ -98,6 +100,7 @@ def _plot_graph() -> tuple[Response | None, int]:
 
     buffer = drawer.save_graph_to_buffer(graph, "png", dpi=str(100))
     return send_file(buffer, mimetype="image/png"), 200
+
 
 @circuit_controller.post("/code")
 def _code_graph() -> tuple[Response | None, int]:

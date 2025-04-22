@@ -1,7 +1,7 @@
-from qsimplify.model.gate_name import GateName
-from qsimplify.model.quantum_graph import QuantumGraph
-from qsimplify.model.position import Position
 from qsimplify.model.edge_name import EdgeName
+from qsimplify.model.gate_name import GateName
+from qsimplify.model.position import Position
+from qsimplify.model.quantum_graph import QuantumGraph
 
 
 def clean_and_fill(graph: QuantumGraph) -> None:

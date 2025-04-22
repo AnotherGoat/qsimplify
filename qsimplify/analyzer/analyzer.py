@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from qsimplify.analyzer.quantum_metrics import QuantumMetrics
-from qsimplify.model import GateName, Position, QuantumGraph, GraphNode, EdgeName
+from qsimplify.model import EdgeName, GateName, GraphNode, Position, QuantumGraph
 
 _SINGLE_QUBIT_GATES = {gate_name for gate_name in GateName if gate_name.number_of_qubits() == 1}
 _SINGLE_CONTROLLED_GATES = {gate_name for gate_name in GateName if gate_name.is_single_controlled()}

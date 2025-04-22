@@ -1,7 +1,7 @@
 import os
 
-from flask import Flask, jsonify, Response
 from dotenv import load_dotenv
+from flask import Flask, Response, jsonify
 
 from qsimplify.controller.circuit_controller import circuit_controller
 
@@ -12,9 +12,11 @@ FLASK_DEBUG = os.getenv("FLASK_DEBUG", True)
 
 app = Flask(__name__)
 
+
 @app.route("/api")
 def _index() -> tuple[Response | None, int]:
     return jsonify({"message": "Welcome to QSimplify API"}), 200
+
 
 app.register_blueprint(circuit_controller, url_prefix="/api/circuit")
 

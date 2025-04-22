@@ -4,13 +4,19 @@
 
 ### Required
 
-- Poetry is used to manage dependencies. You can check installation instructions [here](https://python-poetry.org/docs/#installation).
+- uv is used to manage dependencies. You can check installation instructions [here](https://docs.astral.sh/uv/getting-started/installation/).
 
 ### Optional
 
 - Graphviz is used to draw graphs. You can check installation instructions [here](https://graphviz.org/download/).
 
 ## Running the program
+
+- Install pre-commit hooks (run once after pulling the repository)
+
+```shell
+uv run pre-commit install
+```
 
 - Install dependencies
 

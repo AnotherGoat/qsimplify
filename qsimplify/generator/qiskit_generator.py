@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from typing import Callable
 
 from qsimplify.converter import GatesConverter
-from qsimplify.model import QuantumGate
 from qsimplify.generator.code_generator import CodeGenerator
-from qsimplify.model import QuantumGraph, GateName
+from qsimplify.model import GateName, QuantumGate, QuantumGraph
 
 CIRCUIT_NAME = "circuit"
 gates_converter = GatesConverter()
+
 
 @dataclass
 class GenerationContext:
@@ -17,6 +17,7 @@ class GenerationContext:
 
     def unpack(self) -> tuple[list[str], list[str], QuantumGate]:
         return self.imports, self.build_steps, self.gate
+
 
 class QiskitGenerator(CodeGenerator):
     def generate(self, graph: QuantumGraph) -> str:
@@ -41,7 +42,6 @@ class QiskitGenerator(CodeGenerator):
             handler(context)
         else:
             raise NotImplementedError(f"No generate_gate handler for gate type {context.gate.name}")
-
 
     @property
     def _generate_gate_handlers(self) -> dict[GateName, Callable[[GenerationContext], None]]:
@@ -94,12 +94,16 @@ class QiskitGenerator(CodeGenerator):
     @staticmethod
     def _generate_cswap(context: GenerationContext) -> None:
         imports, build_steps, gate = context.unpack()
-        QiskitGenerator._add_build_step(context, gate.control_qubit, gate.target_qubit, gate.target_qubit2)
+        QiskitGenerator._add_build_step(
+            context, gate.control_qubit, gate.target_qubit, gate.target_qubit2
+        )
 
     @staticmethod
     def _generate_ccx(context: GenerationContext) -> None:
         imports, build_steps, gate = context.unpack()
-        QiskitGenerator._add_build_step(context, gate.control_qubit, gate.control_qubit2, gate.target_qubit)
+        QiskitGenerator._add_build_step(
+            context, gate.control_qubit, gate.control_qubit2, gate.target_qubit
+        )
 
     @staticmethod
     def _add_build_step(context: GenerationContext, *params: int | float) -> None:

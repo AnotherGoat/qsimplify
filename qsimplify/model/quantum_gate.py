@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Literal, Union, Annotated, Self, Any
-
 import math
-from pydantic import BaseModel, Field, ConfigDict, field_validator, TypeAdapter, model_validator
+from typing import Annotated, Any, Literal, Self, Union
+
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator, model_validator
 
 from qsimplify.model import GateName
 
@@ -245,8 +245,10 @@ QuantumGate = Annotated[
 _gate_adapter = TypeAdapter(QuantumGate)
 _gates_adapter = TypeAdapter(list[QuantumGate])
 
+
 def parse_gate(json: Any) -> QuantumGate:
     return _gate_adapter.validate_python(json)
+
 
 def parse_gates(json: Any) -> list[QuantumGate]:
     return _gates_adapter.validate_python(json)
