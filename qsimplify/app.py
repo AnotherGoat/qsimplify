@@ -6,11 +6,7 @@ from flask import Flask, Response, jsonify
 from qsimplify.controller.circuit_controller import circuit_controller
 
 load_dotenv()
-<<<<<<< Updated upstream
 _FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "127.0.0.1")
-=======
-_FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "0.0.0.0")
->>>>>>> Stashed changes
 _FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT", 5001)
 _FLASK_DEBUG = os.getenv("FLASK_DEBUG", True)
 
