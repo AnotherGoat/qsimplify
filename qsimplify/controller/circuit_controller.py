@@ -12,6 +12,7 @@ from qsimplify.simplifier import Simplifier
 
 type Errors = dict[int, list[str]]
 
+# 🔷 Instancias y blueprint
 circuit_controller = Blueprint("circuit", __name__)
 gates_converter = GatesConverter()
 qiskit_converter = QiskitConverter()
@@ -22,17 +23,30 @@ qiskit_generator = QiskitGenerator()
 
 @circuit_controller.post("/simplify")
 def _simplify_circuit() -> tuple[Response | None, int]:
+    # 🔹 Validar la entrada
     gates_json = request.get_json()
     validation_result = _validate_request(gates_json)
-
     if validation_result is not None:
         return validation_result
 
-    gates = quantum_gate.parse_gates(gates_json)
-    graph = gates_converter.to_graph(gates)
-    simplified_graph = simplifier.simplify_graph(graph)
-    simplified_gates = [gate.model_dump() for gate in gates_converter.from_graph(simplified_graph)]
-    return jsonify(simplified_gates), 200
+    try:
+        # 🔹 Convertir a objetos QuantumGate
+        gates = quantum_gate.parse_gates(gates_json)
+
+        # 🔹 Convertir a grafo
+        graph = gates_converter.to_graph(gates)
+
+        # 🔹 Simplificar
+        simplified_graph = simplifier.simplify_graph(graph)
+
+        # 🔹 Convertir de nuevo a lista de puertas
+        simplified_gates = [gate.model_dump() for gate in gates_converter.from_graph(simplified_graph)]
+
+        # 🔹 Devolver JSON
+        return jsonify(simplified_gates), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 def _validate_request(gates_json: Any) -> tuple[Response | None, int] | None:
