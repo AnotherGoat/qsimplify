@@ -51,12 +51,13 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         builder = GraphBuilder()
 
         for gate in data:
-            self._add_to_graph(builder, gate)
+            context = ToGraphContext(builder, gate)
+            self._add_to_graph(context)
 
         return builder.build()
 
     @property
-    def _to_graph_handlers(self) -> dict[GateName, Callable[[GraphBuilder, QuantumGate], None]]:
+    def _to_graph_handlers(self) -> dict[GateName, Callable[[ToGraphContext], None]]:
         return {
             GateName.ID: self._add_id_to_graph,
             GateName.H: self._add_h_to_graph,
@@ -75,13 +76,13 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.CCX: self._add_ccx_to_graph,
         }
 
-    def _add_to_graph(self, builder: GraphBuilder, gate: QuantumGate) -> None:
-        handler = self._to_graph_handlers.get(gate.name)
+    def _add_to_graph(self, context: ToGraphContext) -> None:
+        handler = self._to_graph_handlers.get(context.gate.name)
 
         if handler:
-            handler(builder, gate)
+            handler(context)
         else:
-            raise NotImplementedError(f"No to_graph handler for gate type {gate.name}")
+            raise NotImplementedError(f"No to_graph handler for gate type {context.gate.name}")
 
     @staticmethod
     def _add_id_to_graph(context: ToGraphContext) -> None:
