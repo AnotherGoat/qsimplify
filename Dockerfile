@@ -19,7 +19,7 @@ RUN uv sync --frozen
 # Set app environment variables
 ENV DEBUG=False
 ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5000
+ENV FLASK_RUN_PORT=5001
 ENV FLASK_DEBUG=True
 
 CMD ["uv", "run", "python", "-m", "qsimplify.app"]

@@ -7,7 +7,7 @@ from qsimplify.controller.circuit_controller import circuit_controller
 
 load_dotenv()
 _FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "127.0.0.1")
-_FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT", 5000)
+_FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT", 5001)
 _FLASK_DEBUG = os.getenv("FLASK_DEBUG", True)
 
 app = Flask(__name__)
