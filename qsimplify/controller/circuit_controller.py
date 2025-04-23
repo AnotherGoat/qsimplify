@@ -23,8 +23,9 @@ qiskit_generator = QiskitGenerator()
 
 @circuit_controller.post("/simplify")
 def _simplify_circuit() -> tuple[Response | None, int]:
+    print(request.get_json())
     # 🔹 Validar la entrada
-    gates_json = request.get_json()
+    gates_json = request.get_json()["gates"]
     validation_result = _validate_request(gates_json)
     if validation_result is not None:
         return validation_result
