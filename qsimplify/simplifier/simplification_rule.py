@@ -5,8 +5,16 @@ class SimplificationRule:
     def __init__(self, pattern: QuantumGraph, replacement: QuantumGraph) -> None:
         self.pattern = pattern
         self.replacement = replacement
+        self._validate_graphs()
         self._fill_replacement()
         self._generate_mask()
+
+    def _validate_graphs(self) -> None:
+        if any(gate.name == GateName.MEASURE for gate in self.pattern):
+            raise ValueError("Original pattern can't have measurement gates")
+
+        if any(gate.name == GateName.MEASURE for gate in self.replacement):
+            raise ValueError("Replacement pattern can't have measurement gates")
 
     def _fill_replacement(self) -> None:
         for position in self.pattern.iter_positions_by_row():

@@ -10,6 +10,7 @@ from qsimplify.model.quantum_gate import ChGate as ChGate
 from qsimplify.model.quantum_gate import CswapGate as CswapGate
 from qsimplify.model.quantum_gate import CxGate as CxGate
 from qsimplify.model.quantum_gate import CzGate as CzGate
+from qsimplify.model.quantum_gate import GatesValidationError as GatesValidationError
 from qsimplify.model.quantum_gate import HGate as HGate
 from qsimplify.model.quantum_gate import IdGate as IdGate
 from qsimplify.model.quantum_gate import MeasureGate as MeasureGate

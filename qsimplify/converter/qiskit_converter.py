@@ -33,7 +33,7 @@ class FromGraphContext:
 
 
 class QiskitConverter(GraphConverter[QuantumCircuit]):
-    def to_graph(self, data: QuantumCircuit) -> QuantumGraph:
+    def to_graph(self, data: QuantumCircuit, clean_up: bool = True) -> QuantumGraph:
         builder = GraphBuilder()
 
         for instruction in data.data:
@@ -49,7 +49,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
             context = ToGraphContext(builder, gate_name, qubits, bits, params)
             self._add_to_graph(context)
 
-        return builder.build()
+        return builder.build(clean_up)
 
     @staticmethod
     def _find_qubit_indices(circuit: QuantumCircuit, instruction: CircuitInstruction) -> list[int]:

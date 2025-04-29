@@ -1,18 +1,14 @@
 from typing import Any
 
 from flask import Blueprint, Response, jsonify, request, send_file
-from pydantic import ValidationError
-from pydantic_core import ErrorDetails
 
 from qsimplify.converter import GatesConverter, QiskitConverter
 from qsimplify.drawer import Drawer
 from qsimplify.generator.qiskit_generator import QiskitGenerator
 from qsimplify.model import quantum_gate
+from qsimplify.model.quantum_graph import QuantumGraph
 from qsimplify.simplifier import Simplifier
 
-type Errors = dict[int, list[str]]
-
-# 🔷 Instancias y blueprint
 circuit_controller = Blueprint("circuit", __name__)
 gates_converter = GatesConverter()
 qiskit_converter = QiskitConverter()
@@ -22,110 +18,35 @@ qiskit_generator = QiskitGenerator()
 
 
 @circuit_controller.post("/simplify")
-def _simplify_circuit() -> tuple[Response | None, int]:
-    print(request.get_json())
-    # 🔹 Validar la entrada
-    gates_json = request.get_json()["gates"]
-    validation_result = _validate_request(gates_json)
-    if validation_result is not None:
-        return validation_result
-
-    try:
-        # 🔹 Convertir a objetos QuantumGate
-        gates = quantum_gate.parse_gates(gates_json)
-
-        # 🔹 Convertir a grafo
-        graph = gates_converter.to_graph(gates)
-
-        # 🔹 Simplificar
-        simplified_graph = simplifier.simplify_graph(graph)
-
-        # 🔹 Convertir de nuevo a lista de puertas
-        simplified_gates = [gate.model_dump() for gate in gates_converter.from_graph(simplified_graph)]
-
-        # 🔹 Devolver JSON
-        return jsonify(simplified_gates), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+def _simplify_circuit() -> tuple[Response, int]:
+    graph = _json_to_graph(request.get_json()["gates"])
+    simplified_graph = simplifier.simplify_graph(graph)
+    simplified_gates = [gate.model_dump() for gate in gates_converter.from_graph(simplified_graph)]
+    return jsonify(simplified_gates), 200
 
 
-def _validate_request(gates_json: Any) -> tuple[Response | None, int] | None:
-    if not isinstance(gates_json, list):
-        return jsonify({"errors": {"non_field": ["Expected a list of gates"]}}), 400
-
-    validation_errors = _validate_gates(gates_json)
-
-    if validation_errors:
-        return jsonify({"errors": validation_errors}), 400
-
-    return None
-
-
-def _validate_gates(gates: list[dict]) -> Errors:
-    errors: Errors = {}
-
-    for idx, json in enumerate(gates):
-        try:
-            quantum_gate.parse_gate(json)
-        except ValidationError as error:
-            errors[idx] = _extract_error_messages(error)
-        except Exception as error:
-            errors[idx] = [f"unknown: {error}"]
-
-    return errors
-
-
-def _extract_error_messages(validation_error: ValidationError) -> list[str]:
-    return [_format_error_message(error) for error in validation_error.errors()]
-
-
-def _format_error_message(error: ErrorDetails) -> str:
-    location = error["loc"][-1]
-    message = error["msg"]
-    return f"{location}: {message}"
+def _json_to_graph(json: Any) -> QuantumGraph:
+    gates = quantum_gate.parse_gates(json)
+    return gates_converter.to_graph(gates)
 
 
 @circuit_controller.post("/plot")
-def _plot_circuit() -> tuple[Response | None, int]:
-    gates_json = request.get_json()
-    validation_result = _validate_request(gates_json)
-
-    if validation_result is not None:
-        return validation_result
-
-    gates = quantum_gate.parse_gates(gates_json)
-    graph = gates_converter.to_graph(gates)
+def _plot_circuit() -> tuple[Response, int]:
+    graph = _json_to_graph(request.get_json()["gates"])
     qiskit_circuit = qiskit_converter.from_graph(graph)
-
     buffer = drawer.save_circuit_to_buffer(qiskit_circuit)
     return send_file(buffer, mimetype="image/png"), 200
 
 
 @circuit_controller.post("/plot_graph")
-def _plot_graph() -> tuple[Response | None, int]:
-    gates_json = request.get_json()
-    validation_result = _validate_request(gates_json)
-
-    if validation_result is not None:
-        return validation_result
-
-    gates = quantum_gate.parse_gates(gates_json)
-    graph = gates_converter.to_graph(gates)
-
+def _plot_graph() -> tuple[Response, int]:
+    graph = _json_to_graph(request.get_json()["gates"])
     buffer = drawer.save_graph_to_buffer(graph, "png", dpi=str(100))
     return send_file(buffer, mimetype="image/png"), 200
 
 
 @circuit_controller.post("/code")
-def _code_graph() -> tuple[Response | None, int]:
-    gates_json = request.get_json()
-    validation_result = _validate_request(gates_json)
-
-    if validation_result is not None:
-        return validation_result
-
-    gates = quantum_gate.parse_gates(gates_json)
-    graph = gates_converter.to_graph(gates)
+def _code_graph() -> tuple[Response, int]:
+    graph = _json_to_graph(request.get_json()["gates"])
     build_steps = qiskit_generator.generate(graph)
     return jsonify({"code": build_steps}), 200

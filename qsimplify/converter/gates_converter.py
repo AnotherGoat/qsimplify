@@ -47,14 +47,14 @@ class FromGraphContext:
 
 
 class GatesConverter(GraphConverter[list[QuantumGate]]):
-    def to_graph(self, data: list[QuantumGate]) -> QuantumGraph:
+    def to_graph(self, data: list[QuantumGate], clean_up: bool = True) -> QuantumGraph:
         builder = GraphBuilder()
 
         for gate in data:
             context = ToGraphContext(builder, gate)
             self._add_to_graph(context)
 
-        return builder.build()
+        return builder.build(clean_up)
 
     @property
     def _to_graph_handlers(self) -> dict[GateName, Callable[[ToGraphContext], None]]:

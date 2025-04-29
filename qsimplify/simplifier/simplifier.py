@@ -16,7 +16,7 @@ class Simplifier:
 
         parser = RuleParser()
         script_path = Path(__file__).parent
-        default_rules_path = script_path / "default_rules.json5"
+        default_rules_path = script_path / "default_rules.json"
 
         self._default_rules = parser.load_rules_from_file(default_rules_path)
 

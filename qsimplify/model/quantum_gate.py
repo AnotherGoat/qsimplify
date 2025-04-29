@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import math
-from typing import Annotated, Any, Literal, Self, Union
+from typing import Annotated, Literal, Self, Union
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator, model_validator
+from pydantic_core import ErrorDetails
 
 from qsimplify.model import GateName
 
@@ -243,12 +244,42 @@ QuantumGate = Annotated[
 ]
 
 _gate_adapter = TypeAdapter(QuantumGate)
-_gates_adapter = TypeAdapter(list[QuantumGate])
 
 
-def parse_gate(json: Any) -> QuantumGate:
-    return _gate_adapter.validate_python(json)
+type Errors = dict[int, list[str]]
 
 
-def parse_gates(json: Any) -> list[QuantumGate]:
-    return _gates_adapter.validate_python(json)
+class GatesValidationError(Exception):
+    errors: Errors
+
+    def __init__(self, errors: list[str]) -> None:
+        self.errors = errors
+        super().__init__(f"Gates validation failed {self.errors}")
+
+
+def parse_gates(gates: list[dict]) -> list[QuantumGate]:
+    output: list[QuantumGate] = []
+    errors: Errors = {}
+
+    for index, json in enumerate(gates):
+        try:
+            output.append(_gate_adapter.validate_python(json))
+        except ValidationError as error:
+            errors[index] = _extract_error_messages(error)
+        except Exception as error:
+            errors[index] = [f"unknown: {error}"]
+
+    if len(errors) != 0:
+        raise GatesValidationError(errors)
+
+    return output
+
+
+def _extract_error_messages(validation_error: ValidationError) -> list[str]:
+    return [_format_error_message(error) for error in validation_error.errors()]
+
+
+def _format_error_message(error: ErrorDetails) -> str:
+    location = error["loc"][-1]
+    message = error["msg"]
+    return f"{location}: {message}"
