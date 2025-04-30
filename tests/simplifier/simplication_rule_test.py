@@ -3,8 +3,8 @@ from qsimplify.simplifier import SimplificationRule
 
 
 def test_rule_mask():
-    pattern = GraphBuilder().put_x(0, 0).put_y(0, 1).build(clean_up=False)
-    replacement = GraphBuilder().put_x(0, 0).put_y(0, 3).build(clean_up=False)
+    pattern = GraphBuilder().push_x(0).push_y(0).build()
+    replacement = GraphBuilder().push_x(0).put_y(0, 3).build(False)
 
     rule = SimplificationRule(pattern, replacement)
 

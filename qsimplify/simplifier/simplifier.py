@@ -31,6 +31,7 @@ class Simplifier:
         for rule in rules:
             self.apply_simplification_rule(result, rule)
 
+        graph_cleaner.clean_and_fill(result)
         return result
 
     def apply_simplification_rule(self, graph: QuantumGraph, rule: SimplificationRule) -> None:

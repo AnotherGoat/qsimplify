@@ -14,9 +14,6 @@ class GraphBuilder:
     def __str__(self) -> str:
         return str(self._graph)
 
-    def is_occupied(self, row: int, column: int) -> bool:
-        return self._graph.is_occupied(Position(row, column))
-
     def push_id(self, qubit: int) -> GraphBuilder:
         return self.put_id(qubit, self._find_push_column([qubit]))
 
@@ -79,40 +76,34 @@ class GraphBuilder:
         )
 
     def put_id(self, qubit: int, column: int) -> GraphBuilder:
-        return self.put_single(GateName.ID, qubit, column)
+        return self._put_single(GateName.ID, qubit, column)
 
     def put_h(self, qubit: int, column: int) -> GraphBuilder:
-        return self.put_single(GateName.H, qubit, column)
+        return self._put_single(GateName.H, qubit, column)
 
     def put_x(self, qubit: int, column: int) -> GraphBuilder:
-        return self.put_single(GateName.X, qubit, column)
+        return self._put_single(GateName.X, qubit, column)
 
     def put_y(self, qubit: int, column: int) -> GraphBuilder:
-        return self.put_single(GateName.Y, qubit, column)
+        return self._put_single(GateName.Y, qubit, column)
 
     def put_z(self, qubit: int, column: int) -> GraphBuilder:
-        return self.put_single(GateName.Z, qubit, column)
+        return self._put_single(GateName.Z, qubit, column)
 
-    def put_single(self, name: GateName, qubit: int, column: int) -> GraphBuilder:
-        if name not in (GateName.ID, GateName.H, GateName.X, GateName.Y, GateName.Z):
-            raise ValueError(f"{name} is not a single-qubit gate without parameters")
-
+    def _put_single(self, name: GateName, qubit: int, column: int) -> GraphBuilder:
         self._graph.add_new_node(name, Position(qubit, column))
         return self
 
     def put_rx(self, phi: float, qubit: int, column: int) -> GraphBuilder:
-        return self.put_rotation(GateName.RX, phi, qubit, column)
+        return self._put_rotation(GateName.RX, phi, qubit, column)
 
     def put_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        return self.put_rotation(GateName.RY, theta, qubit, column)
+        return self._put_rotation(GateName.RY, theta, qubit, column)
 
     def put_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        return self.put_rotation(GateName.RZ, theta, qubit, column)
+        return self._put_rotation(GateName.RZ, theta, qubit, column)
 
-    def put_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
-        if name not in (GateName.RX, GateName.RY, GateName.RZ):
-            raise ValueError(f"{name} is not a rotation gate")
-
+    def _put_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
         self._graph.add_new_node(name, Position(qubit, column), rotation=angle)
         return self
 
@@ -132,17 +123,14 @@ class GraphBuilder:
         return self
 
     def put_ch(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
-        return self.put_control(GateName.CH, control_qubit, target_qubit, column)
+        return self._put_control(GateName.CH, control_qubit, target_qubit, column)
 
     def put_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
-        return self.put_control(GateName.CX, control_qubit, target_qubit, column)
+        return self._put_control(GateName.CX, control_qubit, target_qubit, column)
 
-    def put_control(
+    def _put_control(
         self, name: GateName, control_qubit: int, target_qubit: int, column: int
     ) -> GraphBuilder:
-        if name not in (GateName.CH, GateName.CX):
-            raise ValueError(f"{name} is not an asymmetrical two-qubit controlled gate")
-
         control = Position(control_qubit, column)
         target = Position(target_qubit, column)
 
@@ -228,6 +216,9 @@ class GraphBuilder:
         return self._graph
 
     def measure_all(self) -> QuantumGraph:
+        """
+        Build the graph by cleaning it up and then adding a measure gate for every qubit.
+        """
         graph_cleaner.clean_and_fill(self._graph)
 
         for row in range(self._graph.height):

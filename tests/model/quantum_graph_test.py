@@ -40,30 +40,21 @@ def test_empty_dimensions():
 
 
 def test_graph_equals():
-    graph1 = GraphBuilder().put_x(0, 0).put_x(1, 1).build()
-    graph2 = GraphBuilder().put_x(0, 0).put_x(1, 1).build()
+    graph1 = GraphBuilder().push_x(0).push_x(1).build()
+    graph2 = GraphBuilder().push_x(0).push_x(1).build()
 
     assert graph1 == graph2
 
 
 def test_graph_not_equals():
-    graph1 = GraphBuilder().put_x(0, 0).put_x(1, 1).build()
-    graph2 = GraphBuilder().put_x(0, 0).put_y(1, 1).build()
+    graph1 = GraphBuilder().push_x(0).push_x(1).build()
+    graph2 = GraphBuilder().push_x(0).push_y(1).build()
 
     assert graph1 != graph2
 
 
 def test_is_occupied():
-    graph = (
-        GraphBuilder()
-        .put_x(0, 1)
-        .put_y(0, 2)
-        .put_z(1, 0)
-        .put_x(1, 2)
-        .put_y(2, 0)
-        .put_z(2, 1)
-        .build()
-    )
+    graph = GraphBuilder().put_x(0, 1).push_y(0).push_z(1).put_x(1, 2).push_y(2).push_z(2).build()
 
     assert not graph.is_occupied(Position(0, 0))
     assert graph.is_occupied(Position(0, 1))
@@ -98,7 +89,7 @@ def test_has_node_at():
 
 
 def test_doesnt_have_nodes_outside():
-    graph = GraphBuilder().put_h(2, 2).build()
+    graph = GraphBuilder().put_h(2, 2).build(False)
 
     assert not graph.has_node_at(Position(0, 3))
     assert not graph.has_node_at(Position(3, 0))
