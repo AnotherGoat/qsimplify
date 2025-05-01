@@ -3,7 +3,15 @@ from __future__ import annotations
 import math
 from typing import Annotated, Literal, Self, Union
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    TypeAdapter,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 from pydantic_core import ErrorDetails
 
 from qsimplify.model import GateName
