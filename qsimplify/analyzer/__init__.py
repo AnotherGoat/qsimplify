@@ -1,1 +1,2 @@
-from qsimplify.analyzer.quantum_metrics import QuantumMetrics as QuantumMetrics
+from qsimplify.analyzer.metrics import DetailedMetrics as DetailedMetrics
+from qsimplify.analyzer.metrics import Metrics as Metrics

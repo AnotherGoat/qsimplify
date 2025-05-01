@@ -29,7 +29,7 @@ def _run_demo() -> None:
     print("\n===== Original graph =====")
     print(graph)
 
-    metrics = analyzer.calculate_metrics(graph)
+    metrics = analyzer.calculate_detailed_metrics(graph)
 
     print("\n===== Original metrics =====")
     print(metrics)
@@ -47,7 +47,7 @@ def _run_demo() -> None:
     print("\n===== Simplified build steps =====")
     print(build_steps)
 
-    simplified_metrics = analyzer.calculate_metrics(simplified_graph)
+    simplified_metrics = analyzer.calculate_detailed_metrics(simplified_graph)
     print("\n===== Simplified metrics =====")
     print(simplified_metrics)
 

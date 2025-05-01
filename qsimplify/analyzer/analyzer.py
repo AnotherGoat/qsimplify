@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from qsimplify.analyzer.quantum_metrics import QuantumMetrics
+from qsimplify.analyzer.metrics import DetailedMetrics, Metrics
 from qsimplify.model import EdgeName, GateName, GraphNode, Position, QuantumGraph
 
 _SINGLE_QUBIT_GATES = {gate_name for gate_name in GateName if gate_name.number_of_qubits() == 1}
@@ -8,7 +8,36 @@ _SINGLE_CONTROLLED_GATES = {gate_name for gate_name in GateName if gate_name.is_
 _CONTROLLED_GATES = {gate_name for gate_name in GateName if gate_name.is_controlled()}
 
 
-def calculate_metrics(graph: QuantumGraph) -> QuantumMetrics:
+def calculate_metrics(graph: QuantumGraph) -> Metrics:
+    number_of_qubits = graph.height
+    x_count = _count_gates(graph, GateName.X)
+    y_count = _count_gates(graph, GateName.Y)
+    z_count = _count_gates(graph, GateName.Z)
+    measure_count = _count_measured_qubits(graph)
+
+    return Metrics(
+        number_of_qubits=number_of_qubits,
+        depth=graph.width,
+        x_count=x_count,
+        y_count=y_count,
+        z_count=z_count,
+        pauli_count=x_count + y_count + z_count,
+        hadamard_count=_count_gates(graph, GateName.H),
+        rotation_count=_count_gates(graph, GateName.RX)
+        + _count_gates(graph, GateName.RY)
+        + _count_gates(graph, GateName.RZ),
+        square_root_count=0,
+        measure_count=measure_count,
+        swap_count=_count_gates(graph, GateName.SWAP),
+        cx_count=_count_gates(graph, GateName.CX),
+        gate_count=_count_total_gates(graph),
+        single_gate_count=_count_single_gates(graph),
+        controlled_gate_count=_count_controlled_gates(graph),
+        ancilla_qubit_count=number_of_qubits - measure_count,
+    )
+
+
+def calculate_detailed_metrics(graph: QuantumGraph) -> DetailedMetrics:
     gate_count = _count_total_gates(graph)
     x_count = _count_gates(graph, GateName.X)
     y_count = _count_gates(graph, GateName.Y)
@@ -22,7 +51,7 @@ def calculate_metrics(graph: QuantumGraph) -> QuantumMetrics:
     measure_count = _count_measured_qubits(graph)
     measure_percent = 0 if graph.is_empty() else measure_count / graph.height
 
-    return QuantumMetrics(
+    return DetailedMetrics(
         width=graph.height,
         depth=graph.width,
         max_density=_calculate_max_density(graph),

@@ -2,6 +2,7 @@ from typing import Any
 
 from flask import Blueprint, Response, jsonify, request, send_file
 
+from qsimplify.analyzer import analyzer
 from qsimplify.converter import GatesConverter, QiskitConverter
 from qsimplify.drawer import Drawer
 from qsimplify.generator.qiskit_generator import QiskitGenerator
@@ -50,3 +51,10 @@ def _code_graph() -> tuple[Response, int]:
     graph = _json_to_graph(request.get_json()["gates"])
     build_steps = qiskit_generator.generate(graph)
     return jsonify({"code": build_steps}), 200
+
+
+@circuit_controller.post("/metrics")
+def _calculate_detailed_metrics() -> tuple[Response, int]:
+    graph = _json_to_graph(request.get_json()["gates"])
+    metrics = analyzer.calculate_metrics(graph)
+    return jsonify({"metrics": metrics}), 200

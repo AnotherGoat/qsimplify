@@ -3,7 +3,27 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class QuantumMetrics:
+class Metrics:
+    number_of_qubits: int
+    depth: int
+    x_count: int
+    y_count: int
+    z_count: int
+    pauli_count: int
+    hadamard_count: int
+    rotation_count: int
+    square_root_count: int
+    measure_count: int
+    swap_count: int
+    cx_count: int
+    gate_count: int
+    single_gate_count: int
+    controlled_gate_count: int
+    ancilla_qubit_count: int
+
+
+@dataclass(frozen=True)
+class DetailedMetrics:
     """
     Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
 
