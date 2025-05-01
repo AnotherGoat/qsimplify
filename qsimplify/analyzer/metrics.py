@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Metrics:
-    number_of_qubits: int
+    qubit_count: int
     depth: int
     x_count: int
     y_count: int
@@ -20,6 +20,26 @@ class Metrics:
     single_gate_count: int
     controlled_gate_count: int
     ancilla_qubit_count: int
+
+
+@dataclass(frozen=True)
+class DeltaMetrics:
+    qubit_count: int | None = None
+    depth: int | None = None
+    x_count: int | None = None
+    y_count: int | None = None
+    z_count: int | None = None
+    pauli_count: int | None = None
+    hadamard_count: int | None = None
+    rotation_count: int | None = None
+    square_root_count: int | None = None
+    measure_count: int | None = None
+    swap_count: int | None = None
+    cx_count: int | None = None
+    gate_count: int | None = None
+    single_gate_count: int | None = None
+    controlled_gate_count: int | None = None
+    ancilla_qubit_count: int | None = None
 
 
 @dataclass(frozen=True)

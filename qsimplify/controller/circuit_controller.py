@@ -1,8 +1,10 @@
+from dataclasses import asdict
 from typing import Any
 
 from flask import Blueprint, Response, jsonify, request, send_file
 
 from qsimplify.analyzer import analyzer
+from qsimplify.analyzer.metrics import DeltaMetrics
 from qsimplify.converter import GatesConverter, QiskitConverter
 from qsimplify.drawer import Drawer
 from qsimplify.generator.qiskit_generator import QiskitGenerator
@@ -54,7 +56,21 @@ def _code_graph() -> tuple[Response, int]:
 
 
 @circuit_controller.post("/metrics")
-def _calculate_detailed_metrics() -> tuple[Response, int]:
+def _calculate_metrics() -> tuple[Response, int]:
     graph = _json_to_graph(request.get_json()["gates"])
     metrics = analyzer.calculate_metrics(graph)
     return jsonify({"metrics": metrics}), 200
+
+
+@circuit_controller.post("/compare")
+def _compare_metrics() -> tuple[Response, int]:
+    old = _json_to_graph(request.get_json()["old_gates"])
+    new = _json_to_graph(request.get_json()["new_gates"])
+    delta_metrics = analyzer.compare_metrics(old, new)
+    return jsonify({"delta_metrics": _remove_empty_fields(delta_metrics)}), 200
+
+
+def _remove_empty_fields(metrics: DeltaMetrics) -> dict[str, int]:
+    return {
+        metric_name: value for metric_name, value in asdict(metrics).items() if value is not None
+    }

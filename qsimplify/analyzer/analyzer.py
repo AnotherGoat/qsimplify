@@ -1,6 +1,7 @@
+from dataclasses import fields
 from typing import Iterable
 
-from qsimplify.analyzer.metrics import DetailedMetrics, Metrics
+from qsimplify.analyzer.metrics import DeltaMetrics, DetailedMetrics, Metrics
 from qsimplify.model import EdgeName, GateName, GraphNode, Position, QuantumGraph
 
 _SINGLE_QUBIT_GATES = {gate_name for gate_name in GateName if gate_name.number_of_qubits() == 1}
@@ -9,14 +10,14 @@ _CONTROLLED_GATES = {gate_name for gate_name in GateName if gate_name.is_control
 
 
 def calculate_metrics(graph: QuantumGraph) -> Metrics:
-    number_of_qubits = graph.height
+    qubit_count = graph.height
     x_count = _count_gates(graph, GateName.X)
     y_count = _count_gates(graph, GateName.Y)
     z_count = _count_gates(graph, GateName.Z)
     measure_count = _count_measured_qubits(graph)
 
     return Metrics(
-        number_of_qubits=number_of_qubits,
+        qubit_count=qubit_count,
         depth=graph.width,
         x_count=x_count,
         y_count=y_count,
@@ -33,8 +34,23 @@ def calculate_metrics(graph: QuantumGraph) -> Metrics:
         gate_count=_count_total_gates(graph),
         single_gate_count=_count_single_gates(graph),
         controlled_gate_count=_count_controlled_gates(graph),
-        ancilla_qubit_count=number_of_qubits - measure_count,
+        ancilla_qubit_count=qubit_count - measure_count,
     )
+
+
+def compare_metrics(old: QuantumGraph, new: QuantumGraph) -> DeltaMetrics:
+    old_metrics = calculate_metrics(old)
+    new_metrics = calculate_metrics(new)
+
+    deltas: dict[str, int] = {}
+
+    for field in fields(DeltaMetrics):
+        delta = getattr(new_metrics, field.name) - getattr(old_metrics, field.name)
+
+        if delta != 0:
+            deltas[field.name] = delta
+
+    return DeltaMetrics(**deltas)
 
 
 def calculate_detailed_metrics(graph: QuantumGraph) -> DetailedMetrics:
