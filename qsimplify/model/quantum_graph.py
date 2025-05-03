@@ -14,20 +14,23 @@ from qsimplify.model.position import Position
 
 
 class QuantumGraph:
-    """
-    Represents a quantum circuit as a graph-grid hybrid.
-    Position tuples of the form (row, column) are used to index the graph's nodes.
+    """Represents a quantum circuit as a hybrid of a directed graph and a 2D matrix.
+
+    This structured graph makes it easier to analyze and simplify circuits.
+    Position values of the form (row, column) are used to index the graph's nodes.
     Each qubit is represented by a row in the grid.
-    Single-qubit gates occupy a single GraphNode, while multi-qubit gates use multiple related GraphNodes (one for each qubit involved).
+    Single-qubit gates occupy a single node, while multi-qubit gates use multiple related nodes (one for each qubit involved).
+    Empty spaces are filled by ID (identity) gates.
+    It's recommended to use the graph builder to build the graph with ease.
     """
 
     def __init__(self) -> None:
-        """Create an empty QuantumGraph."""
+        """Create an empty quantum graph."""
         self._network = DiGraph()
 
     @property
     def width(self) -> int:
-        """The number of columns in the graph."""
+        """The number of columns in the graph. Also known as the graph depth."""
         if self.is_empty():
             return 0
 
@@ -60,11 +63,7 @@ class QuantumGraph:
         """Check whether this graph is empty (has no gates) or not."""
         return len(self) == 0
 
-    def add_node(self, node: GraphNode) -> None:
-        """Add an existing GraphNode to the graph."""
-        self.add_new_node(node.name, node.position, node.rotation, node.measure_to)
-
-    def add_new_node(
+    def add_node(
         self,
         name: GateName,
         position: Position,
@@ -80,7 +79,7 @@ class QuantumGraph:
         )
 
     def remove_node(self, position: Position) -> None:
-        """Remove the GraphNode at the specified position and all its edges. If no such node exists, nothing happens."""
+        """Remove the node at the specified position and all its edges. If no such node exists, nothing happens."""
         if self.has_node_at(position):
             self._network.remove_node(position)
 
@@ -109,12 +108,12 @@ class QuantumGraph:
                 self._network.add_edge(end, target, **data)
 
     def clear_node(self, position: Position) -> None:
-        """Replace the GraphNode at the specified position with an identity node."""
+        """Replace the node at the specified position with an identity node."""
         self.remove_node(position)
-        self.add_new_node(GateName.ID, position)
+        self.add_node(GateName.ID, position)
 
     def __getitem__(self, position: Position) -> GraphNode | None:
-        """Get the GraphNode at the specified position."""
+        """Get the node at the specified position."""
         if not self.has_node_at(position):
             return None
 
@@ -137,8 +136,8 @@ class QuantumGraph:
             )
 
     def iter_positions_by_row(self) -> Iterator[Position]:
-        """
-        Iterate over the graph's positions, first row by row and then column by column.
+        """Iterate over the graph's positions, first row by row and then column by column.
+
         In case some spaces are empty, they will be skipped.
         """
         for row in range(self.height):
@@ -149,8 +148,8 @@ class QuantumGraph:
                     yield position
 
     def iter_positions_by_column(self) -> Iterator[Position]:
-        """
-        Iterate over the graph's positions, first column by column and then row by row.
+        """Iterate over the graph's positions, first column by column and then row by row.
+
         In case some spaces are empty, they will be skipped.
         """
         for column in range(self.width):
@@ -164,13 +163,14 @@ class QuantumGraph:
         """Retrieve all the nodes in the graph."""
         return list(self)
 
-    def add_edge(self, edge: GraphEdge) -> None:
-        """Add an existing GraphEdge to the graph."""
-        self._network.add_edge(edge.start.position, edge.end.position, name=edge.name)
-
-    def add_new_edge(self, name: EdgeName, start: Position, end: Position) -> None:
+    def add_edge(self, name: EdgeName, start: Position, end: Position) -> None:
         """Add a new edge to the graph."""
         self._network.add_edge(start, end, name=name)
+
+    def add_bidirectional_edge(self, name: EdgeName, first: Position, second: Position) -> None:
+        """Add a new bidirectional edge to the graph, as a pair of unidirectional edges."""
+        self._network.add_edge(first, second, name=name)
+        self._network.add_edge(second, first, name=name)
 
     def iter_edges(self) -> Iterator[GraphEdge]:
         """Iterate over the edges in the graph."""
@@ -182,13 +182,16 @@ class QuantumGraph:
         return list(self.iter_edges())
 
     def iter_node_edges(self, position: Position) -> Iterator[GraphEdge]:
+        """Iterate over the edges of the node at the specified position."""
         for _, end, data in self._network.out_edges(position, data=True):
             yield GraphEdge(data["name"], self[position], self[end])
 
     def node_edges(self, position: Position) -> list[GraphEdge]:
+        """Retrieve all the edges of the node at the specified position."""
         return list(self.iter_node_edges(position))
 
     def node_edge_data(self, position: Position) -> EdgeData | None:
+        """Retrieve the edge data of the node at the specified position."""
         origin = self[position]
 
         if origin is None:
@@ -216,6 +219,7 @@ class QuantumGraph:
         return EdgeData(origin, **edge_data)
 
     def __str__(self) -> str:
+        """Get a string representation of the graph, as a list of nodes followed by a list of edges."""
         result = ["Nodes:"]
         result += [str(node) for node in self]
         result += ["\nEdges:"]
@@ -223,6 +227,7 @@ class QuantumGraph:
         return "\n".join(result)
 
     def draw_grid(self) -> str:
+        """Get a string representation of the graph, as a 2D grid."""
         grid = [[GateName.ID.value for _ in range(self.width)] for _ in range(self.height)]
 
         for position in self._get_positions():
@@ -249,22 +254,20 @@ class QuantumGraph:
 
         return "\n".join(rows)
 
-    def __contains__(self, node: GraphNode) -> bool:
-        return node.position in self._network
-
     def __eq__(self, other: object) -> bool:
+        """Check whether this graph is equal to another graph. Fails automatically if other is not a graph."""
         if not isinstance(other, QuantumGraph):
             return NotImplemented
 
         return networkx.utils.graphs_equal(self._network, other._network)
 
-    def is_occupied(self, position: Position) -> bool:
-        """Check whether the graph has a non-filler node at the specified row and column."""
-        return self.has_node_at(position) and self[position].name != GateName.ID
-
     def has_node_at(self, position: Position) -> bool:
         """Check whether the graph has a node at the specified row and column."""
         return position in self._network
+
+    def is_occupied(self, position: Position) -> bool:
+        """Check whether the graph has a non-identity node at the specified row and column."""
+        return self.has_node_at(position) and self[position].name != GateName.ID
 
     def insert_column(self, column_index: int) -> None:
         """Insert an empty column at the given index by shifting all columns at or to the right of it rightward by one."""
@@ -283,7 +286,7 @@ class QuantumGraph:
                     self.move_node(old_position, new_position)
 
         for row in range(self.height):
-            self.add_new_node(GateName.ID, Position(row, column_index))
+            self.add_node(GateName.ID, Position(row, column_index))
 
     def clear(self) -> None:
         """Remove all the nodes and edges from the graph."""
@@ -298,6 +301,7 @@ class QuantumGraph:
         return len(self._network.nodes)
 
     def copy(self) -> QuantumGraph:
+        """Create a copy of the graph."""
         copy = QuantumGraph()
         copy._network = self._network.copy()
         return copy

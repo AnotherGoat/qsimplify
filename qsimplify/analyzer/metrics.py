@@ -4,6 +4,29 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Metrics:
+    """
+    Defines a set of metrics that can be used to estimate the complexity and quality of a quantum circuit.
+
+    Attributes:
+        qubit_count: Number of qubits in the circuit.
+        depth: Maximum number of operations applied to a qubit in the circuit.
+        x_count: Number of Pauli X (NOT) gates.
+        y_count: Number of Pauli Y gates.
+        z_count: Number of Pauli Z gates.
+        pauli_count: Total number of Pauli X (NOT), Y and Z gates.
+        hadamard_count: Number of Hadamard gates.
+        rotation_count: Number of rotation gates.
+        square_root_count: Number of square root gates.
+        measure_count: Number of measured qubits.
+        swap_count: Number of SWAP gates.
+        cx_count: Number of CX (CNOT) gates.
+        gate_count: Total number of gates.
+        single_gate_count: Total number of single-qubit gates.
+        controlled_gate_count: Total number of controlled gates.
+        ancilla_qubit_count: Number of ancilla qubits (qubits that are not measured).
+        gate_types_count: Number of different gates used in the circuit.
+    """
+
     qubit_count: int
     depth: int
     x_count: int
@@ -20,10 +43,34 @@ class Metrics:
     single_gate_count: int
     controlled_gate_count: int
     ancilla_qubit_count: int
+    gate_types_count: int
 
 
 @dataclass(frozen=True)
 class DeltaMetrics:
+    """
+    Defines the difference in metrics between two quantum circuits.
+
+    Attributes:
+        qubit_count: Difference in qubits in the circuit.
+        depth: Difference in maximum number of operations applied to a qubit in the circuit.
+        x_count: Difference in Pauli X (NOT) gates.
+        y_count: Difference in Pauli Y gates.
+        z_count: Difference in Pauli Z gates.
+        pauli_count: Difference in total of Pauli X (NOT), Y and Z gates.
+        hadamard_count: Difference in Hadamard gates.
+        rotation_count: Difference in rotation gates.
+        square_root_count: Difference in square root gates.
+        measure_count: Difference in measured qubits.
+        swap_count: Difference in SWAP gates.
+        cx_count: Difference in CX (CNOT) gates.
+        gate_count: Difference in total number of gates.
+        single_gate_count: Difference in single-qubit gates.
+        controlled_gate_count: Difference in controlled gates.
+        ancilla_qubit_count: Difference in ancilla qubits (qubits that are not measured).
+        gate_types_count: Difference in different gates used in the circuit.
+    """
+
     qubit_count: int | None = None
     depth: int | None = None
     x_count: int | None = None
@@ -40,6 +87,7 @@ class DeltaMetrics:
     single_gate_count: int | None = None
     controlled_gate_count: int | None = None
     ancilla_qubit_count: int | None = None
+    gate_types_count: int | None = None
 
 
 @dataclass(frozen=True)

@@ -4,6 +4,8 @@ from typing import Iterable
 from qsimplify.analyzer.metrics import DeltaMetrics, DetailedMetrics, Metrics
 from qsimplify.model import EdgeName, GateName, GraphNode, Position, QuantumGraph
 
+_ROTATION_GATES = {gate_name for gate_name in GateName if gate_name.is_rotation()}
+_SQUARE_ROOT_GATES = {gate_name for gate_name in GateName if gate_name.is_square_root()}
 _SINGLE_QUBIT_GATES = {gate_name for gate_name in GateName if gate_name.number_of_qubits() == 1}
 _SINGLE_CONTROLLED_GATES = {gate_name for gate_name in GateName if gate_name.is_single_controlled()}
 _CONTROLLED_GATES = {gate_name for gate_name in GateName if gate_name.is_controlled()}
@@ -24,10 +26,8 @@ def calculate_metrics(graph: QuantumGraph) -> Metrics:
         z_count=z_count,
         pauli_count=x_count + y_count + z_count,
         hadamard_count=_count_gates(graph, GateName.H),
-        rotation_count=_count_gates(graph, GateName.RX)
-        + _count_gates(graph, GateName.RY)
-        + _count_gates(graph, GateName.RZ),
-        square_root_count=0,
+        rotation_count=_count_rotation_gates(graph),
+        square_root_count=_count_square_root_gates(graph),
         measure_count=measure_count,
         swap_count=_count_gates(graph, GateName.SWAP),
         cx_count=_count_gates(graph, GateName.CX),
@@ -35,6 +35,7 @@ def calculate_metrics(graph: QuantumGraph) -> Metrics:
         single_gate_count=_count_single_gates(graph),
         controlled_gate_count=_count_controlled_gates(graph),
         ancilla_qubit_count=qubit_count - measure_count,
+        gate_types_count=_count_gate_types(graph),
     )
 
 
@@ -243,9 +244,22 @@ def _count_max_toffoli(graph: QuantumGraph) -> int:
     return max(counts.values())
 
 
+def _count_rotation_gates(graph: QuantumGraph) -> int:
+    return sum([_count_gates(graph, gate_name) for gate_name in _ROTATION_GATES])
+
+
+def _count_square_root_gates(graph: QuantumGraph) -> int:
+    return sum([_count_gates(graph, gate_name) for gate_name in _SQUARE_ROOT_GATES])
+
+
 def _count_measured_qubits(graph: QuantumGraph) -> int:
     if graph.is_empty():
         return 0
 
     measured_rows = {node.position.row for node in graph if node.name == GateName.MEASURE}
     return len(measured_rows)
+
+
+def _count_gate_types(graph: QuantumGraph) -> int:
+    types = {node.name for node in graph if node.name != GateName.ID}
+    return len(types)

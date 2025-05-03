@@ -1,4 +1,6 @@
+import pytest
 from qiskit import QuantumCircuit
+from qiskit.circuit.library.standard_gates import YGate
 
 from qsimplify.converter import QiskitConverter
 from qsimplify.model import GraphBuilder
@@ -225,7 +227,27 @@ def test_qubit_placement():
     assert graph == expected
 
 
-def test_one_qubit_to_circuit():
+def test_add_sy_to_graph():
+    circuit = QuantumCircuit(1)
+
+    circuit.append(YGate().power(1 / 2), [0])
+
+    graph = converter.to_graph(circuit)
+    expected = GraphBuilder().push_sy(0).build()
+
+    assert graph == expected
+
+
+def test_add_unknown_unitary_to_graph():
+    circuit = QuantumCircuit(1)
+
+    circuit.append(YGate().power(1 / 3), [0])
+
+    with pytest.raises(ValueError, match="Non-SY unitary gates are not supported"):
+        converter.to_graph(circuit)
+
+
+def test_one_qubit_from_graph():
     circuit = QuantumCircuit(1)
 
     circuit.h(0)
@@ -243,7 +265,7 @@ def test_one_qubit_to_circuit():
     assert circuit.data == converted_circuit.data
 
 
-def test_two_qubits_to_circuit():
+def test_two_qubits_from_graph():
     circuit = QuantumCircuit(2)
 
     circuit.h(0)
@@ -272,3 +294,13 @@ def test_removed_identities():
 
     assert circuit.data != converted_circuit.data
     assert len(converted_circuit.data) == 0
+
+
+def test_add_sy_from_graph():
+    graph = GraphBuilder().push_sy(0).build()
+    circuit = converter.from_graph(graph)
+
+    expected = QuantumCircuit(1)
+    expected.append(YGate().power(1 / 2), [0])
+
+    assert circuit == expected

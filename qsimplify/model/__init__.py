@@ -1,3 +1,5 @@
+"""Contains data structures necessary to represent quantum circuits and their elements."""
+
 from qsimplify.model.edge_data import EdgeData as EdgeData
 from qsimplify.model.edge_name import EdgeName as EdgeName
 from qsimplify.model.gate_name import GateName as GateName
@@ -18,7 +20,13 @@ from qsimplify.model.quantum_gate import QuantumGate as QuantumGate
 from qsimplify.model.quantum_gate import RxGate as RxGate
 from qsimplify.model.quantum_gate import RyGate as RyGate
 from qsimplify.model.quantum_gate import RzGate as RzGate
+from qsimplify.model.quantum_gate import SdgGate as SdgGate
+from qsimplify.model.quantum_gate import SGate as SGate
 from qsimplify.model.quantum_gate import SwapGate as SwapGate
+from qsimplify.model.quantum_gate import SxGate as SxGate
+from qsimplify.model.quantum_gate import SyGate as SyGate
+from qsimplify.model.quantum_gate import TdgGate as TdgGate
+from qsimplify.model.quantum_gate import TGate as TGate
 from qsimplify.model.quantum_gate import XGate as XGate
 from qsimplify.model.quantum_gate import YGate as YGate
 from qsimplify.model.quantum_gate import ZGate as ZGate

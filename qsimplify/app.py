@@ -9,8 +9,8 @@ from qsimplify.model.quantum_gate import GatesValidationError
 
 load_dotenv()
 _FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "127.0.0.1")
-_FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT", 5001)
-_FLASK_DEBUG = os.getenv("FLASK_DEBUG", True)
+_FLASK_RUN_PORT = int(os.getenv("FLASK_RUN_PORT", 5001))
+_FLASK_DEBUG = bool(os.getenv("FLASK_DEBUG", True))
 
 app = Flask(__name__)
 CORS(app)

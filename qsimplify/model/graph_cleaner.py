@@ -109,7 +109,7 @@ def _remove_unused_bits(graph: QuantumGraph) -> None:
         position = node.position
         new_bit = mappings[node.measure_to]
         graph.remove_node(position)
-        graph.add_new_node(GateName.MEASURE, position, measure_to=new_bit)
+        graph.add_node(GateName.MEASURE, position, measure_to=new_bit)
 
 
 def _fill_empty_spaces(graph: QuantumGraph) -> None:
@@ -120,7 +120,7 @@ def _fill_empty_spaces(graph: QuantumGraph) -> None:
             if graph.has_node_at(position):
                 continue
 
-            graph.add_new_node(GateName.ID, position)
+            graph.add_node(GateName.ID, position)
 
 
 def _fix_positional_edges(graph: QuantumGraph) -> None:
@@ -133,7 +133,7 @@ def _fix_positional_edges(graph: QuantumGraph) -> None:
 
             for direction, adjacent_position in adjacent_positions.items():
                 if graph.has_node_at(adjacent_position):
-                    graph.add_new_edge(direction, node_position, adjacent_position)
+                    graph.add_edge(direction, node_position, adjacent_position)
 
 
 def _clear_positional_edges(graph: QuantumGraph) -> None:
@@ -142,7 +142,7 @@ def _clear_positional_edges(graph: QuantumGraph) -> None:
     graph.clear_edges()
 
     for edge in non_positional_edges:
-        graph.add_edge(edge)
+        graph.add_edge(edge.name, edge.start.position, edge.end.position)
 
 
 def _find_adjacent_positions(position: Position) -> dict[EdgeName, Position]:

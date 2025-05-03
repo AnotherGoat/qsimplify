@@ -19,7 +19,7 @@ class SimplificationRule:
     def _fill_replacement(self) -> None:
         for position in self.pattern.iter_positions_by_row():
             if not self.replacement.has_node_at(position):
-                self.replacement.add_new_node(GateName.ID, position)
+                self.replacement.add_node(GateName.ID, position)
 
     def _generate_mask(self) -> None:
         self.mask = {node.position: node.name != GateName.ID for node in self.replacement}

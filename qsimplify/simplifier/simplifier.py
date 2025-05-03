@@ -163,7 +163,7 @@ class Simplifier:
 
         for old_position, new_position in mappings.items():
             node = graph[old_position]
-            subgraph.add_new_node(
+            subgraph.add_node(
                 node.name,
                 new_position,
                 rotation=node.rotation,
@@ -174,7 +174,7 @@ class Simplifier:
                 edge for edge in graph.node_edges(old_position) if not edge.name.is_positional()
             ]
             for edge in edges:
-                subgraph.add_new_edge(
+                subgraph.add_edge(
                     edge.name,
                     mappings[edge.start.position],
                     mappings[edge.end.position],
@@ -285,15 +285,13 @@ class Simplifier:
 
         for original, match in mappings.items():
             node = replacement[match]
-            graph.add_new_node(
-                node.name, original, rotation=node.rotation, measure_to=node.measure_to
-            )
+            graph.add_node(node.name, original, rotation=node.rotation, measure_to=node.measure_to)
 
             for edge in replacement.node_edges(match):
                 if edge.name.is_positional():
                     continue
 
-                graph.add_new_edge(edge.name, original, reverse_mappings[edge.end.position])
+                graph.add_edge(edge.name, original, reverse_mappings[edge.end.position])
 
         graph_cleaner.clean_and_fill(graph)
 

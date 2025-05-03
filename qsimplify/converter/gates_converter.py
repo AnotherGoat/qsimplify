@@ -24,6 +24,7 @@ from qsimplify.model import (
     YGate,
     ZGate,
 )
+from qsimplify.model.quantum_gate import CczGate, SdgGate, SGate, SxGate, SyGate, TdgGate, TGate
 
 
 @dataclass
@@ -67,6 +68,12 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.RX: self._add_rx_to_graph,
             GateName.RY: self._add_ry_to_graph,
             GateName.RZ: self._add_rz_to_graph,
+            GateName.S: self._add_s_to_graph,
+            GateName.SDG: self._add_sdg_to_graph,
+            GateName.SX: self._add_sx_to_graph,
+            GateName.SY: self._add_sy_to_graph,
+            GateName.T: self._add_t_to_graph,
+            GateName.TDG: self._add_tdg_to_graph,
             GateName.MEASURE: self._add_measure_to_graph,
             GateName.SWAP: self._add_swap_to_graph,
             GateName.CH: self._add_ch_to_graph,
@@ -74,6 +81,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.CZ: self._add_cz_to_graph,
             GateName.CSWAP: self._add_cswap_to_graph,
             GateName.CCX: self._add_ccx_to_graph,
+            GateName.CCZ: self._add_ccz_to_graph,
         }
 
     def _add_to_graph(self, context: ToGraphContext) -> None:
@@ -85,7 +93,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             raise NotImplementedError(f"No to_graph handler for gate type {context.gate.name}")
 
     @staticmethod
-    def _add_id_to_graph(context: ToGraphContext) -> None:
+    def _add_id_to_graph(_: ToGraphContext) -> None:
         pass
 
     @staticmethod
@@ -124,6 +132,36 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         builder.push_rz(gate.angle, gate.qubit)
 
     @staticmethod
+    def _add_s_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_s(gate.qubit)
+
+    @staticmethod
+    def _add_sdg_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_sdg(gate.qubit)
+
+    @staticmethod
+    def _add_sx_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_sx(gate.qubit)
+
+    @staticmethod
+    def _add_sy_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_sy(gate.qubit)
+
+    @staticmethod
+    def _add_t_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_t(gate.qubit)
+
+    @staticmethod
+    def _add_tdg_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_tdg(gate.qubit)
+
+    @staticmethod
     def _add_measure_to_graph(context: ToGraphContext) -> None:
         builder, gate = context.unpack()
         builder.push_measure(gate.qubit, gate.bit)
@@ -157,6 +195,11 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_ccx_to_graph(context: ToGraphContext) -> None:
         builder, gate = context.unpack()
         builder.push_ccx(gate.control_qubit, gate.control_qubit2, gate.target_qubit)
+
+    @staticmethod
+    def _add_ccz_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_ccz(gate.qubit, gate.qubit2, gate.qubit3)
 
     def from_graph(self, graph: QuantumGraph) -> list[QuantumGate]:
         gates = []
@@ -193,6 +236,12 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.RX: self._add_rx_from_graph,
             GateName.RY: self._add_ry_from_graph,
             GateName.RZ: self._add_rz_from_graph,
+            GateName.S: self._add_s_from_graph,
+            GateName.SDG: self._add_sdg_from_graph,
+            GateName.SX: self._add_sx_from_graph,
+            GateName.SY: self._add_sy_from_graph,
+            GateName.T: self._add_t_from_graph,
+            GateName.TDG: self._add_tdg_from_graph,
             GateName.MEASURE: self._add_measure_from_graph,
             GateName.SWAP: self._add_swap_from_graph,
             GateName.CH: self._add_ch_from_graph,
@@ -200,17 +249,18 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.CZ: self._add_cz_from_graph,
             GateName.CSWAP: self._add_cswap_from_graph,
             GateName.CCX: self._add_ccx_from_graph,
+            GateName.CCZ: self._add_ccz_from_graph,
         }
 
     @staticmethod
-    def _add_id_from_graph(context: FromGraphContext) -> None:
+    def _add_id_from_graph(_: FromGraphContext) -> None:
         pass
 
     @staticmethod
     def _add_single_gate_from_graph(
         context: FromGraphContext, factory: Callable[..., QuantumGate]
     ) -> None:
-        graph, node, gates, skipped = context.unpack()
+        _, node, gates, _ = context.unpack()
 
         gate = factory(qubit=node.position.row)
         gates.append(gate)
@@ -235,7 +285,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_rotation_gate_from_graph(
         context: FromGraphContext, factory: Callable[..., QuantumGate]
     ) -> None:
-        graph, node, gates, skipped = context.unpack()
+        _, node, gates, _ = context.unpack()
 
         gate = factory(qubit=node.position.row, angle=node.rotation)
         gates.append(gate)
@@ -253,8 +303,32 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         GatesConverter._add_rotation_gate_from_graph(context, RzGate)
 
     @staticmethod
+    def _add_s_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_single_gate_from_graph(context, SGate)
+
+    @staticmethod
+    def _add_sdg_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_single_gate_from_graph(context, SdgGate)
+
+    @staticmethod
+    def _add_sx_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_single_gate_from_graph(context, SxGate)
+
+    @staticmethod
+    def _add_sy_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_single_gate_from_graph(context, SyGate)
+
+    @staticmethod
+    def _add_t_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_single_gate_from_graph(context, TGate)
+
+    @staticmethod
+    def _add_tdg_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_single_gate_from_graph(context, TdgGate)
+
+    @staticmethod
     def _add_measure_from_graph(context: FromGraphContext) -> None:
-        graph, node, gates, skipped = context.unpack()
+        _, node, gates, _ = context.unpack()
 
         gate = MeasureGate(qubit=node.position.row, bit=node.measure_to)
         gates.append(gate)
@@ -356,3 +430,17 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         skipped.add(control_position)
         skipped.add(control2_position)
         skipped.add(target_position)
+
+    @staticmethod
+    def _add_ccz_from_graph(context: FromGraphContext) -> None:
+        graph, node, gates, skipped = context.unpack()
+        edges = graph.node_edge_data(node.position)
+        other_position = edges.works_with[0].position
+        other_position2 = edges.works_with[1].position
+
+        gate = CczGate(
+            qubit=node.position.row, qubit2=other_position.row, qubit3=other_position2.row
+        )
+        gates.append(gate)
+        skipped.add(other_position)
+        skipped.add(other_position2)
