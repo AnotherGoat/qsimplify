@@ -24,7 +24,16 @@ from qsimplify.model import (
     YGate,
     ZGate,
 )
-from qsimplify.model.quantum_gate import CczGate, SdgGate, SGate, SxGate, SyGate, TdgGate, TGate
+from qsimplify.model.quantum_gate import (
+    CczGate,
+    CyGate,
+    SdgGate,
+    SGate,
+    SxGate,
+    SyGate,
+    TdgGate,
+    TGate,
+)
 
 
 @dataclass
@@ -78,6 +87,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.SWAP: self._add_swap_to_graph,
             GateName.CH: self._add_ch_to_graph,
             GateName.CX: self._add_cx_to_graph,
+            GateName.CY: self._add_cy_to_graph,
             GateName.CZ: self._add_cz_to_graph,
             GateName.CSWAP: self._add_cswap_to_graph,
             GateName.CCX: self._add_ccx_to_graph,
@@ -182,6 +192,11 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         builder.push_cx(gate.control_qubit, gate.target_qubit)
 
     @staticmethod
+    def _add_cy_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_cy(gate.control_qubit, gate.target_qubit)
+
+    @staticmethod
     def _add_cz_to_graph(context: ToGraphContext) -> None:
         builder, gate = context.unpack()
         builder.push_cz(gate.qubit, gate.qubit2)
@@ -246,6 +261,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.SWAP: self._add_swap_from_graph,
             GateName.CH: self._add_ch_from_graph,
             GateName.CX: self._add_cx_from_graph,
+            GateName.CY: self._add_cy_from_graph,
             GateName.CZ: self._add_cz_from_graph,
             GateName.CSWAP: self._add_cswap_from_graph,
             GateName.CCX: self._add_ccx_from_graph,
@@ -370,6 +386,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     @staticmethod
     def _add_cx_from_graph(context: FromGraphContext) -> None:
         GatesConverter._add_control_gate_from_graph(context, CxGate)
+
+    @staticmethod
+    def _add_cy_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_control_gate_from_graph(context, CyGate)
 
     @staticmethod
     def _add_cz_from_graph(context: FromGraphContext) -> None:

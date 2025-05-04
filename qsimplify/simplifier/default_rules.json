@@ -98,6 +98,160 @@
   {
     "pattern": [
       {
+        "name": "s",
+        "qubit": 0
+      },
+      {
+        "name": "s",
+        "qubit": 0
+      }
+    ],
+    "replacement": [
+      {
+        "name": "z",
+        "qubit": 0
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "y",
+        "qubit": 0
+      },
+      {
+        "name": "s",
+        "qubit": 0
+      },
+      {
+        "name": "x",
+        "qubit": 0
+      }
+    ],
+    "replacement": [
+      {
+        "name": "s",
+        "qubit": 0
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "s",
+        "qubit": 0
+      },
+      {
+        "name": "sdg",
+        "qubit": 0
+      }
+    ],
+    "replacement": []
+  },
+  {
+    "pattern": [
+      {
+        "name": "sdg",
+        "qubit": 0
+      },
+      {
+        "name": "s",
+        "qubit": 0
+      }
+    ],
+    "replacement": []
+  },
+  {
+    "pattern": [
+      {
+        "name": "s",
+        "qubit": 0
+      },
+      {
+        "name": "s",
+        "qubit": 0
+      },
+      {
+        "name": "s",
+        "qubit": 0
+      }
+    ],
+    "replacement": [
+      {
+        "name": "sdg",
+        "qubit": 0
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "sdg",
+        "qubit": 0
+      },
+      {
+        "name": "sdg",
+        "qubit": 0
+      },
+      {
+        "name": "sdg",
+        "qubit": 0
+      }
+    ],
+    "replacement": [
+      {
+        "name": "s",
+        "qubit": 0
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "t",
+        "qubit": 0
+      },
+      {
+        "name": "t",
+        "qubit": 0
+      }
+    ],
+    "replacement": [
+      {
+        "name": "s",
+        "qubit": 0
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "t",
+        "qubit": 0
+      },
+      {
+        "name": "tdg",
+        "qubit": 0
+      }
+    ],
+    "replacement": []
+  },
+  {
+    "pattern": [
+      {
+        "name": "tdg",
+        "qubit": 0
+      },
+      {
+        "name": "t",
+        "qubit": 0
+      }
+    ],
+    "replacement": []
+  },
+  {
+    "pattern": [
+      {
         "name": "ch",
         "control_qubit": 0,
         "target_qubit": 1
@@ -119,6 +273,21 @@
       },
       {
         "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ],
+    "replacement": []
+  },
+  {
+    "pattern": [
+      {
+        "name": "cy",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cy",
         "control_qubit": 0,
         "target_qubit": 1
       }
@@ -217,6 +386,162 @@
         "name": "cx",
         "control_qubit": 1,
         "target_qubit": 0
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "x",
+        "qubit": 0
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "x",
+        "qubit": 0
+      },
+      {
+        "name": "x",
+        "qubit": 1
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "x",
+        "qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "x",
+        "qubit": 1
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "z",
+        "qubit": 0
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "z",
+        "qubit": 0
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "z",
+        "qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "z",
+        "qubit": 0
+      },
+      {
+        "name": "z",
+        "qubit": 1
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cz",
+        "qubit": 0,
+        "qubit2": 1
+      },
+      {
+        "name": "x",
+        "qubit": 0
+      },
+      {
+        "name": "cz",
+        "qubit": 0,
+        "qubit2": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "x",
+        "qubit": 0
+      },
+      {
+        "name": "z",
+        "qubit": 1
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cz",
+        "qubit": 0,
+        "qubit2": 1
+      },
+      {
+        "name": "z",
+        "qubit": 0
+      },
+      {
+        "name": "cz",
+        "qubit": 0,
+        "qubit2": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "z",
+        "qubit": 0
       }
     ]
   },
@@ -249,14 +574,8 @@
   {
     "pattern": [
       {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
-      },
-      {
-        "name": "cx",
-        "control_qubit": 1,
-        "target_qubit": 2
+        "name": "sdg",
+        "qubit": 1
       },
       {
         "name": "cx",
@@ -264,25 +583,31 @@
         "target_qubit": 1
       },
       {
-        "name": "cx",
-        "control_qubit": 1,
-        "target_qubit": 2
+        "name": "s",
+        "qubit": 1
       }
     ],
     "replacement": [
       {
-        "name": "cx",
+        "name": "cy",
         "control_qubit": 0,
-        "target_qubit": 2
+        "target_qubit": 1
       }
     ]
   },
   {
     "pattern": [
       {
-        "name": "cx",
-        "control_qubit": 1,
-        "target_qubit": 2
+        "name": "s",
+        "qubit": 1
+      },
+      {
+        "name": "h",
+        "qubit": 1
+      },
+      {
+        "name": "t",
+        "qubit": 1
       },
       {
         "name": "cx",
@@ -290,54 +615,59 @@
         "target_qubit": 1
       },
       {
-        "name": "cx",
-        "control_qubit": 1,
-        "target_qubit": 2
+        "name": "tdg",
+        "qubit": 1
       },
       {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
+        "name": "h",
+        "qubit": 1
+      },
+      {
+        "name": "sdg",
+        "qubit": 1
       }
     ],
     "replacement": [
       {
-        "name": "cx",
+        "name": "ch",
         "control_qubit": 0,
-        "target_qubit": 2
+        "target_qubit": 1
       }
     ]
   },
   {
     "pattern": [
       {
-        "name": "cx",
+        "name": "ccx",
         "control_qubit": 0,
+        "control_qubit2": 1,
         "target_qubit": 2
       },
       {
-        "name": "cx",
-        "control_qubit": 1,
-        "target_qubit": 2
-      },
-      {
-        "name": "cx",
+        "name": "ccx",
         "control_qubit": 0,
-        "target_qubit": 1
+        "control_qubit2": 1,
+        "target_qubit": 2
       }
     ],
-    "replacement": [
+    "replacement": []
+  },
+  {
+    "pattern": [
       {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
+        "name": "ccz",
+        "qubit": 0,
+        "qubit2": 1,
+        "qubit3": 2
       },
       {
-        "name": "cx",
-        "control_qubit": 1,
-        "target_qubit": 2
+        "name": "ccz",
+        "qubit": 0,
+        "qubit2": 1,
+        "qubit3": 2
       }
-    ]
+    ],
+    "replacement": []
   },
   {
     "pattern": [
@@ -370,156 +700,212 @@
   {
     "pattern": [
       {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
+        "name": "h",
+        "qubit": 2
       },
       {
-        "name": "x",
-        "qubit": 0
+        "name": "ccx",
+        "control_qubit": 0,
+        "control_qubit2": 1,
+        "target_qubit": 2
       },
       {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
+        "name": "h",
+        "qubit": 2
       }
     ],
     "replacement": [
       {
-        "name": "x",
-        "qubit": 0
-      },
-      {
-        "name": "x",
-        "qubit": 1
-      }
-    ]
-  },
-  {
-    "pattern": [
-      {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
-      },
-      {
-        "name": "x",
-        "qubit": 1
-      },
-      {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
-      }
-    ],
-    "replacement": [
-      {
-        "name": "x",
-        "qubit": 1
-      }
-    ]
-  },
-  {
-    "pattern": [
-      {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
-      },
-      {
-        "name": "z",
-        "qubit": 0
-      },
-      {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
-      }
-    ],
-    "replacement": [
-      {
-        "name": "z",
-        "qubit": 0
-      }
-    ]
-  },
-  {
-    "pattern": [
-      {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
-      },
-      {
-        "name": "z",
-        "qubit": 1
-      },
-      {
-        "name": "cx",
-        "control_qubit": 0,
-        "target_qubit": 1
-      }
-    ],
-    "replacement": [
-      {
-        "name": "z",
-        "qubit": 0
-      },
-      {
-        "name": "z",
-        "qubit": 1
-      }
-    ]
-  },
-  {
-    "pattern": [
-      {
-        "name": "cz",
+        "name": "ccz",
         "qubit": 0,
-        "qubit2": 1
-      },
-      {
-        "name": "x",
-        "qubit": 0
-      },
-      {
-        "name": "cz",
-        "qubit": 0,
-        "qubit2": 1
-      }
-    ],
-    "replacement": [
-      {
-        "name": "x",
-        "qubit": 0
-      },
-      {
-        "name": "z",
-        "qubit": 1
+        "qubit2": 1,
+        "qubit3": 2
       }
     ]
   },
   {
     "pattern": [
       {
-        "name": "cz",
-        "qubit": 0,
-        "qubit2": 1
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
       },
       {
-        "name": "z",
-        "qubit": 0
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
       },
       {
-        "name": "cz",
-        "qubit": 0,
-        "qubit2": 1
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
       }
     ],
     "replacement": [
       {
-        "name": "z",
-        "qubit": 0
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 2
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 2
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 2
+      }
+    ],
+    "replacement": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ],
+    "replacement": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 2
+      }
+    ],
+    "replacement": [
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      }
+    ]
+  },
+  {
+    "pattern": [
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
+      },
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      }
+    ],
+    "replacement": [
+      {
+        "name": "cx",
+        "control_qubit": 1,
+        "target_qubit": 2
+      },
+      {
+        "name": "cx",
+        "control_qubit": 0,
+        "target_qubit": 1
       }
     ]
   }

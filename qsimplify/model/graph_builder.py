@@ -94,6 +94,12 @@ class GraphBuilder:
             control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit])
         )
 
+    def push_cy(self, control_qubit: int, target_qubit: int) -> GraphBuilder:
+        """Push a CY gate at the end of the graph."""
+        return self.put_cy(
+            control_qubit, target_qubit, self._find_push_column([control_qubit, target_qubit])
+        )
+
     def push_cz(self, qubit: int, qubit2: int) -> GraphBuilder:
         """Push a CZ gate at the end of the graph."""
         return self.put_cz(qubit, qubit2, self._find_push_column([qubit, qubit2]))
@@ -207,6 +213,10 @@ class GraphBuilder:
     def put_cx(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
         """Put a CX gate directly into the graph, which may break it when used incorrectly."""
         return self._put_control(GateName.CX, control_qubit, target_qubit, column)
+
+    def put_cy(self, control_qubit: int, target_qubit: int, column: int) -> GraphBuilder:
+        """Put a CY gate directly into the graph, which may break it when used incorrectly."""
+        return self._put_control(GateName.CY, control_qubit, target_qubit, column)
 
     def _put_control(
         self, name: GateName, control_qubit: int, target_qubit: int, column: int

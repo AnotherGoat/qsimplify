@@ -42,6 +42,8 @@ class GateName(str, Enum):
     """Two-qubit controlled Hadamard gate."""
     CX = "cx"
     """Two-qubit controlled X gate. Also known as the CNOT gate."""
+    CY = "cy"
+    """Two-qubit controlled Y gate."""
     CZ = "cz"
     """Two-qubit controlled Z gate."""
     CSWAP = "cswap"
@@ -78,7 +80,7 @@ class GateName(str, Enum):
         match self:
             case GateName.ID:
                 return 0
-            case GateName.SWAP | GateName.CH | GateName.CX | GateName.CZ:
+            case GateName.SWAP | GateName.CH | GateName.CX | GateName.CY | GateName.CZ:
                 return 2
             case GateName.CSWAP | GateName.CCX | GateName.CCZ:
                 return 3
@@ -92,7 +94,7 @@ class GateName(str, Enum):
     def control_qubit_count(self) -> int:
         """Get the number of control qubits used by this type of gate."""
         match self:
-            case GateName.CH | GateName.CX | GateName.CZ | GateName.CSWAP:
+            case GateName.CH | GateName.CX | GateName.CY | GateName.CZ | GateName.CSWAP:
                 return 1
             case GateName.CCX | GateName.CCZ:
                 return 2

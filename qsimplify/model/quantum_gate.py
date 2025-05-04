@@ -226,6 +226,12 @@ class CxGate(SingleControlledGate):
     name: Literal[GateName.CX] = GateName.CX
 
 
+class CyGate(SingleControlledGate):
+    """Two-qubit controlled Y gate."""
+
+    name: Literal[GateName.CY] = GateName.CY
+
+
 class CzGate(TwoQubitGate):
     """Two-qubit controlled Z gate."""
 
@@ -345,6 +351,7 @@ QuantumGate = Annotated[
         SwapGate,
         ChGate,
         CxGate,
+        CyGate,
         CzGate,
         CswapGate,
         CcxGate,
