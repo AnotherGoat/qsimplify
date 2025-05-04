@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 from typing import Annotated, Literal, Self, Union
 
 from pydantic import (
@@ -20,13 +19,6 @@ from qsimplify.model import GateName
 def _check_index(value: int) -> int:
     if value < 0:
         raise ValueError("it must be 0 or positive")
-
-    return value
-
-
-def _check_angle(value: float) -> float:
-    if value < 0 or value >= 2 * math.tau:
-        raise ValueError(f"it must be between 0 and {2 * math.tau} radians")
 
     return value
 
@@ -95,11 +87,6 @@ class ZGate(SingleGate):
 
 class RotationGate(SingleGate):
     angle: float
-
-    @field_validator("angle")
-    @classmethod
-    def _validate_angle(cls, value: float) -> float:
-        return _check_angle(value)
 
 
 class RxGate(RotationGate):

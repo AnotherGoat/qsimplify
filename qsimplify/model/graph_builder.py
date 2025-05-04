@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import numpy
+
 from qsimplify.model import graph_cleaner
 from qsimplify.model.edge_name import EdgeName
 from qsimplify.model.gate_name import GateName
@@ -39,15 +41,24 @@ class GraphBuilder:
         return self.put_z(qubit, self._find_push_column([qubit]))
 
     def push_rx(self, phi: float, qubit: int) -> GraphBuilder:
-        """Push a RX gate at the end of the graph."""
+        """Push a RX gate at the end of the graph.
+
+        Angles are normalized to [0, 4pi).
+        """
         return self.put_rx(phi, qubit, self._find_push_column([qubit]))
 
     def push_ry(self, theta: float, qubit: int) -> GraphBuilder:
-        """Push a RY gate at the end of the graph."""
+        """Push a RY gate at the end of the graph.
+
+        Angles are normalized to [0, 4pi).
+        """
         return self.put_ry(theta, qubit, self._find_push_column([qubit]))
 
     def push_rz(self, theta: float, qubit: int) -> GraphBuilder:
-        """Push a RZ gate at the end of the graph."""
+        """Push a RZ gate at the end of the graph.
+
+        Angles are normalized to [0, 4pi).
+        """
         return self.put_rz(theta, qubit, self._find_push_column([qubit]))
 
     def push_s(self, qubit: int) -> GraphBuilder:
@@ -151,20 +162,32 @@ class GraphBuilder:
         return self
 
     def put_rx(self, phi: float, qubit: int, column: int) -> GraphBuilder:
-        """Put a RX gate directly into the graph, which may break it when used incorrectly."""
+        """Put a RX gate directly into the graph, which may break it when used incorrectly.
+
+        Angles are normalized to [0, 4pi).
+        """
         return self._put_rotation(GateName.RX, phi, qubit, column)
 
     def put_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        """Put a RY gate directly into the graph, which may break it when used incorrectly."""
+        """Put a RY gate directly into the graph, which may break it when used incorrectly.
+
+        Angles are normalized to [0, 4pi).
+        """
         return self._put_rotation(GateName.RY, theta, qubit, column)
 
     def put_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        """Put a RZ gate directly into the graph, which may break it when used incorrectly."""
+        """Put a RZ gate directly into the graph, which may break it when used incorrectly.
+
+        Angles are normalized to [0, 4pi).
+        """
         return self._put_rotation(GateName.RZ, theta, qubit, column)
 
     def _put_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
-        self._graph.add_node(name, Position(qubit, column), rotation=angle)
+        self._graph.add_node(name, Position(qubit, column), rotation=self._normalize_angle(angle))
         return self
+
+    def _normalize_angle(self, angle: float) -> float:
+        return angle % (4 * numpy.pi)
 
     def put_s(self, qubit: int, column: int) -> GraphBuilder:
         """Put a S gate directly into the graph, which may break it when used incorrectly."""
