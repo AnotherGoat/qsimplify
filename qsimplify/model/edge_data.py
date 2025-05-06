@@ -5,8 +5,7 @@ from qsimplify.model.graph_node import GraphNode
 
 @dataclass(frozen=True)
 class EdgeData:
-    """
-    A view of a node in a quantum graph, including all the nodes in the edges connected to it.
+    """A view of a node in a quantum graph, including all the nodes in the edges connected to it.
 
     Attributes:
         origin: The node at the center of the view.
@@ -16,6 +15,7 @@ class EdgeData:
         targets: The nodes that are targeted by the origin node.
         controlled_by: The nodes that control the origin node.
         works_with: The nodes that work together with the origin node.
+
     """
 
     origin: GraphNode

@@ -243,7 +243,7 @@ def test_add_unknown_unitary_to_graph():
 
     circuit.append(YGate().power(1 / 3), [0])
 
-    with pytest.raises(ValueError, match="Non-SY unitary gates are not supported"):
+    with pytest.raises(ValueError, match=r"Non-SY unitary gates are not supported"):
         converter.to_graph(circuit)
 
 

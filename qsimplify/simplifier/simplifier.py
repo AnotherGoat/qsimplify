@@ -1,6 +1,8 @@
 import itertools
+import math
 from pathlib import Path
 
+from qsimplify import math_utils
 from qsimplify.model import GateName, GraphNode, Position, QuantumGraph, graph_cleaner
 from qsimplify.simplifier.graph_mappings import GraphMappings
 from qsimplify.simplifier.rule_parser import RuleParser
@@ -9,9 +11,12 @@ from qsimplify.utils import setup_logger
 
 
 class Simplifier:
+    """Simplifies a quantum graph using a set of rules."""
+
     _default_rules: list[SimplificationRule]
 
     def __init__(self) -> None:
+        """Create a new simplifier."""
         self._logger = setup_logger("Simplifier")
 
         parser = RuleParser()
@@ -23,6 +28,11 @@ class Simplifier:
     def simplify_graph(
         self, graph: QuantumGraph, rules: list[SimplificationRule] | None = None
     ) -> QuantumGraph:
+        """Simplify a quantum graph using a set of rules.
+
+        A custom set of rules can be provided. If not, the default rules will be used.
+        The graph will be cleaned up after applying all the rules.
+        """
         if rules is None:
             rules = self._default_rules
 
@@ -35,6 +45,10 @@ class Simplifier:
         return result
 
     def apply_simplification_rule(self, graph: QuantumGraph, rule: SimplificationRule) -> None:
+        """Apply a single simplification rule to a graph.
+
+        Note that the graph is not cleaned up after the rule is applied.
+        """
         self._logger.debug("Applying rule with mask %s", rule.mask)
         mappings = self.find_pattern(graph, rule.pattern, mask=rule.mask)
 
@@ -48,6 +62,7 @@ class Simplifier:
         pattern: QuantumGraph,
         mask: dict[Position, bool] | None = None,
     ) -> GraphMappings | None:
+        """Try finding a pattern in a graph."""
         pattern_start = self._find_start(pattern)
         self._logger.debug("Pattern start found at %s", pattern_start.position)
 
@@ -87,9 +102,20 @@ class Simplifier:
     def _are_nodes_similar(start: GraphNode, end: GraphNode) -> bool:
         return (
             start.name == end.name
-            and start.rotation == end.rotation
-            and start.measure_to == end.measure_to
+            and Simplifier._are_angles_similar(start.angle, end.angle)
+            and start.bit == end.bit
         )
+
+    @staticmethod
+    def _are_angles_similar(first: float | None, second: float | None) -> bool:
+        """Check whether two angles are close enough to be considered equal."""
+        if first is None and second is None:
+            return True
+
+        if first is None or second is None:
+            return False
+
+        return math_utils.are_floats_similar(first, second)
 
     def _match_pattern(
         self,
@@ -166,8 +192,8 @@ class Simplifier:
             subgraph.add_node(
                 node.name,
                 new_position,
-                rotation=node.rotation,
-                measure_to=node.measure_to,
+                angle=node.angle,
+                bit=node.bit,
             )
 
             edges = [
@@ -285,7 +311,7 @@ class Simplifier:
 
         for original, match in mappings.items():
             node = replacement[match]
-            graph.add_node(node.name, original, rotation=node.rotation, measure_to=node.measure_to)
+            graph.add_node(node.name, original, angle=node.angle, bit=node.bit)
 
             for edge in replacement.node_edges(match):
                 if edge.name.is_positional():

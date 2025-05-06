@@ -7,7 +7,7 @@ from qsimplify.analyzer import analyzer
 from qsimplify.analyzer.metrics import DeltaMetrics
 from qsimplify.converter import GatesConverter, QiskitConverter
 from qsimplify.drawer import Drawer
-from qsimplify.generator.qiskit_generator import QiskitGenerator
+from qsimplify.generator import QiskitGenerator
 from qsimplify.model import quantum_gate
 from qsimplify.model.quantum_graph import QuantumGraph
 from qsimplify.simplifier import Simplifier
@@ -25,12 +25,31 @@ def _simplify_circuit() -> tuple[Response, int]:
     graph = _json_to_graph(request.get_json()["gates"])
     simplified_graph = simplifier.simplify_graph(graph)
     simplified_gates = [gate.model_dump() for gate in gates_converter.from_graph(simplified_graph)]
-    return jsonify(simplified_gates), 200
+    original_metrics = analyzer.calculate_metrics(graph)
+    new_metrics = analyzer.calculate_metrics(simplified_graph)
+    delta_metrics = analyzer.compare_metrics(graph, simplified_graph)
+    build_steps = qiskit_generator.generate(graph)
+
+    result = {
+        "gates": simplified_gates,
+        "original_metrics": original_metrics,
+        "new_metrics": new_metrics,
+        "delta_metrics": _remove_empty_metrics(delta_metrics),
+        "code": build_steps,
+    }
+
+    return jsonify(result), 200
 
 
 def _json_to_graph(json: Any) -> QuantumGraph:
     gates = quantum_gate.parse_gates(json)
     return gates_converter.to_graph(gates)
+
+
+def _remove_empty_metrics(metrics: DeltaMetrics) -> dict[str, int]:
+    return {
+        metric_name: value for metric_name, value in asdict(metrics).items() if value is not None
+    }
 
 
 @circuit_controller.post("/plot")
@@ -67,10 +86,4 @@ def _compare_metrics() -> tuple[Response, int]:
     old = _json_to_graph(request.get_json()["old_gates"])
     new = _json_to_graph(request.get_json()["new_gates"])
     delta_metrics = analyzer.compare_metrics(old, new)
-    return jsonify({"delta_metrics": _remove_empty_fields(delta_metrics)}), 200
-
-
-def _remove_empty_fields(metrics: DeltaMetrics) -> dict[str, int]:
-    return {
-        metric_name: value for metric_name, value in asdict(metrics).items() if value is not None
-    }
+    return jsonify({"delta_metrics": _remove_empty_metrics(delta_metrics)}), 200

@@ -1,3 +1,5 @@
+import numpy
+
 from qsimplify.model import GraphEdge, GraphNode, Position, QuantumGraph, graph_cleaner
 from tests import *
 
@@ -25,7 +27,7 @@ def test_fix_positional_edges():
     ]
 
     for node in nodes:
-        graph.add_node(node.name, node.position, node.rotation, node.measure_to)
+        graph.add_node(node.name, node.position, node.angle, node.bit)
 
     graph_cleaner.fill(graph)
     edges = graph.edges()
@@ -59,12 +61,35 @@ def test_remove_empty_columns():
     assert graph.width == 2
 
 
+def test_normalize_rotation_angles():
+    graph = QuantumGraph()
+
+    graph.add_node(RX, Position(0, 0), angle=0)
+    graph.add_node(RY, Position(0, 1), angle=numpy.pi)
+    graph.add_node(RZ, Position(0, 2), angle=2 * numpy.pi)
+    graph.add_node(RX, Position(0, 3), angle=3 * numpy.pi)
+    graph.add_node(RY, Position(0, 4), angle=4 * numpy.pi)
+    graph.add_node(RZ, Position(0, 5), angle=5 * numpy.pi)
+    graph.add_node(RX, Position(0, 6), angle=50)
+
+    graph_cleaner.clean_and_fill(graph)
+
+    assert len(graph) == 7
+    assert graph[Position(0, 0)].angle == 0
+    assert graph[Position(0, 1)].angle == numpy.pi
+    assert graph[Position(0, 2)].angle == 2 * numpy.pi
+    assert graph[Position(0, 3)].angle == 3 * numpy.pi
+    assert graph[Position(0, 4)].angle == 0
+    assert graph[Position(0, 5)].angle == numpy.pi
+    assert graph[Position(0, 6)].angle == 50 % (4 * numpy.pi)
+
+
 def test_remove_unused_bits():
     graph = QuantumGraph()
 
-    graph.add_node(MEASURE, Position(0, 0), measure_to=0)
-    graph.add_node(MEASURE, Position(1, 0), measure_to=1)
-    graph.add_node(MEASURE, Position(2, 0), measure_to=3)
+    graph.add_node(MEASURE, Position(0, 0), bit=0)
+    graph.add_node(MEASURE, Position(1, 0), bit=1)
+    graph.add_node(MEASURE, Position(2, 0), bit=3)
 
     assert graph.bits == 4
 

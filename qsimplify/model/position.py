@@ -4,12 +4,12 @@ from typing import Iterator
 
 @dataclass(frozen=True)
 class Position:
-    """
-    Represents a (row, column) position in a QuantumGraph.
+    """Represents a (row, column) position in a QuantumGraph.
 
     Attributes:
         row: The row, equivalent to the qubit index. Cannot be negative.
         column: The column index. Cannot be negative.
+
     """
 
     row: int

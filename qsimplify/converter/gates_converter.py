@@ -303,7 +303,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     ) -> None:
         _, node, gates, _ = context.unpack()
 
-        gate = factory(qubit=node.position.row, angle=node.rotation)
+        gate = factory(qubit=node.position.row, angle=node.angle)
         gates.append(gate)
 
     @staticmethod
@@ -346,7 +346,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_measure_from_graph(context: FromGraphContext) -> None:
         _, node, gates, _ = context.unpack()
 
-        gate = MeasureGate(qubit=node.position.row, bit=node.measure_to)
+        gate = MeasureGate(qubit=node.position.row, bit=node.bit)
         gates.append(gate)
 
     @staticmethod

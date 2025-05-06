@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import numpy
-
 from qsimplify.model import graph_cleaner
 from qsimplify.model.edge_name import EdgeName
 from qsimplify.model.gate_name import GateName
@@ -40,26 +38,17 @@ class GraphBuilder:
         """Push a Z gate at the end of the graph."""
         return self.put_z(qubit, self._find_push_column([qubit]))
 
-    def push_rx(self, phi: float, qubit: int) -> GraphBuilder:
-        """Push a RX gate at the end of the graph.
+    def push_rx(self, angle: float, qubit: int) -> GraphBuilder:
+        """Push a RX gate at the end of the graph."""
+        return self.put_rx(angle, qubit, self._find_push_column([qubit]))
 
-        Angles are normalized to [0, 4pi).
-        """
-        return self.put_rx(phi, qubit, self._find_push_column([qubit]))
+    def push_ry(self, angle: float, qubit: int) -> GraphBuilder:
+        """Push a RY gate at the end of the graph."""
+        return self.put_ry(angle, qubit, self._find_push_column([qubit]))
 
-    def push_ry(self, theta: float, qubit: int) -> GraphBuilder:
-        """Push a RY gate at the end of the graph.
-
-        Angles are normalized to [0, 4pi).
-        """
-        return self.put_ry(theta, qubit, self._find_push_column([qubit]))
-
-    def push_rz(self, theta: float, qubit: int) -> GraphBuilder:
-        """Push a RZ gate at the end of the graph.
-
-        Angles are normalized to [0, 4pi).
-        """
-        return self.put_rz(theta, qubit, self._find_push_column([qubit]))
+    def push_rz(self, angle: float, qubit: int) -> GraphBuilder:
+        """Push a RZ gate at the end of the graph."""
+        return self.put_rz(angle, qubit, self._find_push_column([qubit]))
 
     def push_s(self, qubit: int) -> GraphBuilder:
         """Push a S gate at the end of the graph."""
@@ -161,33 +150,21 @@ class GraphBuilder:
         self._graph.add_node(name, Position(qubit, column))
         return self
 
-    def put_rx(self, phi: float, qubit: int, column: int) -> GraphBuilder:
-        """Put a RX gate directly into the graph, which may break it when used incorrectly.
+    def put_rx(self, angle: float, qubit: int, column: int) -> GraphBuilder:
+        """Put a RX gate directly into the graph, which may break it when used incorrectly."""
+        return self._put_rotation(GateName.RX, angle, qubit, column)
 
-        Angles are normalized to [0, 4pi).
-        """
-        return self._put_rotation(GateName.RX, phi, qubit, column)
+    def put_ry(self, angle: float, qubit: int, column: int) -> GraphBuilder:
+        """Put a RY gate directly into the graph, which may break it when used incorrectly."""
+        return self._put_rotation(GateName.RY, angle, qubit, column)
 
-    def put_ry(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        """Put a RY gate directly into the graph, which may break it when used incorrectly.
-
-        Angles are normalized to [0, 4pi).
-        """
-        return self._put_rotation(GateName.RY, theta, qubit, column)
-
-    def put_rz(self, theta: float, qubit: int, column: int) -> GraphBuilder:
-        """Put a RZ gate directly into the graph, which may break it when used incorrectly.
-
-        Angles are normalized to [0, 4pi).
-        """
-        return self._put_rotation(GateName.RZ, theta, qubit, column)
+    def put_rz(self, angle: float, qubit: int, column: int) -> GraphBuilder:
+        """Put a RZ gate directly into the graph, which may break it when used incorrectly."""
+        return self._put_rotation(GateName.RZ, angle, qubit, column)
 
     def _put_rotation(self, name: GateName, angle: float, qubit: int, column: int) -> GraphBuilder:
-        self._graph.add_node(name, Position(qubit, column), rotation=self._normalize_angle(angle))
+        self._graph.add_node(name, Position(qubit, column), angle=angle)
         return self
-
-    def _normalize_angle(self, angle: float) -> float:
-        return angle % (4 * numpy.pi)
 
     def put_s(self, qubit: int, column: int) -> GraphBuilder:
         """Put a S gate directly into the graph, which may break it when used incorrectly."""
@@ -215,7 +192,7 @@ class GraphBuilder:
 
     def put_measure(self, qubit: int, bit: int, column: int) -> GraphBuilder:
         """Put a MEASURE gate directly into the graph, which may break it when used incorrectly."""
-        self._graph.add_node(GateName.MEASURE, Position(qubit, column), measure_to=bit)
+        self._graph.add_node(GateName.MEASURE, Position(qubit, column), bit=bit)
         return self
 
     def put_swap(self, qubit: int, qubit2: int, column: int) -> GraphBuilder:
@@ -270,36 +247,36 @@ class GraphBuilder:
     ) -> GraphBuilder:
         """Put a CSWAP gate directly into the graph, which may break it when used incorrectly."""
         control = Position(control_qubit, column)
-        target1 = Position(target_qubit, column)
+        target = Position(target_qubit, column)
         target2 = Position(target_qubit2, column)
 
         self._graph.add_node(GateName.CSWAP, control)
-        self._graph.add_node(GateName.CSWAP, target1)
+        self._graph.add_node(GateName.CSWAP, target)
         self._graph.add_node(GateName.CSWAP, target2)
 
-        self._graph.add_edge(EdgeName.TARGETS, control, target1)
+        self._graph.add_edge(EdgeName.TARGETS, control, target)
         self._graph.add_edge(EdgeName.TARGETS, control, target2)
-        self._graph.add_edge(EdgeName.CONTROLLED_BY, target1, control)
+        self._graph.add_edge(EdgeName.CONTROLLED_BY, target, control)
         self._graph.add_edge(EdgeName.CONTROLLED_BY, target2, control)
-        self._graph.add_bidirectional_edge(EdgeName.SWAPS_WITH, target1, target2)
+        self._graph.add_bidirectional_edge(EdgeName.SWAPS_WITH, target, target2)
         return self
 
     def put_ccx(
         self, control_qubit: int, control_qubit2: int, target_qubit: int, column: int
     ) -> GraphBuilder:
         """Put a CCX gate directly into the graph, which may break it when used incorrectly."""
-        control1 = Position(control_qubit, column)
+        control = Position(control_qubit, column)
         control2 = Position(control_qubit2, column)
         target = Position(target_qubit, column)
 
-        self._graph.add_node(GateName.CCX, control1)
+        self._graph.add_node(GateName.CCX, control)
         self._graph.add_node(GateName.CCX, control2)
         self._graph.add_node(GateName.CCX, target)
 
-        self._graph.add_edge(EdgeName.TARGETS, control1, target)
+        self._graph.add_edge(EdgeName.TARGETS, control, target)
         self._graph.add_edge(EdgeName.TARGETS, control2, target)
-        self._graph.add_bidirectional_edge(EdgeName.WORKS_WITH, control1, control2)
-        self._graph.add_edge(EdgeName.CONTROLLED_BY, target, control1)
+        self._graph.add_bidirectional_edge(EdgeName.WORKS_WITH, control, control2)
+        self._graph.add_edge(EdgeName.CONTROLLED_BY, target, control)
         self._graph.add_edge(EdgeName.CONTROLLED_BY, target, control2)
         return self
 
@@ -332,8 +309,8 @@ class GraphBuilder:
         return max(latest_columns) if latest_columns else 0
 
     def build(self, clean_up: bool = True) -> QuantumGraph:
-        """
-        Build the graph to get a working result.
+        """Build the graph to get a working result.
+
         By default, any empty rows and columns will be deleted, unless clean_up is set to False.
         """
         if clean_up:
@@ -344,9 +321,7 @@ class GraphBuilder:
         return self._graph
 
     def measure_all(self) -> QuantumGraph:
-        """
-        Build the graph by cleaning it up and then adding a measure gate for every qubit.
-        """
+        """Build the graph by cleaning it up and then adding a measure gate for every qubit."""
         graph_cleaner.clean_and_fill(self._graph)
 
         for row in range(self._graph.height):

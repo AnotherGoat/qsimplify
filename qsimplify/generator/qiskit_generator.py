@@ -20,7 +20,10 @@ class GenerationContext:
 
 
 class QiskitGenerator(CodeGenerator):
+    """Generates Qiskit code that can build a quantum circuit from a graph."""
+
     def generate(self, graph: QuantumGraph) -> str:
+        """Convert the provided graph into coded that uses the Qiskit library."""
         gates = gates_converter.from_graph(graph)
         imports = {"from qiskit import QuantumCircuit"}
 

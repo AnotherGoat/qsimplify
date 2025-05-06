@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Annotated, Literal, Self, Union
 
 from pydantic import (
@@ -43,11 +44,13 @@ def _format_fields(fields: list[str]) -> str:
 
 class BaseGate(BaseModel):
     name: GateName
+    """The name of this gate."""
     model_config = ConfigDict(extra="forbid")
 
 
 class SingleGate(BaseGate):
     qubit: int
+    """The qubit that this gate is placed on."""
 
     @field_validator("qubit")
     @classmethod
@@ -87,6 +90,13 @@ class ZGate(SingleGate):
 
 class RotationGate(SingleGate):
     angle: float
+    """The angle that this gate is rotated by."""
+
+    @field_validator("angle")
+    @classmethod
+    def _validate_angle(cls, value: int) -> int:
+        if not math.isfinite(value):
+            raise ValueError("it must be a finite number (not Inf or NaN)")
 
 
 class RxGate(RotationGate):
@@ -148,6 +158,7 @@ class MeasureGate(SingleGate):
 
     name: Literal[GateName.MEASURE] = GateName.MEASURE
     bit: int
+    """The bit to store the measurement result in."""
 
     @field_validator("bit")
     @classmethod
@@ -157,7 +168,9 @@ class MeasureGate(SingleGate):
 
 class TwoQubitGate(BaseGate):
     qubit: int
+    """The qubit that this gate is placed on."""
     qubit2: int
+    """The second qubit that this gate is placed on."""
 
     @field_validator("qubit")
     @classmethod
@@ -183,7 +196,9 @@ class SwapGate(TwoQubitGate):
 
 class SingleControlledGate(BaseGate):
     control_qubit: int
+    """The qubit that controls its targets."""
     target_qubit: int
+    """The qubit that is controlled by the control qubits."""
 
     @field_validator("control_qubit")
     @classmethod
@@ -230,8 +245,11 @@ class CswapGate(BaseGate):
 
     name: Literal[GateName.CSWAP] = GateName.CSWAP
     control_qubit: int
+    """The qubit that controls its targets."""
     target_qubit: int
+    """The qubit that is controlled by the control qubits."""
     target_qubit2: int
+    """The second qubit that is controlled by the control qubits."""
 
     @field_validator("control_qubit")
     @classmethod
@@ -262,8 +280,11 @@ class CcxGate(BaseGate):
 
     name: Literal[GateName.CCX] = GateName.CCX
     control_qubit: int
+    """The qubit that controls its targets."""
     control_qubit2: int
+    """The second qubit that controls its targets."""
     target_qubit: int
+    """The qubit that is controlled by the control qubits."""
 
     @field_validator("control_qubit")
     @classmethod
@@ -294,8 +315,11 @@ class CczGate(BaseGate):
 
     name: Literal[GateName.CCZ] = GateName.CCZ
     qubit: int
+    """The qubit that this gate is placed on."""
     qubit2: int
+    """The second qubit that this gate is placed on."""
     qubit3: int
+    """The third qubit that this gate is placed on."""
 
     @field_validator("qubit")
     @classmethod
@@ -346,7 +370,7 @@ QuantumGate = Annotated[
     ],
     Field(discriminator="name"),
 ]
-"""Any of the gates that may compose a quantum circuit."""
+"""Any of the gates that may be placed in a quantum circuit."""
 
 _gate_adapter = TypeAdapter(QuantumGate)
 
@@ -355,15 +379,19 @@ type Errors = dict[int, list[str]]
 
 
 class GatesValidationError(Exception):
+    """Exception raised when a list of gates is invalid."""
+
     errors: Errors
+    """A dictionary mapping each gate index to a list of validation errors related to that gate."""
 
     def __init__(self, errors: Errors) -> None:
+        """Create a new gates validation error."""
         self.errors = errors
         super().__init__(f"Gates validation failed {self.errors}")
 
 
 def parse_gates(gates: list[dict]) -> list[QuantumGate]:
-    """Validates and converts a JSON list of dictionaries into a list of quantum gates."""
+    """Validate and convert a JSON list of dictionaries into a list of quantum gates."""
     output: list[QuantumGate] = []
     errors: Errors = {}
 

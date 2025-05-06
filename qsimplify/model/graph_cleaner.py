@@ -1,3 +1,4 @@
+from qsimplify import math_utils
 from qsimplify.model.edge_name import EdgeName
 from qsimplify.model.gate_name import GateName
 from qsimplify.model.position import Position
@@ -8,6 +9,7 @@ def clean_and_fill(graph: QuantumGraph) -> None:
     """Clean the provided graph, which removes empty rows, columns, adjusts bit indices, and also fills up any empty spaces."""
     _remove_empty_rows(graph)
     _remove_empty_columns(graph)
+    _normalize_rotation_angles(graph)
     _remove_unused_bits(graph)
     fill(graph)
 
@@ -16,6 +18,12 @@ def fill(graph: QuantumGraph) -> None:
     """Fill up empty spaces on the provided graph, without removing any empty rows, columns, or adjusting bit indices."""
     _fill_empty_spaces(graph)
     _fix_positional_edges(graph)
+
+
+def _normalize_rotation_angles(graph: QuantumGraph) -> None:
+    for node in [node for node in graph if node.name.is_rotation()]:
+        graph.remove_node(node.position)
+        graph.add_node(node.name, node.position, angle=math_utils.normalize_angle(node.angle))
 
 
 def _remove_empty_rows(graph: QuantumGraph) -> None:
@@ -102,14 +110,14 @@ def _find_empty_columns(graph: QuantumGraph) -> list[int]:
 
 def _remove_unused_bits(graph: QuantumGraph) -> None:
     measure_nodes = [node for node in graph if node.name == GateName.MEASURE]
-    original_values = {node.measure_to for node in measure_nodes}
+    original_values = {node.bit for node in measure_nodes}
     mappings = {original: new for new, original in enumerate(sorted(original_values))}
 
     for node in measure_nodes:
         position = node.position
-        new_bit = mappings[node.measure_to]
+        new_bit = mappings[node.bit]
         graph.remove_node(position)
-        graph.add_node(GateName.MEASURE, position, measure_to=new_bit)
+        graph.add_node(GateName.MEASURE, position, bit=new_bit)
 
 
 def _fill_empty_spaces(graph: QuantumGraph) -> None:

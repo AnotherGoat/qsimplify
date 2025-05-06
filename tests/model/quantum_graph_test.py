@@ -102,7 +102,7 @@ def test_move_nonexistent_node():
     graph.add_node(X, Position(0, 1))
     graph.add_node(Y, Position(0, 2))
 
-    with pytest.raises(ValueError, match="Node at position \\(0, 3\\) does not exist"):
+    with pytest.raises(ValueError, match=r"Node at position \(0, 3\) does not exist"):
         graph.move_node(Position(0, 3), Position(1, 3))
 
 
@@ -111,9 +111,7 @@ def test_null_move():
 
     graph.add_node(H, Position(0, 0))
 
-    with pytest.raises(
-        ValueError, match="Start and end positions shouldn't be the same \\(0, 0\\)"
-    ):
+    with pytest.raises(ValueError, match=r"Start and end positions shouldn't be the same \(0, 0\)"):
         graph.move_node(Position(0, 0), Position(0, 0))
 
 
@@ -159,7 +157,7 @@ def test_move_node_preserves_edges():
 def test_insert_column_on_empty_graph():
     graph = QuantumGraph()
 
-    with pytest.raises(ValueError, match="It's not possible to insert a column on an empty graph"):
+    with pytest.raises(ValueError, match=r"It's not possible to insert a column on an empty graph"):
         graph.insert_column(0)
 
 
@@ -169,10 +167,10 @@ def test_insert_out_of_range_column():
     graph.add_node(X, Position(0, 0))
     graph.add_node(Y, Position(0, 1))
 
-    with pytest.raises(ValueError, match="Column index -1 is out of bounds"):
+    with pytest.raises(ValueError, match=r"Column index -1 is out of bounds"):
         graph.insert_column(-1)
 
-    with pytest.raises(ValueError, match="Column index 3 is out of bounds"):
+    with pytest.raises(ValueError, match=r"Column index 3 is out of bounds"):
         graph.insert_column(3)
 
 

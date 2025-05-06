@@ -4,8 +4,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Metrics:
-    """
-    Defines a set of metrics that can be used to estimate the complexity and quality of a quantum circuit.
+    """Defines a set of metrics that can be used to estimate the complexity and quality of a quantum circuit.
 
     Attributes:
         qubit_count: Number of qubits in the circuit.
@@ -25,6 +24,7 @@ class Metrics:
         controlled_gate_count: Total number of controlled gates.
         ancilla_qubit_count: Number of ancilla qubits (qubits that are not measured).
         gate_types_count: Number of different gates used in the circuit.
+
     """
 
     qubit_count: int
@@ -48,8 +48,7 @@ class Metrics:
 
 @dataclass(frozen=True)
 class DeltaMetrics:
-    """
-    Defines the difference in metrics between two quantum circuits.
+    """Defines the difference in metrics between two quantum circuits.
 
     Attributes:
         qubit_count: Difference in qubits in the circuit.
@@ -69,6 +68,7 @@ class DeltaMetrics:
         controlled_gate_count: Difference in controlled gates.
         ancilla_qubit_count: Difference in ancilla qubits (qubits that are not measured).
         gate_types_count: Difference in different gates used in the circuit.
+
     """
 
     qubit_count: int | None = None
@@ -92,8 +92,7 @@ class DeltaMetrics:
 
 @dataclass(frozen=True)
 class DetailedMetrics:
-    """
-    Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
+    """Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
 
     Attributes:
         width (int): Number of qubits in the circuit.
@@ -115,6 +114,7 @@ class DetailedMetrics:
         gate_count (int): Total number of gates in the circuit.
         controlled_gate_count (int): Total number of controlled gates in the circuit.
         single_qubit_percent (float): Ratio of single gates to total gates.
+
     """
 
     # Circuit Size

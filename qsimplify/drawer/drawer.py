@@ -21,11 +21,15 @@ _DARK_GRAY = "#424242"
 
 
 class Drawer:
+    """Class capable of drawing quantum graphs and circuits."""
+
     def __init__(self, view: bool = False) -> None:
+        """Create a new drawer."""
         self._logger = setup_logger("Drawer")
         self.view = view
 
     def save_circuit_png(self, circuit: QuantumCircuit, file_name: str) -> None:
+        """Save a Qiskit circuit to a png file."""
         self._logger.info("Saving circuit to file %s.png", file_name)
 
         figure = circuit.draw("mpl")
@@ -33,6 +37,7 @@ class Drawer:
 
     @staticmethod
     def save_circuit_to_buffer(circuit: QuantumCircuit) -> BytesIO:
+        """Create a buffer with a Qiskit circuit image."""
         figure = circuit.draw(output="mpl")
         buffer = BytesIO()
         figure.savefig(buffer, format="png", bbox_inches="tight")
@@ -41,14 +46,17 @@ class Drawer:
         return buffer
 
     def save_graph_png(self, graph: QuantumGraph, file_name: str) -> None:
+        """Save a quantum graph to a png file."""
         self._logger.info("Saving graph to file %s.png", file_name)
         self._save_graph(graph, file_name, "png", dpi=str(150))
 
     def save_graph_svg(self, graph: QuantumGraph, file_name: str) -> None:
+        """Save a quantum graph to a svg file."""
         self._logger.info("Saving graph to file %s.svg", file_name)
         self._save_graph(graph, file_name, "svg")
 
     def save_graph_to_buffer(self, graph: QuantumGraph, extension: str, **kwargs: str) -> BytesIO:
+        """Create a buffer with a quantum graph image."""
         image = graphviz.Digraph(format=extension)
         image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", **kwargs)
 
@@ -99,9 +107,9 @@ class Drawer:
     def _find_node_label(node: GraphNode) -> str:
         match node.name:
             case GateName.RX | GateName.RY | GateName.RZ:
-                top_label = f"{node.name.name}({node.rotation:.3f})"
+                top_label = f"{node.name.name}({node.angle:.3f})"
             case GateName.MEASURE:
-                top_label = f"M({node.measure_to})"
+                top_label = f"M({node.bit})"
             case _:
                 top_label = f"{node.name.name}"
 
@@ -114,11 +122,20 @@ class Drawer:
                 return "white"
             case GateName.H | GateName.CH:
                 return _RED
-            case GateName.X | GateName.RX | GateName.CX | GateName.CCX:
+            case GateName.X | GateName.RX | GateName.SX | GateName.CX | GateName.CCX:
                 return _BLUE
-            case GateName.Y | GateName.RY:
+            case GateName.Y | GateName.RY | GateName.SY | GateName.CY:
                 return _ORANGE
-            case GateName.Z | GateName.RZ | GateName.CZ:
+            case (
+                GateName.Z
+                | GateName.RZ
+                | GateName.S
+                | GateName.SDG
+                | GateName.T
+                | GateName.TDG
+                | GateName.CZ
+                | GateName.CCZ
+            ):
                 return _GREEN
             case GateName.SWAP | GateName.CSWAP:
                 return _PURPLE

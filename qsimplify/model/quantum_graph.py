@@ -52,7 +52,7 @@ class QuantumGraph:
         if len(measure_nodes) == 0:
             return 0
 
-        highest_bit = max(node.measure_to for node in measure_nodes)
+        highest_bit = max(node.bit for node in measure_nodes)
         return highest_bit + 1
 
     def _get_positions(self) -> Iterator[Position]:
@@ -67,15 +67,15 @@ class QuantumGraph:
         self,
         name: GateName,
         position: Position,
-        rotation: float | None = None,
-        measure_to: int | None = None,
+        angle: float | None = None,
+        bit: int | None = None,
     ) -> None:
         """Add a new node to the graph."""
         self._network.add_node(
             position,
             name=name,
-            rotation=rotation,
-            measure_to=measure_to,
+            angle=angle,
+            bit=bit,
         )
 
     def remove_node(self, position: Position) -> None:
@@ -121,8 +121,8 @@ class QuantumGraph:
         return GraphNode(
             node["name"],
             position,
-            rotation=node["rotation"],
-            measure_to=node["measure_to"],
+            angle=node["angle"],
+            bit=node["bit"],
         )
 
     def __iter__(self) -> Iterator[GraphNode]:
@@ -131,8 +131,8 @@ class QuantumGraph:
             yield GraphNode(
                 node["name"],
                 position,
-                rotation=node["rotation"],
-                measure_to=node["measure_to"],
+                angle=node["angle"],
+                bit=node["bit"],
             )
 
     def iter_positions_by_row(self) -> Iterator[Position]:

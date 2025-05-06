@@ -55,8 +55,8 @@ class GateName(str, Enum):
 
     @classmethod
     def from_str(cls, name: str) -> GateName:
-        """
-        Obtain a GateName by providing its name as a string.
+        """Obtain a GateName by providing its name as a string.
+
         Any combination of uppercase and lowercase letters is accepted.
         """
         try:
@@ -73,8 +73,8 @@ class GateName(str, Enum):
         return self in {GateName.S, GateName.SDG, GateName.SX, GateName.SY}
 
     def number_of_qubits(self) -> int:
-        """
-        Get the number of qubits used by this type of gate.
+        """Get the number of qubits used by this type of gate.
+
         Identity gates return 0 because they add no value to the circuit.
         """
         match self:
@@ -102,8 +102,8 @@ class GateName(str, Enum):
                 return 0
 
     def target_qubit_count(self) -> int:
-        """
-        Get the number of qubits affected by this type of gate.
+        """Get the number of qubits affected by this type of gate.
+
         Identity gates return 0 because they target a single qubit, but make no changes to it.
         """
         match self:
