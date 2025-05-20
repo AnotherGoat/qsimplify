@@ -20,7 +20,7 @@ RUN uv sync --frozen
 ENV DEBUG=False
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=5001
-ENV FLASK_DEBUG=True
+ENV FLASK_DEBUG=False
 
 CMD ["uv", "run", "python", "-m", "qsimplify.app"]
 ENTRYPOINT ["uv", "run"]

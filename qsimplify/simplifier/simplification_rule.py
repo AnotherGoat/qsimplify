@@ -2,7 +2,13 @@ from qsimplify.model import GateName, QuantumGraph
 
 
 class SimplificationRule:
+    """A rule for simplifying a quantum graph, by reeplacing a pattern."""
+
     def __init__(self, pattern: QuantumGraph, replacement: QuantumGraph) -> None:
+        """Create a new simplification rule.
+
+        Neither the pattern nor the replacement can have measurement gates.
+        """
         self.pattern = pattern
         self.replacement = replacement
         self._validate_graphs()
@@ -25,4 +31,5 @@ class SimplificationRule:
         self.mask = {node.position: node.name != GateName.ID for node in self.replacement}
 
     def __str__(self) -> str:
+        """Get a string representation of this rule."""
         return f"Replace\n{self.pattern.draw_grid()}\nWith\n{self.replacement.draw_grid()}"

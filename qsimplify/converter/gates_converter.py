@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Never, assert_never
 
 from qsimplify.converter.graph_converter import GraphConverter
 from qsimplify.model import (
@@ -104,7 +104,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
 
     @staticmethod
     def _add_id_to_graph(_: ToGraphContext) -> None:
-        pass
+        """Adding an identity gate is a no-op."""
 
     @staticmethod
     def _add_h_to_graph(context: ToGraphContext) -> None:
@@ -353,6 +353,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_swap_from_graph(context: FromGraphContext) -> None:
         graph, node, gates, skipped = context.unpack()
         edges = graph.node_edge_data(node.position)
+
+        if edges is None:
+            assert_never(edges)
+
         other_position = edges.swaps_with.position
 
         gate = SwapGate(qubit=node.position.row, qubit2=other_position.row)
@@ -365,6 +369,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     ) -> None:
         graph, node, gates, skipped = context.unpack()
         edges = graph.node_edge_data(node.position)
+
+        if edges is None:
+            assert_never(edges)
+
         is_target = edges.targets == []
 
         if is_target:
@@ -395,6 +403,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_cz_from_graph(context: FromGraphContext) -> None:
         graph, node, gates, skipped = context.unpack()
         edges = graph.node_edge_data(node.position)
+
+        if edges is None:
+            assert_never(edges)
+
         other_position = edges.works_with[0].position
 
         gate = CzGate(qubit=node.position.row, qubit2=other_position.row)
@@ -405,6 +417,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_cswap_from_graph(context: FromGraphContext) -> None:
         graph, node, gates, skipped = context.unpack()
         edges = graph.node_edge_data(node.position)
+
+        if edges is None:
+            assert_never(edges)
+
         is_target = edges.targets == []
 
         if is_target:
@@ -430,6 +446,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_ccx_from_graph(context: FromGraphContext) -> None:
         graph, node, gates, skipped = context.unpack()
         edges = graph.node_edge_data(node.position)
+
+        if edges is None:
+            assert_never(edges)
+
         is_target = edges.targets == []
 
         if is_target:
@@ -455,6 +475,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_ccz_from_graph(context: FromGraphContext) -> None:
         graph, node, gates, skipped = context.unpack()
         edges = graph.node_edge_data(node.position)
+
+        if edges is None:
+            assert_never(edges)
+
         other_position = edges.works_with[0].position
         other_position2 = edges.works_with[1].position
 

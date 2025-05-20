@@ -5,7 +5,8 @@ from flask import Flask, Response, jsonify
 from flask_cors import CORS
 
 from qsimplify.controller.circuit_controller import circuit_controller
-from qsimplify.model.quantum_gate import GatesValidationError
+from qsimplify.model.position import Position
+from qsimplify.model.quantum_gate import GatesValidationError, SGate, parse_gates
 
 load_dotenv()
 _FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "127.0.0.1")

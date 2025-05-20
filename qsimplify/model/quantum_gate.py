@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Annotated, Literal, Self, Union
+from typing import Annotated, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -19,14 +19,14 @@ from qsimplify.model import GateName
 
 def _check_index(value: int) -> int:
     if value < 0:
-        raise ValueError("it must be 0 or positive")
+        raise ValueError("It must be 0 or positive")
 
     return value
 
 
 def _check_indices(fields: list[str], values: list[int]) -> None:
     if len(set(values)) != len(values):
-        raise ValueError(f"{_format_fields(fields)} must be different")
+        raise ValueError(f"Fields {_format_fields(fields)} must be different")
 
 
 def _format_fields(fields: list[str]) -> str:
@@ -96,7 +96,9 @@ class RotationGate(SingleGate):
     @classmethod
     def _validate_angle(cls, value: int) -> int:
         if not math.isfinite(value):
-            raise ValueError("it must be a finite number (not Inf or NaN)")
+            raise ValueError("It must be a finite number (not Inf or NaN)")
+
+        return value
 
 
 class RxGate(RotationGate):
@@ -343,31 +345,29 @@ class CczGate(BaseGate):
 
 
 QuantumGate = Annotated[
-    Union[
-        IdGate,
-        HGate,
-        XGate,
-        YGate,
-        ZGate,
-        RxGate,
-        RyGate,
-        RzGate,
-        SGate,
-        SdgGate,
-        SxGate,
-        SyGate,
-        TGate,
-        TdgGate,
-        MeasureGate,
-        SwapGate,
-        ChGate,
-        CxGate,
-        CyGate,
-        CzGate,
-        CswapGate,
-        CcxGate,
-        CczGate,
-    ],
+    IdGate
+    | HGate
+    | XGate
+    | YGate
+    | ZGate
+    | RxGate
+    | RyGate
+    | RzGate
+    | SGate
+    | SdgGate
+    | SxGate
+    | SyGate
+    | TGate
+    | TdgGate
+    | MeasureGate
+    | SwapGate
+    | ChGate
+    | CxGate
+    | CyGate
+    | CzGate
+    | CswapGate
+    | CcxGate
+    | CczGate,
     Field(discriminator="name"),
 ]
 """Any of the gates that may be placed in a quantum circuit."""
@@ -376,6 +376,23 @@ _gate_adapter = TypeAdapter(QuantumGate)
 
 
 type Errors = dict[int, list[str]]
+ALIASES = {
+    "i": "id",
+    "not": "x",
+    "sz": "s",
+    "sqrtz": "s",
+    "sd": "sdg",
+    "szd": "sdg",
+    "szdg": "sdg",
+    "sqrtzd": "sdg",
+    "sqrtzdg": "sdg",
+    "sqrtx": "sx",
+    "sqrty": "sy",
+    "td": "tdg",
+    "cnot": "cx",
+    "ccnot": "ccx",
+    "toffoli": "ccx",
+}
 
 
 class GatesValidationError(Exception):
@@ -397,6 +414,9 @@ def parse_gates(gates: list[dict]) -> list[QuantumGate]:
 
     for index, json in enumerate(gates):
         try:
+            if "name" in json and json["name"] in ALIASES:
+                json["name"] = ALIASES[json["name"]]
+
             output.append(_gate_adapter.validate_python(json))
         except ValidationError as error:
             errors[index] = _extract_error_messages(error)
@@ -414,6 +434,20 @@ def _extract_error_messages(validation_error: ValidationError) -> list[str]:
 
 
 def _format_error_message(error: ErrorDetails) -> str:
-    location = error["loc"][-1]
     message = error["msg"]
-    return f"{location}: {message}"
+
+    if message == "Unable to extract tag using discriminator 'name'":
+        return "name: Field required"
+
+    if (
+        message.startswith("Input tag")
+        and "found using 'name' does not match any of the expected tags" in message
+    ):
+        return "name: It must be a supported gate name"
+
+    if message.startswith("Value error, "):
+        message = message.replace("Value error, ", "", 1)
+
+    location = error["loc"]
+    last_location = location[-1]
+    return f"{last_location}: {message}"

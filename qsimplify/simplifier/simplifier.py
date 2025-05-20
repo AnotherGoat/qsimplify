@@ -1,5 +1,4 @@
 import itertools
-import math
 from pathlib import Path
 
 from qsimplify import math_utils
