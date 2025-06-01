@@ -8,7 +8,7 @@
 
 ### Optional
 
-- Graphviz is used to draw graphs. You can check installation instructions [here](https://graphviz.org/download/).
+- Graphviz is used to draw quantum circuit graphs. You can check installation instructions [here](https://graphviz.org/download/).
 
 ## Running the program
 
@@ -69,28 +69,28 @@ uv run python -m qsimplify.app
 - Build the demo Docker image
 
 ```shell
-sudo docker rmi qsimplify_demo
-sudo docker build -t qsimplify_demo -f Dockerfile.demo .
+docker rmi qsimplify_demo
+docker build -t qsimplify_demo -f Dockerfile.demo .
 ```
 
 - Run the demo Docker image and keep the output files in the "out" subdirectory
 
 ```shell
 mkdir out
-sudo docker run -it --rm -v "$(pwd)/out:/app/out" qsimplify_demo
+docker run -it --rm -v "$(pwd)/out:/app/out" qsimplify_demo
 ```
 
 - Build the Flask server Docker image
 
 ```shell
-sudo docker rmi qsimplify
-sudo docker build -t qsimplify .
+docker rmi qsimplify
+docker build -t qsimplify .
 ```
 
-- Run the Flask server Docker image and expose it in port 5000
+- Run the Flask server Docker image and expose it in port 5001
 
 ```shell
-sudo docker run -it --rm -p 5000:5000 qsimplify
+docker run -it --rm -p 5001:5001 qsimplify
 ```
 
 ## Examples
