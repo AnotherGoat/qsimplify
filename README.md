@@ -1,14 +1,22 @@
-# Quantum Circuit Simplifier
+# QSimplify
+
+A quantum circuit simplifier prototype, available as a Flask REST API.
+
+## Example usage
+
+https://github.com/user-attachments/assets/9f7d0529-8752-43ca-ac05-570e79179afe
 
 ## Project dependencies
 
+- If you are not using Docker to run the project, you may have to install the following dependencies:
+
 ### Required
 
-- uv is used to manage dependencies. You can check installation instructions [here](https://docs.astral.sh/uv/getting-started/installation/).
+- uv is used to manage dependencies. [Intallation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
 ### Optional
 
-- Graphviz is used to draw quantum circuit graphs. You can check installation instructions [here](https://graphviz.org/download/).
+- Graphviz is used to draw quantum circuit graphs. [Intallation instructions](https://graphviz.org/download/).
 
 ## Running the program
 
