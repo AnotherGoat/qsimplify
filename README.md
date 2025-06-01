@@ -6,17 +6,21 @@ A quantum circuit simplifier prototype, available as a Flask REST API.
 
 https://github.com/user-attachments/assets/9f7d0529-8752-43ca-ac05-570e79179afe
 
+## Simplification rules
+
+[A catalogue of equivalent quantum circuits](docs/quantum_circuit_equivalences.pdf) is included as an extra document, which contains every simplification rule used by the program by default. The code parses the catalogue from [a JSON file](qsimplify/simplifier/default_rules.json).
+
 ## Project dependencies
 
-- If you are not using Docker to run the project, you may have to install the following dependencies:
+If you are not using Docker to run the project, you may have to install the following dependencies:
 
 ### Required
 
-- uv is used to manage dependencies. [Intallation instructions](https://docs.astral.sh/uv/getting-started/installation/).
+- `uv` is used for dependency management. [Intallation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
 ### Optional
 
-- Graphviz is used to draw quantum circuit graphs. [Intallation instructions](https://graphviz.org/download/).
+- `Graphviz` is used for drawing quantum circuit graphs. [Intallation instructions](https://graphviz.org/download/).
 
 ## Running the program
 
