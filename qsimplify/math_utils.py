@@ -11,9 +11,9 @@ def are_floats_similar(first: float, second: float) -> bool:
     return math.isclose(first, second, rel_tol=1e-05, abs_tol=1e-08)
 
 
-def normalize_angle(angle: float) -> float:
-    """Normalize an angle to the range [0, 4pi)."""
+def normalize_angle(angle: float, full_cycle: float = 2 * numpy.pi) -> float:
+    """Normalize an angle to the range [0, full_cycle)."""
     if not math.isfinite(angle):
         raise ValueError("The angle must be a finite number (not Inf or NaN)")
 
-    return angle % (4 * numpy.pi)
+    return angle % full_cycle

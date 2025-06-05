@@ -25,22 +25,30 @@ class Simplifier:
         self._default_rules = parser.load_rules_from_file(default_rules_path)
 
     def simplify_graph(
-        self, graph: QuantumGraph, rules: list[SimplificationRule] | None = None
+        self,
+        graph: QuantumGraph,
+        rules: list[SimplificationRule] | None = None,
+        iterations: int = 1,
     ) -> QuantumGraph:
         """Simplify a quantum graph using a set of rules.
 
         A custom set of rules can be provided. If not, the default rules will be used.
         The graph will be cleaned up after applying all the rules.
         """
+        if iterations <= 0:
+            raise ValueError("Number of iterations must be greater than 0")
+
         if rules is None:
             rules = self._default_rules
 
         result = graph.copy()
 
-        for rule in rules:
-            self.apply_simplification_rule(result, rule)
+        for _ in range(iterations):
+            for rule in rules:
+                self.apply_simplification_rule(result, rule)
 
-        graph_cleaner.clean_and_fill(result)
+            graph_cleaner.clean_and_fill(result)
+
         return result
 
     def apply_simplification_rule(self, graph: QuantumGraph, rule: SimplificationRule) -> None:

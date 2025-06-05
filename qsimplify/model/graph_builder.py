@@ -38,6 +38,10 @@ class GraphBuilder:
         """Push a Z gate at the end of the graph."""
         return self.put_z(qubit, self._find_push_column([qubit]))
 
+    def push_p(self, angle: float, qubit: int) -> GraphBuilder:
+        """Push a P gate at the end of the graph."""
+        return self.put_p(angle, qubit, self._find_push_column([qubit]))
+
     def push_rx(self, angle: float, qubit: int) -> GraphBuilder:
         """Push a RX gate at the end of the graph."""
         return self.put_rx(angle, qubit, self._find_push_column([qubit]))
@@ -104,6 +108,15 @@ class GraphBuilder:
         """Push a CZ gate at the end of the graph."""
         return self.put_cz(qubit, qubit2, self._find_push_column([qubit, qubit2]))
 
+    def push_cp(self, angle: float, control_qubit: int, target_qubit: int) -> GraphBuilder:
+        """Push a CP gate at the end of the graph."""
+        return self.put_cp(
+            angle,
+            control_qubit,
+            target_qubit,
+            self._find_push_column([control_qubit, target_qubit]),
+        )
+
     def push_cswap(self, control_qubit: int, target_qubit: int, target_qubit2: int) -> GraphBuilder:
         """Push a CSWAP gate at the end of the graph."""
         return self.put_cswap(
@@ -149,6 +162,10 @@ class GraphBuilder:
     def _put_single(self, name: GateName, qubit: int, column: int) -> GraphBuilder:
         self._graph.add_node(name, Position(qubit, column))
         return self
+
+    def put_p(self, angle: float, qubit: int, column: int) -> GraphBuilder:
+        """Put a P gate directly into the graph, which may break it when used incorrectly."""
+        return self._put_rotation(GateName.P, angle, qubit, column)
 
     def put_rx(self, angle: float, qubit: int, column: int) -> GraphBuilder:
         """Put a RX gate directly into the graph, which may break it when used incorrectly."""
@@ -240,6 +257,20 @@ class GraphBuilder:
         self._graph.add_node(GateName.CZ, second)
 
         self._graph.add_bidirectional_edge(EdgeName.WORKS_WITH, first, second)
+        return self
+
+    def put_cp(
+        self, angle: float, control_qubit: int, target_qubit: int, column: int
+    ) -> GraphBuilder:
+        """Put a CP gate directly into the graph, which may break it when used incorrectly."""
+        control = Position(control_qubit, column)
+        target = Position(target_qubit, column)
+
+        self._graph.add_node(GateName.CP, control)
+        self._graph.add_node(GateName.CP, target, angle=angle)
+
+        self._graph.add_edge(EdgeName.TARGETS, control, target)
+        self._graph.add_edge(EdgeName.CONTROLLED_BY, target, control)
         return self
 
     def put_cswap(

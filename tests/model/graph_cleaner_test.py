@@ -61,6 +61,23 @@ def test_remove_empty_columns():
     assert graph.width == 2
 
 
+def test_normalize_phase_angles():
+    graph = QuantumGraph()
+
+    graph.add_node(P, Position(0, 0), angle=0)
+    graph.add_node(P, Position(0, 1), angle=numpy.pi)
+    graph.add_node(P, Position(0, 2), angle=2 * numpy.pi)
+    graph.add_node(P, Position(0, 3), angle=3 * numpy.pi)
+
+    graph_cleaner.clean_and_fill(graph)
+
+    assert len(graph) == 4
+    assert graph[Position(0, 0)].angle == 0
+    assert graph[Position(0, 1)].angle == numpy.pi
+    assert graph[Position(0, 2)].angle == 0
+    assert graph[Position(0, 3)].angle == numpy.pi
+
+
 def test_normalize_rotation_angles():
     graph = QuantumGraph()
 
@@ -82,6 +99,27 @@ def test_normalize_rotation_angles():
     assert graph[Position(0, 4)].angle == 0
     assert graph[Position(0, 5)].angle == numpy.pi
     assert graph[Position(0, 6)].angle == 50 % (4 * numpy.pi)
+
+
+def test_keep_cp_connections():
+    graph = QuantumGraph()
+    control = Position(0, 0)
+    target = Position(1, 0)
+
+    graph.add_node(CP, control)
+    graph.add_node(CP, target, angle=3 * numpy.pi)
+    graph.add_edge(EdgeName.TARGETS, control, target)
+    graph.add_edge(EdgeName.CONTROLLED_BY, target, control)
+
+    graph_cleaner.clean_and_fill(graph)
+
+    assert len(graph) == 2
+    assert graph[control].angle is None
+    assert graph[target].angle == numpy.pi
+    assert graph.edges() == [
+        GraphEdge(EdgeName.TARGETS, graph[control], graph[target]),
+        GraphEdge(EdgeName.CONTROLLED_BY, graph[target], graph[control]),
+    ]
 
 
 def test_remove_unused_bits():

@@ -16,7 +16,8 @@ coverage/
 # Local configuration files
 .env
 
-# Files exported by the demo
+# Files exported by the demos
 **/*.gv
 **/*.png
 **/*.svg
+**/*.csv

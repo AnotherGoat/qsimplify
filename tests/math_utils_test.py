@@ -30,41 +30,65 @@ def test_are_very_close_floats_similar():
 
 
 def test_normalize_zero_angle():
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(0), 0)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-0), 0)
+    assert math_utils.are_floats_similar(math_utils.normalize_angle(0, 4 * numpy.pi), 0)
+    assert math_utils.are_floats_similar(math_utils.normalize_angle(-0, 4 * numpy.pi), 0)
 
 
 def test_normalize_positive_angle():
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(numpy.pi), numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(2 * numpy.pi), 2 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(3 * numpy.pi), 3 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(4 * numpy.pi), 0)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(5 * numpy.pi), numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(6 * numpy.pi), 2 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(7 * numpy.pi), 3 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(8 * numpy.pi), 0)
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(numpy.pi, 4 * numpy.pi), numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(2 * numpy.pi, 4 * numpy.pi), 2 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(3 * numpy.pi, 4 * numpy.pi), 3 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(math_utils.normalize_angle(4 * numpy.pi, 4 * numpy.pi), 0)
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(5 * numpy.pi, 4 * numpy.pi), numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(6 * numpy.pi, 4 * numpy.pi), 2 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(7 * numpy.pi, 4 * numpy.pi), 3 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(math_utils.normalize_angle(8 * numpy.pi, 4 * numpy.pi), 0)
 
 
 def test_normalize_negative_angle():
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-numpy.pi), 3 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-2 * numpy.pi), 2 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-3 * numpy.pi), numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-4 * numpy.pi), 0)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-5 * numpy.pi), 3 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-6 * numpy.pi), 2 * numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-7 * numpy.pi), numpy.pi)
-    assert math_utils.are_floats_similar(math_utils.normalize_angle(-8 * numpy.pi), 0)
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(-numpy.pi, 4 * numpy.pi), 3 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(-2 * numpy.pi, 4 * numpy.pi), 2 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(-3 * numpy.pi, 4 * numpy.pi), numpy.pi
+    )
+    assert math_utils.are_floats_similar(math_utils.normalize_angle(-4 * numpy.pi, 4 * numpy.pi), 0)
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(-5 * numpy.pi, 4 * numpy.pi), 3 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(-6 * numpy.pi, 4 * numpy.pi), 2 * numpy.pi
+    )
+    assert math_utils.are_floats_similar(
+        math_utils.normalize_angle(-7 * numpy.pi, 4 * numpy.pi), numpy.pi
+    )
+    assert math_utils.are_floats_similar(math_utils.normalize_angle(-8 * numpy.pi, 4 * numpy.pi), 0)
 
 
 def test_normalize_edge_case_angles():
     with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(math.inf)
+        assert math_utils.normalize_angle(math.inf, 4 * numpy.pi)
 
     with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(-math.inf)
+        assert math_utils.normalize_angle(-math.inf, 4 * numpy.pi)
 
     with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(math.nan)
+        assert math_utils.normalize_angle(math.nan, 4 * numpy.pi)
 
     with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(-math.nan)
+        assert math_utils.normalize_angle(-math.nan, 4 * numpy.pi)

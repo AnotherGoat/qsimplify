@@ -16,6 +16,8 @@ class GateName(str, Enum):
     """Single-qubit Y gate."""
     Z = "z"
     """Single-qubit Z gate."""
+    P = "p"
+    """Single-qubit phase gate."""
     RX = "rx"
     """Single-qubit rotation gate, which rotates around the X axis."""
     RY = "ry"
@@ -46,6 +48,8 @@ class GateName(str, Enum):
     """Two-qubit controlled Y gate."""
     CZ = "cz"
     """Two-qubit controlled Z gate."""
+    CP = "cp"
+    """Two-qubit controlled phase gate."""
     CSWAP = "cswap"
     """Three-qubit controlled SWAP gate."""
     CCX = "ccx"
@@ -64,6 +68,10 @@ class GateName(str, Enum):
         except ValueError as error:
             raise ValueError(f"'{name}' is not a valid GateName") from error
 
+    def is_phase(self) -> bool:
+        """Check whether this gate type is a phase gate or not."""
+        return self in {GateName.P, GateName.CP}
+
     def is_rotation(self) -> bool:
         """Check whether this gate type is a rotation or not."""
         return self in {GateName.RX, GateName.RY, GateName.RZ}
@@ -80,7 +88,9 @@ class GateName(str, Enum):
         match self:
             case GateName.ID:
                 return 0
-            case GateName.SWAP | GateName.CH | GateName.CX | GateName.CY | GateName.CZ:
+            case (
+                GateName.SWAP | GateName.CH | GateName.CX | GateName.CY | GateName.CZ | GateName.CP
+            ):
                 return 2
             case GateName.CSWAP | GateName.CCX | GateName.CCZ:
                 return 3
@@ -94,7 +104,9 @@ class GateName(str, Enum):
     def control_qubit_count(self) -> int:
         """Get the number of control qubits used by this type of gate."""
         match self:
-            case GateName.CH | GateName.CX | GateName.CY | GateName.CZ | GateName.CSWAP:
+            case (
+                GateName.CH | GateName.CX | GateName.CY | GateName.CZ | GateName.CP | GateName.CSWAP
+            ):
                 return 1
             case GateName.CCX | GateName.CCZ:
                 return 2

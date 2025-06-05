@@ -1,3 +1,5 @@
+import numpy
+
 from qsimplify import math_utils
 from qsimplify.model.edge_name import EdgeName
 from qsimplify.model.gate_name import GateName
@@ -21,9 +23,29 @@ def fill(graph: QuantumGraph) -> None:
 
 
 def _normalize_rotation_angles(graph: QuantumGraph) -> None:
-    for node in [node for node in graph if node.name.is_rotation()]:
+    for node in [node for node in graph if node.name == GateName.P]:
         graph.remove_node(node.position)
         graph.add_node(node.name, node.position, angle=math_utils.normalize_angle(node.angle))
+
+    for node in [node for node in graph if node.name.is_rotation()]:
+        graph.remove_node(node.position)
+        graph.add_node(
+            node.name, node.position, angle=math_utils.normalize_angle(node.angle, 4 * numpy.pi)
+        )
+
+    for node in [node for node in graph if node.name == GateName.CP and node.angle is not None]:
+        edges = graph.node_edge_data(node.position)
+        control = edges.controlled_by[0].position
+        target = node.position
+
+        graph.remove_node(control)
+        graph.remove_node(target)
+
+        graph.add_node(GateName.CP, control)
+        graph.add_node(GateName.CP, target, angle=math_utils.normalize_angle(node.angle))
+
+        graph.add_edge(EdgeName.TARGETS, control, target)
+        graph.add_edge(EdgeName.CONTROLLED_BY, target, control)
 
 
 def _remove_empty_rows(graph: QuantumGraph) -> None:

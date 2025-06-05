@@ -35,6 +35,8 @@ class FromGraphContext:
 
 
 class QiskitConverter(GraphConverter[QuantumCircuit]):
+    """Converts a decomposed Qiskit circuit into a quantum graph."""
+
     def to_graph(self, data: QuantumCircuit, clean_up: bool = True) -> QuantumGraph:
         builder = GraphBuilder()
 
@@ -114,6 +116,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
             GateName.X: self._add_x_to_graph,
             GateName.Y: self._add_y_to_graph,
             GateName.Z: self._add_z_to_graph,
+            GateName.P: self._add_p_to_graph,
             GateName.RX: self._add_rx_to_graph,
             GateName.RY: self._add_ry_to_graph,
             GateName.RZ: self._add_rz_to_graph,
@@ -129,6 +132,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
             GateName.CX: self._add_cx_to_graph,
             GateName.CY: self._add_cy_to_graph,
             GateName.CZ: self._add_cz_to_graph,
+            GateName.CP: self._add_cp_to_graph,
             GateName.CSWAP: self._add_cswap_to_graph,
             GateName.CCX: self._add_ccx_to_graph,
             GateName.CCZ: self._add_ccz_to_graph,
@@ -157,6 +161,10 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
     def _add_z_to_graph(context: ToGraphContext) -> None:
         builder, _, qubits, _, _ = context.unpack()
         builder.push_z(qubits[0])
+
+    def _add_p_to_graph(self, context: ToGraphContext) -> None:
+        builder, _, qubits, _, params = context.unpack()
+        builder.push_p(params[0], qubits[0])
 
     @staticmethod
     def _add_rx_to_graph(context: ToGraphContext) -> None:
@@ -234,6 +242,11 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
         builder.push_cz(qubits[0], qubits[1])
 
     @staticmethod
+    def _add_cp_to_graph(context: ToGraphContext) -> None:
+        builder, _, qubits, _, params = context.unpack()
+        builder.push_cp(params[0], qubits[0], qubits[1])
+
+    @staticmethod
     def _add_cswap_to_graph(context: ToGraphContext) -> None:
         builder, _, qubits, _, _ = context.unpack()
         builder.push_cswap(qubits[0], qubits[1], qubits[2])
@@ -274,6 +287,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
             GateName.X: self._add_x_from_graph,
             GateName.Y: self._add_y_from_graph,
             GateName.Z: self._add_z_from_graph,
+            GateName.P: self._add_p_from_graph,
             GateName.RX: self._add_rx_from_graph,
             GateName.RY: self._add_ry_from_graph,
             GateName.RZ: self._add_rz_from_graph,
@@ -289,6 +303,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
             GateName.CX: self._add_cx_from_graph,
             GateName.CY: self._add_cy_from_graph,
             GateName.CZ: self._add_cz_from_graph,
+            GateName.CP: self._add_cp_from_graph,
             GateName.CSWAP: self._add_cswap_from_graph,
             GateName.CCX: self._add_ccx_from_graph,
             GateName.CCZ: self._add_ccz_from_graph,
@@ -317,6 +332,11 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
     def _add_z_from_graph(context: FromGraphContext) -> None:
         circuit, gate = context.unpack()
         circuit.z(gate.qubit)
+
+    @staticmethod
+    def _add_p_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.p(gate.angle, gate.qubit)
 
     @staticmethod
     def _add_rx_from_graph(context: FromGraphContext) -> None:
@@ -392,6 +412,11 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
     def _add_cz_from_graph(context: FromGraphContext) -> None:
         circuit, gate = context.unpack()
         circuit.cz(gate.qubit, gate.qubit2)
+
+    @staticmethod
+    def _add_cp_from_graph(context: FromGraphContext) -> None:
+        circuit, gate = context.unpack()
+        circuit.cp(gate.angle, gate.control_qubit, gate.target_qubit)
 
     @staticmethod
     def _add_cswap_from_graph(context: FromGraphContext) -> None:

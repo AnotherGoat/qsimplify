@@ -26,7 +26,9 @@ from qsimplify.model import (
 )
 from qsimplify.model.quantum_gate import (
     CczGate,
+    CpGate,
     CyGate,
+    PGate,
     SdgGate,
     SGate,
     SxGate,
@@ -74,6 +76,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.X: self._add_x_to_graph,
             GateName.Y: self._add_y_to_graph,
             GateName.Z: self._add_z_to_graph,
+            GateName.P: self._add_p_to_graph,
             GateName.RX: self._add_rx_to_graph,
             GateName.RY: self._add_ry_to_graph,
             GateName.RZ: self._add_rz_to_graph,
@@ -89,6 +92,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.CX: self._add_cx_to_graph,
             GateName.CY: self._add_cy_to_graph,
             GateName.CZ: self._add_cz_to_graph,
+            GateName.CP: self._add_cp_to_graph,
             GateName.CSWAP: self._add_cswap_to_graph,
             GateName.CCX: self._add_ccx_to_graph,
             GateName.CCZ: self._add_ccz_to_graph,
@@ -125,6 +129,11 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     def _add_z_to_graph(context: ToGraphContext) -> None:
         builder, gate = context.unpack()
         builder.push_z(gate.qubit)
+
+    @staticmethod
+    def _add_p_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_p(gate.angle, gate.qubit)
 
     @staticmethod
     def _add_rx_to_graph(context: ToGraphContext) -> None:
@@ -202,6 +211,11 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         builder.push_cz(gate.qubit, gate.qubit2)
 
     @staticmethod
+    def _add_cp_to_graph(context: ToGraphContext) -> None:
+        builder, gate = context.unpack()
+        builder.push_cp(gate.angle, gate.control_qubit, gate.target_qubit)
+
+    @staticmethod
     def _add_cswap_to_graph(context: ToGraphContext) -> None:
         builder, gate = context.unpack()
         builder.push_cswap(gate.control_qubit, gate.target_qubit, gate.target_qubit2)
@@ -248,6 +262,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.X: self._add_x_from_graph,
             GateName.Y: self._add_y_from_graph,
             GateName.Z: self._add_z_from_graph,
+            GateName.P: self._add_p_from_graph,
             GateName.RX: self._add_rx_from_graph,
             GateName.RY: self._add_ry_from_graph,
             GateName.RZ: self._add_rz_from_graph,
@@ -263,6 +278,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
             GateName.CX: self._add_cx_from_graph,
             GateName.CY: self._add_cy_from_graph,
             GateName.CZ: self._add_cz_from_graph,
+            GateName.CP: self._add_cp_from_graph,
             GateName.CSWAP: self._add_cswap_from_graph,
             GateName.CCX: self._add_ccx_from_graph,
             GateName.CCZ: self._add_ccz_from_graph,
@@ -305,6 +321,10 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
 
         gate = factory(qubit=node.position.row, angle=node.angle)
         gates.append(gate)
+
+    @staticmethod
+    def _add_p_from_graph(context: FromGraphContext) -> None:
+        GatesConverter._add_rotation_gate_from_graph(context, PGate)
 
     @staticmethod
     def _add_rx_from_graph(context: FromGraphContext) -> None:
@@ -412,6 +432,32 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         gate = CzGate(qubit=node.position.row, qubit2=other_position.row)
         gates.append(gate)
         skipped.add(other_position)
+
+    @staticmethod
+    def _add_cp_from_graph(context: FromGraphContext) -> None:
+        graph, node, gates, skipped = context.unpack()
+        edges = graph.node_edge_data(node.position)
+
+        if edges is None:
+            assert_never(edges)
+
+        is_target = edges.targets == []
+
+        if is_target:
+            control_position = edges.controlled_by[0].position
+            target_position = node.position
+            angle = node.angle
+        else:
+            control_position = node.position
+            target_position = edges.targets[0].position
+            angle = edges.targets[0].angle
+
+        gate = CpGate(
+            control_qubit=control_position.row, target_qubit=target_position.row, angle=angle
+        )
+        gates.append(gate)
+        skipped.add(control_position)
+        skipped.add(target_position)
 
     @staticmethod
     def _add_cswap_from_graph(context: FromGraphContext) -> None:

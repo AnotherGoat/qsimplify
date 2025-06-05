@@ -42,6 +42,13 @@ def _format_fields(fields: list[str]) -> str:
     return ", ".join(fields[:-1]) + f" and {fields[-1]}"
 
 
+def _check_angle(value: int) -> int:
+    if not math.isfinite(value):
+        raise ValueError("It must be a finite number (not Inf or NaN)")
+
+    return value
+
+
 class BaseGate(BaseModel):
     name: GateName
     """The name of this gate."""
@@ -95,10 +102,13 @@ class RotationGate(SingleGate):
     @field_validator("angle")
     @classmethod
     def _validate_angle(cls, value: int) -> int:
-        if not math.isfinite(value):
-            raise ValueError("It must be a finite number (not Inf or NaN)")
+        return _check_angle(value)
 
-        return value
+
+class PGate(RotationGate):
+    """Single-qubit phase gate."""
+
+    name: Literal[GateName.P] = GateName.P
 
 
 class RxGate(RotationGate):
@@ -242,6 +252,19 @@ class CzGate(TwoQubitGate):
     name: Literal[GateName.CZ] = GateName.CZ
 
 
+class CpGate(SingleControlledGate):
+    """Two-qubit controlled phase gate."""
+
+    name: Literal[GateName.CP] = GateName.CP
+    angle: float
+    """The angle that the phase is rotated by."""
+
+    @field_validator("angle")
+    @classmethod
+    def _validate_angle(cls, value: int) -> int:
+        return _check_angle(value)
+
+
 class CswapGate(BaseGate):
     """Three-qubit controlled SWAP gate."""
 
@@ -350,6 +373,7 @@ QuantumGate = Annotated[
     | XGate
     | YGate
     | ZGate
+    | PGate
     | RxGate
     | RyGate
     | RzGate
@@ -365,6 +389,7 @@ QuantumGate = Annotated[
     | CxGate
     | CyGate
     | CzGate
+    | CpGate
     | CswapGate
     | CcxGate
     | CczGate,
@@ -379,6 +404,7 @@ type Errors = dict[int, list[str]]
 ALIASES = {
     "i": "id",
     "not": "x",
+    "phase": "p",
     "sz": "s",
     "sqrtz": "s",
     "sd": "sdg",
@@ -390,6 +416,7 @@ ALIASES = {
     "sqrty": "sy",
     "td": "tdg",
     "cnot": "cx",
+    "cphase": "cp",
     "ccnot": "ccx",
     "toffoli": "ccx",
 }

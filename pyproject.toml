@@ -17,6 +17,8 @@ dependencies = [
     "pydantic>=2.11.3",
     "pylatexenc>=2.10",
     "qiskit>=2.0.0",
+    "qiskit-aer>=0.17.1", # Only used by qft.py
+    "qiskit-ibm-runtime>=0.40.0", # Only used by qft.py
 ]
 
 [dependency-groups]

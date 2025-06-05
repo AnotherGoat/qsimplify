@@ -54,6 +54,7 @@ class QiskitGenerator(CodeGenerator):
             GateName.X: self._generate_single_gate,
             GateName.Y: self._generate_single_gate,
             GateName.Z: self._generate_single_gate,
+            GateName.P: self._generate_rotation_gate,
             GateName.RX: self._generate_rotation_gate,
             GateName.RY: self._generate_rotation_gate,
             GateName.RZ: self._generate_rotation_gate,
@@ -68,6 +69,7 @@ class QiskitGenerator(CodeGenerator):
             GateName.CH: self._generate_control_gate,
             GateName.CX: self._generate_control_gate,
             GateName.CZ: self._generate_two_qubit_gate,
+            GateName.CP: self._generate_cp,
             GateName.CSWAP: self._generate_cswap,
             GateName.CCX: self._generate_ccx,
             GateName.CCZ: self._generate_ccz,
@@ -107,6 +109,11 @@ class QiskitGenerator(CodeGenerator):
     def _generate_control_gate(context: GenerationContext) -> None:
         _, _, gate = context.unpack()
         QiskitGenerator._add_build_step(context, gate.control_qubit, gate.target_qubit)
+
+    @staticmethod
+    def _generate_cp(context: GenerationContext) -> None:
+        _, _, gate = context.unpack()
+        QiskitGenerator._add_build_step(context, gate.angle, gate.control_qubit, gate.target_qubit)
 
     @staticmethod
     def _generate_cswap(context: GenerationContext) -> None:

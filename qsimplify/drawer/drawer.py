@@ -128,12 +128,14 @@ class Drawer:
                 return _ORANGE
             case (
                 GateName.Z
+                | GateName.P
                 | GateName.RZ
                 | GateName.S
                 | GateName.SDG
                 | GateName.T
                 | GateName.TDG
                 | GateName.CZ
+                | GateName.CP
                 | GateName.CCZ
             ):
                 return _GREEN
