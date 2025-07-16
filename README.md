@@ -82,7 +82,7 @@ uv run python -m qsimplify.app
 
 ```shell
 docker rmi qsimplify_demo
-docker build -t qsimplify_demo -f Dockerfile.demo .
+docker build -t qsimplify_demo -f demo.Dockerfile .
 ```
 
 - Run the demo Docker image and keep the output files in the "out" subdirectory
@@ -103,6 +103,25 @@ docker build -t qsimplify .
 
 ```shell
 docker run -it --rm -p 5001:5001 qsimplify
+```
+
+- Create SonarQube container for analysis
+
+```shell
+docker volume create --name sonarqube_data
+docker volume create --name sonarqube_logs
+docker volume create --name sonarqube_extensions
+docker run --name sonarqube -p 9000:9000 sonarqube
+```
+
+Then log in as admin on http://localhost:9000 and create a project with key and name "qsimplify"
+
+- Analyze project with SonarQube (include your own generated token)
+
+```shell
+docker start -i sonarqube
+uv run pytest --cov=qsimplify --cov-report=xml
+uv run pysonar --sonar-host-url=http://localhost:9000 --sonar-token=TOKEN
 ```
 
 ## Examples

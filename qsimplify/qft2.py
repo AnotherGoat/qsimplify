@@ -14,8 +14,13 @@ load_dotenv()
 
 IBM_API_KEY = os.getenv("IBM_API_KEY", None)
 
+
+class QftException(Exception):
+    pass
+
+
 if IBM_API_KEY is None:
-    raise Exception("Please set the IBM_API_KEY environment variable")
+    raise QftException("Please set the IBM_API_KEY environment variable")
 
 
 @dataclass

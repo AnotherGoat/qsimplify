@@ -14,6 +14,11 @@ RUN addgroup --gid "$GID" appgroup && \
 # Send output streams straight into the terminal, without buffering them
 ENV PYTHONUNBUFFERED=1
 
+# Install Graphviz (used for drawing graphs)
+RUN apt-get update && \
+    apt-get install --no-install-suggests --no-install-recommends -y graphviz && \
+    apt-get clean
+
 # Install UV
 COPY --from=ghcr.io/astral-sh/uv:0.7.17 /uv /uvx /bin/
 
@@ -25,14 +30,8 @@ COPY . ./
 RUN chown -R appuser:appgroup /app && \
     uv sync --frozen
 
-# Set app-specific environment variables
-ENV DEBUG=False
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5001
-ENV FLASK_DEBUG=False
-
 # Set app user
 USER appuser
 
-CMD ["uv", "run", "python", "-m", "qsimplify.app"]
+CMD ["uv", "run", "python", "-m", "qsimplify.demo"]
 ENTRYPOINT ["uv", "run"]

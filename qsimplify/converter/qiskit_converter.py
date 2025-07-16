@@ -140,6 +140,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
 
     @staticmethod
     def _add_id_to_graph(_: ToGraphContext) -> None:
+        """Adding an identity gate is a no-op."""
         pass
 
     @staticmethod
@@ -311,6 +312,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
 
     @staticmethod
     def _add_id_from_graph(_: FromGraphContext) -> None:
+        """Adding an identity gate is a no-op."""
         pass
 
     @staticmethod

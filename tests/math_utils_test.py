@@ -4,7 +4,8 @@ import numpy
 from pytest import raises
 
 from qsimplify import math_utils
-from tests import *
+
+ANGLE_FINITE = r"The angle must be a finite number \(not Inf or NaN\)"
 
 
 def test_are_different_floats_similar():
@@ -81,14 +82,14 @@ def test_normalize_negative_angle():
 
 
 def test_normalize_edge_case_angles():
-    with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(math.inf, 4 * numpy.pi)
+    with raises(ValueError, match=ANGLE_FINITE):
+        math_utils.normalize_angle(math.inf, 4 * numpy.pi)
 
-    with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(-math.inf, 4 * numpy.pi)
+    with raises(ValueError, match=ANGLE_FINITE):
+        math_utils.normalize_angle(-math.inf, 4 * numpy.pi)
 
-    with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(math.nan, 4 * numpy.pi)
+    with raises(ValueError, match=ANGLE_FINITE):
+        math_utils.normalize_angle(math.nan, 4 * numpy.pi)
 
-    with raises(ValueError, match=r"The angle must be a finite number \(not Inf or NaN\)"):
-        assert math_utils.normalize_angle(-math.nan, 4 * numpy.pi)
+    with raises(ValueError, match=ANGLE_FINITE):
+        math_utils.normalize_angle(-math.nan, 4 * numpy.pi)

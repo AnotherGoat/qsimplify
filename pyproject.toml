@@ -25,6 +25,7 @@ dependencies = [
 dev = [
     "pre-commit>=4.2.0",
     "pyright>=1.1.398",
+    "pysonar>=1.1.0.2035",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
     "ruff>=0.11.4",
@@ -35,10 +36,55 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-    "E4", "E7", "E9", "F", "ERA", "ANN", "S", "B", "A", "C4", "FIX", "FA", "LOG", "G", "INP", "PIE", "PT", "RSE", "RET", "SLF",
-    "SIM", "ARG", "PTH", "FLY", "C90", "N", "PERF", "DOC", "D", "PLC", "PLE", "FURB", "RUF"
+    "F", # Pyflakes
+    "ERA", # eradicate
+    "ANN", # flake8-annotations
+    "S", # flake8-bandit
+    "B", # flake8-bugbear
+    "A", # flake8-builtins
+    "C4", # flake8-comprehensions
+    "FIX", # flake8-fixme
+    "FA", # flake8-future-annotations
+    "LOG", # flake8-logging
+    "G", # flake8-logging-format
+    "INP", # flake8-no-pep420
+    "PIE", # flake8-pie
+    "PT", # flake8-pytest-style
+    "RSE", # flake8-raise
+    "RET", # flake8-return
+    "SLF", # flake8-self
+    "SIM", # flake8-simplify
+    "ARG", # flake8-unused-arguments
+    "PTH", # flake8-use-pathlib
+    "FLY", # flynt
+    "C90", # mccabe
+    "N", #  pep8-naming
+    "PERF", # Perflint
+    "E", # Error (pycodestyle)
+    "DOC", # pydoclint
+    "D", # pydocstyle
+    "PLC", # Convention (Pylint)
+    "PLE", # Error (Pylint)
+    "FURB", # refurb
+    "RUF" # Ruff-specific rules
 ]
-ignore = ["PLC0414"]
+ignore = [
+    "D211", # blank-line-before-class
+    "D213", # multi-line-summary-first-line
+    "PLC0414" # useless-import-alias
+]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["F403", "F405", "ANN201", "S101"]
+"tests/*" = [
+    "ANN201", # missing-return-type-undocumented-public-function
+    "S101" # assert
+]
+
+[tool.coverage.run]
+omit = [
+    "tests/**",
+    "qsimplify/app.py",
+    "qsimplify/demo.py",
+    "qsimplify/qft.py",
+    "qsimplify/qft2.py"
+]

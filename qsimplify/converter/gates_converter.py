@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, Never, assert_never
+from typing import Callable, assert_never
 
 from qsimplify.converter.graph_converter import GraphConverter
 from qsimplify.model import (
@@ -286,6 +286,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
 
     @staticmethod
     def _add_id_from_graph(_: FromGraphContext) -> None:
+        """Adding an identity gate is a no-op."""
         pass
 
     @staticmethod

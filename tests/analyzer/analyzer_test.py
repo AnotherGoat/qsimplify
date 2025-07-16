@@ -1,5 +1,6 @@
 from qsimplify.analyzer import DetailedMetrics, analyzer
 from qsimplify.model import GraphBuilder
+from tests import floats_equal
 
 
 def test_empty_width():
@@ -98,7 +99,7 @@ def test_single_qubit_average_density():
     graph = GraphBuilder().push_h(0).push_h(1).push_h(1).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.average_density == 1.5
+    assert floats_equal(metrics.average_density, 1.5)
 
 
 def test_multi_qubit_average_density():
@@ -110,7 +111,7 @@ def test_multi_qubit_average_density():
     graph = GraphBuilder().push_ch(0, 1).push_x(0).push_ch(2, 3).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.average_density == 1.5
+    assert floats_equal(metrics.average_density, 1.5)
 
     graph = GraphBuilder().push_z(1).push_ccx(0, 1, 2).push_z(2).build()
 
@@ -225,12 +226,12 @@ def test_initial_superposition_percent():
     graph = GraphBuilder().push_h(0).push_h(1).push_x(2).push_x(3).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.initial_superposition_percent == 0.5
+    assert floats_equal(metrics.initial_superposition_percent, 0.5)
 
     graph = GraphBuilder().push_h(0).push_h(1).push_x(2).push_h(3).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.initial_superposition_percent == 0.75
+    assert floats_equal(metrics.initial_superposition_percent, 0.75)
 
     graph = GraphBuilder().push_h(0).build()
 
@@ -371,12 +372,12 @@ def test_cnot_qubit_percent():
     graph = GraphBuilder().push_cx(0, 1).push_z(2).push_x(3).push_cx(1, 4).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.cnot_qubit_percent == 0.6
+    assert floats_equal(metrics.cnot_qubit_percent, 0.6)
 
     graph = GraphBuilder().push_cx(0, 1).push_cx(2, 1).push_cx(3, 1).push_cx(4, 1).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.cnot_qubit_percent == 1
+    assert floats_equal(metrics.cnot_qubit_percent, 1)
 
 
 def test_empty_average_cnot():
@@ -398,7 +399,7 @@ def test_average_cnot():
     )
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.average_cnot == 1.2
+    assert floats_equal(metrics.average_cnot, 1.2)
 
 
 def test_empty_max_cnot():
@@ -468,7 +469,7 @@ def test_toffoli_qubit_percent():
     graph = GraphBuilder().push_h(0).push_ccx(1, 2, 3).push_h(4).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.toffoli_qubit_percent == 0.6
+    assert floats_equal(metrics.toffoli_qubit_percent, 0.6)
 
     graph = GraphBuilder().push_ccx(0, 1, 4).push_ccx(1, 2, 3).build()
 
@@ -486,12 +487,12 @@ def test_average_toffoli():
     graph = GraphBuilder().push_h(0).push_ccx(1, 2, 3).push_h(4).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.average_toffoli == 0.2
+    assert floats_equal(metrics.average_toffoli, 0.2)
 
     graph = GraphBuilder().push_z(0).push_ccx(1, 2, 3).push_ccx(2, 3, 4).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.average_toffoli == 0.4
+    assert floats_equal(metrics.average_toffoli, 0.4)
 
 
 def test_empty_max_toffoli():
@@ -582,7 +583,7 @@ def test_single_qubit_gate_percent():
     graph = GraphBuilder().push_x(0).push_h(1).push_h(2).push_cx(1, 2).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.single_qubit_percent == 0.75
+    assert floats_equal(metrics.single_qubit_percent, 0.75)
 
     graph = (
         GraphBuilder()
@@ -596,7 +597,7 @@ def test_single_qubit_gate_percent():
     )
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.single_qubit_percent == 0.5
+    assert floats_equal(metrics.single_qubit_percent, 0.5)
 
 
 def test_empty_measure_count():
@@ -639,7 +640,7 @@ def test_measure_percent():
     graph = GraphBuilder().push_measure(0, 0).push_x(1).push_y(2).push_z(3).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.measure_percent == 0.25
+    assert floats_equal(metrics.measure_percent, 0.25)
 
 
 def test_empty_ancilla_percent():
@@ -652,7 +653,7 @@ def test_ancilla_percent():
     graph = GraphBuilder().push_measure(0, 0).push_x(1).push_y(2).push_z(3).build()
 
     metrics = analyzer.calculate_detailed_metrics(graph)
-    assert metrics.ancilla_percent == 0.75
+    assert floats_equal(metrics.ancilla_percent, 0.75)
 
     graph = (
         GraphBuilder()

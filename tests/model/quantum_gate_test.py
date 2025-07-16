@@ -1,5 +1,4 @@
 import math
-from typing import Any, Callable
 
 import pytest
 
@@ -30,6 +29,17 @@ from qsimplify.model.quantum_gate import (
     ZGate,
     parse_gates,
 )
+
+ANGLE_REQUIRED = "angle: Field required"
+ANGLE_FINITE = "angle: It must be a finite number (not Inf or NaN)"
+QUBIT_REQUIRED = "qubit: Field required"
+QUBIT_POSITIVE = "qubit: It must be 0 or positive"
+QUBIT2_REQUIRED = "qubit2: Field required"
+QUBIT3_REQUIRED = "qubit3: Field required"
+CONTROL_REQUIRED = "control_qubit: Field required"
+CONTROL2_REQUIRED = "control_qubit2: Field required"
+TARGET_REQUIRED = "target_qubit: Field required"
+TARGET2_REQUIRED = "target_qubit2: Field required"
 
 
 def test_parse_missing_name():
@@ -79,7 +89,7 @@ def test_parse_missing_single_qubit_gates():
     errors = error.value.errors
 
     assert len(errors) == len(gates)
-    assert all(messages == ["qubit: Field required"] for messages in errors.values())
+    assert all(messages == [QUBIT_REQUIRED] for messages in errors.values())
 
 
 def test_parse_missing_rotation_gates():
@@ -98,12 +108,12 @@ def test_parse_missing_rotation_gates():
     errors = error.value.errors
 
     assert errors == {
-        0: ["angle: Field required"],
-        1: ["qubit: Field required"],
-        2: ["angle: Field required"],
-        3: ["qubit: Field required"],
-        4: ["angle: Field required"],
-        5: ["qubit: Field required"],
+        0: [ANGLE_REQUIRED],
+        1: [QUBIT_REQUIRED],
+        2: [ANGLE_REQUIRED],
+        3: [QUBIT_REQUIRED],
+        4: [ANGLE_REQUIRED],
+        5: [QUBIT_REQUIRED],
     }
 
 
@@ -120,7 +130,7 @@ def test_parse_missing_measure_gates():
 
     assert errors == {
         0: ["bit: Field required"],
-        1: ["qubit: Field required"],
+        1: [QUBIT_REQUIRED],
     }
 
 
@@ -147,16 +157,16 @@ def test_parse_missing_two_qubit_gates():
     errors = error.value.errors
 
     assert errors == {
-        0: ["qubit2: Field required"],
-        1: ["qubit: Field required"],
-        2: ["target_qubit: Field required"],
-        3: ["control_qubit: Field required"],
-        4: ["target_qubit: Field required"],
-        5: ["control_qubit: Field required"],
-        6: ["target_qubit: Field required"],
-        7: ["control_qubit: Field required"],
-        8: ["qubit2: Field required"],
-        9: ["qubit: Field required"],
+        0: [QUBIT2_REQUIRED],
+        1: [QUBIT_REQUIRED],
+        2: [TARGET_REQUIRED],
+        3: [CONTROL_REQUIRED],
+        4: [TARGET_REQUIRED],
+        5: [CONTROL_REQUIRED],
+        6: [TARGET_REQUIRED],
+        7: [CONTROL_REQUIRED],
+        8: [QUBIT2_REQUIRED],
+        9: [QUBIT_REQUIRED],
     }
 
 
@@ -179,15 +189,15 @@ def test_parse_missing_three_qubit_gates():
     errors = error.value.errors
 
     assert errors == {
-        0: ["target_qubit: Field required", "target_qubit2: Field required"],
-        1: ["control_qubit: Field required", "target_qubit2: Field required"],
-        2: ["control_qubit: Field required", "target_qubit: Field required"],
-        3: ["control_qubit2: Field required", "target_qubit: Field required"],
-        4: ["control_qubit: Field required", "target_qubit: Field required"],
-        5: ["control_qubit: Field required", "control_qubit2: Field required"],
-        6: ["qubit2: Field required", "qubit3: Field required"],
-        7: ["qubit: Field required", "qubit3: Field required"],
-        8: ["qubit: Field required", "qubit2: Field required"],
+        0: [TARGET_REQUIRED, TARGET2_REQUIRED],
+        1: [CONTROL_REQUIRED, TARGET2_REQUIRED],
+        2: [CONTROL_REQUIRED, TARGET_REQUIRED],
+        3: [CONTROL2_REQUIRED, TARGET_REQUIRED],
+        4: [CONTROL_REQUIRED, TARGET_REQUIRED],
+        5: [CONTROL_REQUIRED, CONTROL2_REQUIRED],
+        6: [QUBIT2_REQUIRED, QUBIT3_REQUIRED],
+        7: [QUBIT_REQUIRED, QUBIT3_REQUIRED],
+        8: [QUBIT_REQUIRED, QUBIT2_REQUIRED],
     }
 
 
@@ -206,8 +216,8 @@ def test_parse_shows_correct_indices():
     errors = error.value.errors
 
     assert errors == {
-        1: ["qubit: Field required"],
-        4: ["qubit: Field required"],
+        1: [QUBIT_REQUIRED],
+        4: [QUBIT_REQUIRED],
     }
 
 
@@ -250,9 +260,9 @@ def test_parse_negative_qubits():
     errors = error.value.errors
 
     assert errors == {
-        0: ["qubit: It must be 0 or positive"],
-        1: ["qubit: It must be 0 or positive"],
-        2: ["qubit: It must be 0 or positive"],
+        0: [QUBIT_POSITIVE],
+        1: [QUBIT_POSITIVE],
+        2: [QUBIT_POSITIVE],
         3: ["qubit2: It must be 0 or positive"],
         4: ["control_qubit: It must be 0 or positive"],
         5: ["target_qubit2: It must be 0 or positive"],
@@ -292,10 +302,10 @@ def test_parse_unexpected_angles():
     errors = error.value.errors
 
     assert errors == {
-        0: ["angle: It must be a finite number (not Inf or NaN)"],
-        1: ["angle: It must be a finite number (not Inf or NaN)"],
-        2: ["angle: It must be a finite number (not Inf or NaN)"],
-        3: ["angle: It must be a finite number (not Inf or NaN)"],
+        0: [ANGLE_FINITE],
+        1: [ANGLE_FINITE],
+        2: [ANGLE_FINITE],
+        3: [ANGLE_FINITE],
     }
 
 

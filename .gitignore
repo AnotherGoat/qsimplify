@@ -5,6 +5,7 @@
 .pytest_cache/
 .ruff_cache/
 **/__pycache__/
+.sonar/
 
 # Virtual environments
 .venv/
@@ -12,6 +13,7 @@
 # Test coverage reports
 coverage/
 .coverage
+coverage.xml
 
 # Local configuration files
 .env

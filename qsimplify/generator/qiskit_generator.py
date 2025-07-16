@@ -77,6 +77,7 @@ class QiskitGenerator(CodeGenerator):
 
     @staticmethod
     def _generate_id(_: GenerationContext) -> None:
+        """Adding an identity gate is a no-op."""
         pass
 
     @staticmethod

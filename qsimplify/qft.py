@@ -5,9 +5,7 @@ from dotenv import load_dotenv
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import QFT
 from qiskit.quantum_info import Operator
-from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_ibm_runtime import QiskitRuntimeService
-from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 from qsimplify.converter.qiskit_converter import QiskitConverter
 from qsimplify.simplifier import Simplifier
@@ -76,10 +74,15 @@ load_dotenv()
 
 IBM_API_KEY = os.getenv("IBM_API_KEY", None)
 
+
+class QftException(Exception):
+    pass
+
+
 assert False
 
 if IBM_API_KEY is None:
-    raise Exception("Please set the IBM_API_KEY environment variable")
+    raise QftException("Please set the IBM_API_KEY environment variable")
 
 QiskitRuntimeService.save_account(
     channel="ibm_quantum", token=IBM_API_KEY, set_as_default=True, overwrite=True
