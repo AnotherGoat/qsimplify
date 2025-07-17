@@ -1,34 +1,54 @@
-"""Flask application entry point."""
+"""FastAPI application entry point."""
 
 import os
+from dataclasses import dataclass
+from http import HTTPStatus
 
+import uvicorn
 from dotenv import load_dotenv
-from flask import Flask, Response, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
-from qsimplify.controller.circuit_controller import circuit_controller
+from qsimplify.controller.circuit_controller import circuit_router
+from qsimplify.controller.index_controller import index_router
 from qsimplify.model.quantum_gate import GatesValidationError
 
 load_dotenv()
-_FLASK_RUN_HOST = os.getenv("FLASK_RUN_HOST", "127.0.0.1")
-_FLASK_RUN_PORT = int(os.getenv("FLASK_RUN_PORT", 5001))
-_FLASK_DEBUG = bool(os.getenv("FLASK_DEBUG", True))
+_API_HOST = os.getenv("API_HOST", "localhost")
+_API_PORT = int(os.getenv("API_PORT", 5001))
+_API_DEBUG = bool(os.getenv("API_DEBUG", True))
 
-app = Flask(__name__)
-CORS(app)
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(index_router)
+app.include_router(circuit_router)
 
 
-@app.route("/api")
-def _index() -> tuple[Response, int]:
-    return jsonify({"message": "Welcome to QSimplify API"}), 200
+@dataclass(frozen=True)
+class GateListErrors:
+    """Error messages for a failed validation of a list of gates."""
+
+    errors: dict[int, list[str]]
 
 
-@app.errorhandler(GatesValidationError)
-def _handle_gates_validation_error(error: GatesValidationError) -> tuple[Response, int]:
-    return jsonify({"errors": error.errors}), 400
+@app.exception_handler(GatesValidationError)
+async def _handle_gates_validation_error(
+    _: Request, exception: GatesValidationError
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=HTTPStatus.BAD_REQUEST,
+        content=jsonable_encoder(GateListErrors(exception.errors)),
+    )
 
-
-app.register_blueprint(circuit_controller, url_prefix="/api/circuit")
 
 if __name__ == "__main__":
-    app.run(host=_FLASK_RUN_HOST, port=_FLASK_RUN_PORT, debug=_FLASK_DEBUG)
+    uvicorn.run("qsimplify.app:app", host=_API_HOST, port=_API_PORT, reload=_API_DEBUG)

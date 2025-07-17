@@ -1,13 +1,14 @@
 import pytest
-from flask import Flask
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
-from qsimplify.controller.circuit_controller import circuit_controller
+from qsimplify.controller.circuit_controller import circuit_router
 
 
 @pytest.fixture
-def _client():
-    app = Flask(__name__)
-    app.register_blueprint(circuit_controller, url_prefix="/api/circuit")
-    app.testing = True
-    with app.test_client() as client:
+def client():
+    app = FastAPI()
+    app.include_router(circuit_router, prefix="/api/circuit")
+
+    with TestClient(app) as client:
         yield client

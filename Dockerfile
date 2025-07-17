@@ -19,7 +19,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.7.17 /uv /uvx /bin/
 
 # Copy project files
 WORKDIR /app
-COPY .python-version wsgi.py pyproject.toml uv.lock ./
+COPY .python-version pyproject.toml uv.lock ./
 COPY qsimplify ./qsimplify/
 
 # Set ownership for all the copied files
@@ -28,11 +28,11 @@ RUN uv sync --no-dev --frozen && \
 
 # Set app-specific environment variables
 ENV DEBUG=False
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=5001
-ENV FLASK_DEBUG=False
+ENV API_HOST=0.0.0.0
+ENV API_PORT=5001
+ENV API_DEBUG=False
 
 # Set app user
 USER appuser
 
-CMD ["sh", "-c", "uv run --no-dev gunicorn wsgi:app --bind $FLASK_RUN_HOST:$FLASK_RUN_PORT"]
+CMD ["uv", "run", "--no-dev", "python", "-m", "qsimplify.app"]

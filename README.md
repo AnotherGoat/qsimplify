@@ -1,6 +1,6 @@
 # QSimplify
 
-A quantum circuit simplifier prototype, available as a Flask REST API.
+A quantum circuit simplifier prototype, available as a FastAPI REST API.
 
 ## Example usage
 
@@ -72,7 +72,7 @@ uv run pyright
 uv run python -m qsimplify.demo
 ```
 
-- Start as a Flask server
+- Start as a FastAPI server
 
 ```shell
 uv run python -m qsimplify.app
@@ -92,14 +92,14 @@ mkdir out
 docker run -it --rm -v "$(pwd)/out:/app/out" qsimplify_demo
 ```
 
-- Build the Flask server Docker image
+- Build the FastAPI server Docker image
 
 ```shell
 docker rmi qsimplify
 docker build -t qsimplify .
 ```
 
-- Run the Flask server Docker image and expose it in port 5001
+- Run the FastAPI server Docker image and expose it in port 5001
 
 ```shell
 docker run -it --rm -p 5001:5001 qsimplify

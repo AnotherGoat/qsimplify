@@ -19,7 +19,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.7.17 /uv /uvx /bin/
 
 # Copy project files
 WORKDIR /app
-COPY .python-version wsgi.py pyproject.toml uv.lock ./
+COPY .python-version pyproject.toml uv.lock ./
 COPY qsimplify ./qsimplify/
 
 # Set ownership for all the copied files and install project dependencies
