@@ -1,3 +1,5 @@
+"""Contains a code generator for generating Qiskit code from quantum graphs."""
+
 from dataclasses import dataclass
 from typing import Callable
 
@@ -11,11 +13,14 @@ gates_converter = GatesConverter()
 
 @dataclass
 class GenerationContext:
+    """Work context for the Qiskit code generator."""
+
     imports: set[str]
     build_steps: list[str]
     gate: QuantumGate
 
     def unpack(self) -> tuple[set[str], list[str], QuantumGate]:
+        """Provides an easy way to unpack all the data related to this context."""
         return self.imports, self.build_steps, self.gate
 
 
@@ -23,7 +28,7 @@ class QiskitGenerator(CodeGenerator):
     """Generates Qiskit code that can build a quantum circuit from a graph."""
 
     def generate(self, graph: QuantumGraph) -> str:
-        """Convert the provided graph into coded that uses the Qiskit library."""
+        """Convert the provided graph into code that uses the Qiskit library."""
         gates = gates_converter.from_graph(graph)
         imports = {"from qiskit import QuantumCircuit"}
 
@@ -78,7 +83,6 @@ class QiskitGenerator(CodeGenerator):
     @staticmethod
     def _generate_id(_: GenerationContext) -> None:
         """Adding an identity gate is a no-op."""
-        pass
 
     @staticmethod
     def _generate_single_gate(context: GenerationContext) -> None:

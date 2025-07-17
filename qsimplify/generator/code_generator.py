@@ -1,3 +1,5 @@
+"""Contains the base for quantum circuit code generators."""
+
 from abc import ABC, abstractmethod
 
 from qsimplify.model import QuantumGraph

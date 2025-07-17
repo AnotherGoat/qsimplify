@@ -1,3 +1,5 @@
+"""Contains the quantum graph data structure."""
+
 from __future__ import annotations
 
 from typing import Iterator

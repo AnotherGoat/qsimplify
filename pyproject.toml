@@ -12,13 +12,18 @@ dependencies = [
     "flask>=3.1.0",
     "flask-cors>=5.0.1",
     "graphviz>=0.20.3",
+    "gunicorn>=23.0.0",
     "matplotlib>=3.10.1",
     "networkx>=3.4.2",
-    "pydantic>=2.11.3",
+    "pydantic>=2.11.7",
     "pylatexenc>=2.10",
     "qiskit>=2.0.0",
-    "qiskit-aer>=0.17.1", # Only used by qft.py
-    "qiskit-ibm-runtime>=0.40.0", # Only used by qft.py
+]
+
+[project.optional-dependencies]
+qft = [
+    "qiskit-aer>=0.17.1",
+    "qiskit-ibm-runtime>=0.40.0",
 ]
 
 [dependency-groups]
@@ -69,16 +74,29 @@ select = [
     "RUF" # Ruff-specific rules
 ]
 ignore = [
-    "D211", # blank-line-before-class
+    "E501", # line-too-long
+    "D203", # incorrect-blank-line-before-class
     "D213", # multi-line-summary-first-line
+    "D413", # missing-blank-line-after-last-section
     "PLC0414" # useless-import-alias
+]
+exclude = [
+    "qsimplify/qft.py",
+    "qsimplify/qft2.py",
+    "wsgi.py"
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = [
+"tests/**" = [
+    "DOC", # pydoclint
+    "D", # pydocstyle
     "ANN201", # missing-return-type-undocumented-public-function
-    "S101" # assert
+    "ANN202", #missing-return-type-private-function
+    "S101", # assert
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.coverage.run]
 omit = [
@@ -86,5 +104,6 @@ omit = [
     "qsimplify/app.py",
     "qsimplify/demo.py",
     "qsimplify/qft.py",
-    "qsimplify/qft2.py"
+    "qsimplify/qft2.py",
+    "wsgi.py"
 ]

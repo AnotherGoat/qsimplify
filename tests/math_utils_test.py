@@ -1,7 +1,7 @@
 import math
 
 import numpy
-from pytest import raises
+import pytest
 
 from qsimplify import math_utils
 
@@ -82,14 +82,14 @@ def test_normalize_negative_angle():
 
 
 def test_normalize_edge_case_angles():
-    with raises(ValueError, match=ANGLE_FINITE):
+    with pytest.raises(ValueError, match=ANGLE_FINITE):
         math_utils.normalize_angle(math.inf, 4 * numpy.pi)
 
-    with raises(ValueError, match=ANGLE_FINITE):
+    with pytest.raises(ValueError, match=ANGLE_FINITE):
         math_utils.normalize_angle(-math.inf, 4 * numpy.pi)
 
-    with raises(ValueError, match=ANGLE_FINITE):
+    with pytest.raises(ValueError, match=ANGLE_FINITE):
         math_utils.normalize_angle(math.nan, 4 * numpy.pi)
 
-    with raises(ValueError, match=ANGLE_FINITE):
+    with pytest.raises(ValueError, match=ANGLE_FINITE):
         math_utils.normalize_angle(-math.nan, 4 * numpy.pi)

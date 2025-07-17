@@ -1,3 +1,5 @@
+"""Contains data structures that store metrics for quantum circuits."""
+
 import textwrap
 from dataclasses import dataclass
 
@@ -24,7 +26,6 @@ class Metrics:
         controlled_gate_count: Total number of controlled gates.
         ancilla_qubit_count: Number of ancilla qubits (qubits that are not measured).
         gate_types_count: Number of different gates used in the circuit.
-
     """
 
     qubit_count: int
@@ -68,7 +69,6 @@ class DeltaMetrics:
         controlled_gate_count: Difference in controlled gates.
         ancilla_qubit_count: Difference in ancilla qubits (qubits that are not measured).
         gate_types_count: Difference in different gates used in the circuit.
-
     """
 
     qubit_count: int | None = None
@@ -114,7 +114,6 @@ class DetailedMetrics:
         gate_count (int): Total number of gates in the circuit.
         controlled_gate_count (int): Total number of controlled gates in the circuit.
         single_qubit_percent (float): Ratio of single gates to total gates.
-
     """
 
     # Circuit Size
@@ -160,6 +159,7 @@ class DetailedMetrics:
     ancilla_percent: float
 
     def __str__(self) -> str:
+        """Get a human-readable string representation of the metrics."""
         return textwrap.dedent(
             f"""
             Circuit Size:

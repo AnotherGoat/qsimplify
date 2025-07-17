@@ -1,6 +1,6 @@
 import numpy
 from qiskit import QuantumCircuit
-from qiskit.circuit.library import QFT
+from qiskit.circuit.library import QFTGate
 from qiskit.quantum_info import Operator
 
 from qsimplify.converter.qiskit_converter import QiskitConverter
@@ -17,8 +17,11 @@ def test_qft_3_qubits():
     circuit.p(numpy.pi / 2, 2)
     circuit.barrier()
 
+    qft_circuit = QuantumCircuit(3)
+    qft_circuit.append(QFTGate(3), range(3))
+
     # QFT
-    circuit.compose(QFT(3).decompose(), qubits=range(3), inplace=True)
+    circuit.compose(qft_circuit.decompose(), qubits=range(3), inplace=True)
 
     # Measurement
     circuit.measure_all()

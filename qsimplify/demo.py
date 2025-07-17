@@ -1,3 +1,5 @@
+"""Quantum circuit simplification demo entry point."""
+
 from pathlib import Path
 
 from qiskit import QuantumCircuit

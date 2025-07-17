@@ -1,8 +1,10 @@
+"""Contains the base for subgraph-based simplification rules."""
+
 from qsimplify.model import GateName, QuantumGraph
 
 
 class SimplificationRule:
-    """A rule for simplifying a quantum graph, by reeplacing a pattern."""
+    """A rule for simplifying a quantum graph, by replacing a pattern."""
 
     def __init__(self, pattern: QuantumGraph, replacement: QuantumGraph) -> None:
         """Create a new simplification rule.

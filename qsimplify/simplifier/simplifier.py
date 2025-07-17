@@ -1,3 +1,5 @@
+"""Contains the quantum circuit simplifier."""
+
 import itertools
 from pathlib import Path
 
@@ -179,6 +181,18 @@ class Simplifier:
         width: int,
         mask: dict[Position, bool] | None = None,
     ) -> tuple[QuantumGraph | None, GraphMappings | None]:
+        """Extract a subgraph from a bigger graph.
+
+        It starts from the specified starting column and always goes to the right from there.
+        The extracted rows can be in any order, depending on the passed parameter.
+
+        Parameters:
+            graph: The graph to extract the subgraph from.
+            rows: The rows to extract, in the specified order from top to bottom.
+            starting_column: The column to start extracting from.
+            width: The width of the extracted subgraph.
+            mask: A mask that specifies which nodes should be extracted. If not specified, all the nodes will be extracted.
+        """
         if len(rows) == 0 or width <= 0 or graph.is_empty():
             raise ValueError("The graph, rows or width are invalid")
 
@@ -308,6 +322,15 @@ class Simplifier:
     def replace_pattern(
         self, graph: QuantumGraph, replacement: QuantumGraph, mappings: GraphMappings
     ) -> None:
+        """Modify a graph by replacing part of it with another graph.
+
+        The replacement graph should be smaller or the same size as the original graph.
+
+        Parameters:
+            graph: The graph to replace the pattern in.
+            replacement: The pattern to put in the graph.
+            mappings: Positional mappings that indicate where each pattern node should go in the graph.
+        """
         self._logger.debug("Removing nodes with mappings %s", mappings)
         for original_position in mappings:
             graph.clear_node(original_position)

@@ -1,3 +1,5 @@
+"""Contains the quantum circuit and graph drawer."""
+
 from io import BytesIO
 
 import graphviz

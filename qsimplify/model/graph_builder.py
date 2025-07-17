@@ -1,3 +1,5 @@
+"""Contains the recommended way of building quantum graphs, by using a GraphBuilder."""
+
 from __future__ import annotations
 
 from qsimplify.model import graph_cleaner

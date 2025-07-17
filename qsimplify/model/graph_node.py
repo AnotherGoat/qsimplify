@@ -1,3 +1,5 @@
+"""Contains the graph node view data structure."""
+
 from dataclasses import dataclass
 
 from qsimplify.model.gate_name import GateName
@@ -13,7 +15,6 @@ class GraphNode:
         position: The position of this node in the graph.
         angle: The rotation angle attached to this node, only for rotation gates.
         bit: The classical bit where the measured qubit is stored, only for measure gates.
-
     """
 
     name: GateName

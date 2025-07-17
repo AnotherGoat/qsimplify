@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy
 from dotenv import load_dotenv
 from qiskit import QuantumCircuit, transpile
-from qiskit.circuit.library import QFT
+from qiskit.circuit.library import QFTGate
 from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import QiskitRuntimeService
 
@@ -15,12 +15,12 @@ load_dotenv()
 IBM_API_KEY = os.getenv("IBM_API_KEY", None)
 
 
-class QftException(Exception):
+class QftError(Exception):
     pass
 
 
 if IBM_API_KEY is None:
-    raise QftException("Please set the IBM_API_KEY environment variable")
+    raise QftError("Please set the IBM_API_KEY environment variable")
 
 
 @dataclass
@@ -62,7 +62,9 @@ circuit.p(numpy.pi / 4, 1)
 circuit.p(numpy.pi / 2, 2)
 
 # QFT
-circuit.compose(QFT(3).decompose(), qubits=range(3), inplace=True)
+qft_circuit = QuantumCircuit(3)
+qft_circuit.append(QFTGate(3), range(3))
+circuit.compose(qft_circuit.decompose(), qubits=range(3), inplace=True)
 
 # Measurement
 circuit.measure_all()

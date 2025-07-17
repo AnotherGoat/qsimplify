@@ -1,3 +1,5 @@
+"""Contains functions for analyzing quantum graphs and calculating metrics."""
+
 from dataclasses import fields
 from typing import Iterable
 
@@ -12,6 +14,7 @@ _CONTROLLED_GATES = {gate_name for gate_name in GateName if gate_name.is_control
 
 
 def calculate_metrics(graph: QuantumGraph) -> Metrics:
+    """Calculate metrics for the provided graph."""
     qubit_count = graph.height
     x_count = _count_gates(graph, GateName.X)
     y_count = _count_gates(graph, GateName.Y)
@@ -40,6 +43,11 @@ def calculate_metrics(graph: QuantumGraph) -> Metrics:
 
 
 def compare_metrics(old: QuantumGraph, new: QuantumGraph) -> DeltaMetrics:
+    """Compare metrics between the provided graphs.
+
+    The calculated deltas are 0 if the metrics are the same for a specific value.
+    Otherwise, they calculate the difference between the new graph and the old graph.
+    """
     old_metrics = calculate_metrics(old)
     new_metrics = calculate_metrics(new)
 
@@ -55,6 +63,7 @@ def compare_metrics(old: QuantumGraph, new: QuantumGraph) -> DeltaMetrics:
 
 
 def calculate_detailed_metrics(graph: QuantumGraph) -> DetailedMetrics:
+    """Calculate detailed metrics for the provided graph."""
     gate_count = _count_total_gates(graph)
     x_count = _count_gates(graph, GateName.X)
     y_count = _count_gates(graph, GateName.Y)

@@ -1,3 +1,5 @@
+"""A controller for the /api/circuit endpoint."""
+
 from dataclasses import asdict
 from typing import Any
 

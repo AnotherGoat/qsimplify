@@ -1,3 +1,5 @@
+"""Contains the rule parser.."""
+
 import json
 from pathlib import Path
 
@@ -9,13 +11,17 @@ GATES_CONVERTER = GatesConverter()
 
 
 class RuleParser:
+    """A parser that can load a set of simplification rules from JSON data."""
+
     def load_rules_from_file(self, path: Path) -> list[SimplificationRule]:
+        """Load simplification rules from the specified JSON file."""
         with path.open("r") as file:
             json_data = json.load(file)
 
         return self._parse_rules(json_data)
 
     def load_rules(self, json_text: str) -> list[SimplificationRule]:
+        """Load simplification rules from the specified JSON file contents, as plain text."""
         json_data = json.loads(json_text)
         return self._parse_rules(json_data)
 

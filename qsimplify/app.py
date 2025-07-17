@@ -1,3 +1,5 @@
+"""Flask application entry point."""
+
 import os
 
 from dotenv import load_dotenv

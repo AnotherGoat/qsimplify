@@ -1,3 +1,5 @@
+"""Contains the names for all the supported quantum gates."""
+
 from __future__ import annotations
 
 from enum import Enum

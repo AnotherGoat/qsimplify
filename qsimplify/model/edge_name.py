@@ -1,3 +1,5 @@
+"""Contains the names for edges between different graph nodes."""
+
 from enum import Enum
 
 

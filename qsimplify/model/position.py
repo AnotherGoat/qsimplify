@@ -1,3 +1,5 @@
+"""Contains the position data structure."""
+
 from dataclasses import dataclass
 from typing import Iterator
 
@@ -9,7 +11,6 @@ class Position:
     Attributes:
         row: The row, equivalent to the qubit index. Cannot be negative.
         column: The column index. Cannot be negative.
-
     """
 
     row: int

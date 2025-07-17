@@ -1,3 +1,5 @@
+"""Contains the edge data view data structure."""
+
 from dataclasses import dataclass, field
 
 from qsimplify.model.graph_node import GraphNode
@@ -15,7 +17,6 @@ class EdgeData:
         targets: The nodes that are targeted by the origin node.
         controlled_by: The nodes that control the origin node.
         works_with: The nodes that work together with the origin node.
-
     """
 
     origin: GraphNode

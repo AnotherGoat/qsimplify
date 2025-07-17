@@ -1,3 +1,5 @@
+"""Contains utility functions related to general use math."""
+
 import math
 
 import numpy

@@ -1,3 +1,5 @@
+"""Contains a converter implementation for converting gates to and from quantum graphs."""
+
 from dataclasses import dataclass
 from typing import Callable, assert_never
 
@@ -40,26 +42,35 @@ from qsimplify.model.quantum_gate import (
 
 @dataclass
 class ToGraphContext:
+    """Work context for the GatesConverter, when converting a list of gates to a graph."""
+
     builder: GraphBuilder
     gate: QuantumGate
 
     def unpack(self) -> tuple[GraphBuilder, QuantumGate]:
+        """Provides an easy way to unpack all the data related to this context."""
         return self.builder, self.gate
 
 
 @dataclass
 class FromGraphContext:
+    """Work context for the GatesConverter, when converting a graph to a list of gates."""
+
     graph: QuantumGraph
     node: GraphNode
     gates: list[QuantumGate]
     skipped: set[Position]
 
     def unpack(self) -> tuple[QuantumGraph, GraphNode, list[QuantumGate], set[Position]]:
+        """Provides an easy way to unpack all the data related to this context."""
         return self.graph, self.node, self.gates, self.skipped
 
 
 class GatesConverter(GraphConverter[list[QuantumGate]]):
+    """Converts a list of QuantumGates to a QuantumGraph and vice versa."""
+
     def to_graph(self, data: list[QuantumGate], clean_up: bool = True) -> QuantumGraph:
+        """Convert a list of QuantumGates into a QuantumGraph."""
         builder = GraphBuilder()
 
         for gate in data:
@@ -231,6 +242,7 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
         builder.push_ccz(gate.qubit, gate.qubit2, gate.qubit3)
 
     def from_graph(self, graph: QuantumGraph) -> list[QuantumGate]:
+        """Convert a QuantumGraph into a list of QuantumGates."""
         gates = []
         skipped = set()
 
@@ -287,7 +299,6 @@ class GatesConverter(GraphConverter[list[QuantumGate]]):
     @staticmethod
     def _add_id_from_graph(_: FromGraphContext) -> None:
         """Adding an identity gate is a no-op."""
-        pass
 
     @staticmethod
     def _add_single_gate_from_graph(

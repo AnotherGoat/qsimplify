@@ -1,3 +1,5 @@
+"""Contains a converter implementation for converting Qiskit circuits to and from quantum graphs."""
+
 from dataclasses import dataclass
 from typing import Callable
 
@@ -15,6 +17,8 @@ GATES_CONVERTER = GatesConverter()
 
 @dataclass
 class ToGraphContext:
+    """Work context for the QiskitConverter, when converting a Qiskit circuit to a graph."""
+
     builder: GraphBuilder
     gate_name: GateName
     qubits: list[int]
@@ -22,22 +26,30 @@ class ToGraphContext:
     params: list
 
     def unpack(self) -> tuple[GraphBuilder, GateName, list[int], list[int], list]:
+        """Provides an easy way to unpack all the data related to this context."""
         return self.builder, self.gate_name, self.qubits, self.bits, self.params
 
 
 @dataclass
 class FromGraphContext:
+    """Work context for the QiskitConverter, when converting a graph to a Qiskit circuit."""
+
     circuit: QuantumCircuit
     gate: QuantumGate
 
     def unpack(self) -> tuple[QuantumCircuit, QuantumGate]:
+        """Provides an easy way to unpack all the data related to this context."""
         return self.circuit, self.gate
 
 
 class QiskitConverter(GraphConverter[QuantumCircuit]):
-    """Converts a decomposed Qiskit circuit into a quantum graph."""
+    """Converts a QuantumGrapth to and from a decomposed Qiskit quantum circuit."""
 
     def to_graph(self, data: QuantumCircuit, clean_up: bool = True) -> QuantumGraph:
+        """Convert a QuantumCircuit into a QuantumGraph.
+
+        If clean_up is set to True, any empty rows and columns will be deleted.
+        """
         builder = GraphBuilder()
 
         for instruction in data.data:
@@ -141,7 +153,6 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
     @staticmethod
     def _add_id_to_graph(_: ToGraphContext) -> None:
         """Adding an identity gate is a no-op."""
-        pass
 
     @staticmethod
     def _add_h_to_graph(context: ToGraphContext) -> None:
@@ -263,6 +274,7 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
         builder.push_ccz(qubits[0], qubits[1], qubits[2])
 
     def from_graph(self, graph: QuantumGraph) -> QuantumCircuit:
+        """Convert a QuantumGraph into a Qiskit circuit."""
         circuit = QuantumCircuit(graph.height, graph.bits)
         gates = GATES_CONVERTER.from_graph(graph)
 
@@ -313,7 +325,6 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
     @staticmethod
     def _add_id_from_graph(_: FromGraphContext) -> None:
         """Adding an identity gate is a no-op."""
-        pass
 
     @staticmethod
     def _add_h_from_graph(context: FromGraphContext) -> None:

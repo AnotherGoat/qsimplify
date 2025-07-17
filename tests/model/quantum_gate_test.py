@@ -444,17 +444,6 @@ def test_parse_empty_gates():
     assert parsed_gates == []
 
 
-ALIASES = {
-    "sd": "sdg",
-    "szd": "sdg",
-    "szdg": "sdg",
-    "sqrtzd": "sdg",
-    "sqrtzdg": "sdg",
-    "sqrtx": "sx",
-    "sqrty": "sy",
-}
-
-
 def test_parse_gate_aliases():
     gates = [
         {"name": "i", "qubit": 0},

@@ -1,3 +1,5 @@
+"""Contains different quantum gates and a way to parse them from a JSON list."""
+
 from __future__ import annotations
 
 import math
@@ -26,16 +28,10 @@ def _check_index(value: int) -> int:
 
 def _check_indices(fields: list[str], values: list[int]) -> None:
     if len(set(values)) != len(values):
-        raise ValueError(f"Fields {_format_fields(fields)} must be different")
+        raise ValueError(f"Fields {_format_multiple_fields(fields)} must be different")
 
 
-def _format_fields(fields: list[str]) -> str:
-    if len(fields) == 0:
-        return ""
-
-    if len(fields) == 1:
-        return fields[0]
-
+def _format_multiple_fields(fields: list[str]) -> str:
     if len(fields) == 2:
         return f"{fields[0]} and {fields[1]}"
 
@@ -50,12 +46,16 @@ def _check_angle(value: int) -> int:
 
 
 class BaseGate(BaseModel):
+    """A generic quantum gate. It's not recommended to use this class directly."""
+
     name: GateName
     """The name of this gate."""
     model_config = ConfigDict(extra="forbid")
 
 
 class SingleGate(BaseGate):
+    """A generic single-qubit gate. It's not recommended to use this class directly."""
+
     qubit: int
     """The qubit that this gate is placed on."""
 
@@ -96,6 +96,8 @@ class ZGate(SingleGate):
 
 
 class RotationGate(SingleGate):
+    """A generic single-qubit rotation or phase gate. It's not recommended to use this class directly."""
+
     angle: float
     """The angle that this gate is rotated by."""
 
@@ -179,6 +181,8 @@ class MeasureGate(SingleGate):
 
 
 class TwoQubitGate(BaseGate):
+    """A generic two-qubit gate. It's not recommended to use this class directly."""
+
     qubit: int
     """The qubit that this gate is placed on."""
     qubit2: int
@@ -207,6 +211,8 @@ class SwapGate(TwoQubitGate):
 
 
 class SingleControlledGate(BaseGate):
+    """A generic two-qubit gate controlled by a single qubit. It's not recommended to use this class directly."""
+
     control_qubit: int
     """The qubit that controls its targets."""
     target_qubit: int

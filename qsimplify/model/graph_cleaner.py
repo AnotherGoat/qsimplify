@@ -1,3 +1,8 @@
+"""Contains functions for cleaning and fixing quantum graphs.
+
+If the GraphBuilder is being used, there is no need to use these functions.
+"""
+
 import numpy
 
 from qsimplify import math_utils
