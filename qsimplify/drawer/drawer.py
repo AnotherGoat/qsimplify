@@ -38,11 +38,11 @@ class Drawer:
         figure.savefig(f"{file_name}.png")
 
     @staticmethod
-    def save_circuit_to_buffer(circuit: QuantumCircuit) -> BytesIO:
+    def save_circuit_to_buffer(circuit: QuantumCircuit, dpi: int = 96) -> BytesIO:
         """Create a buffer with a Qiskit circuit image."""
         figure = circuit.draw(output="mpl")
         buffer = BytesIO()
-        figure.savefig(buffer, format="png", bbox_inches="tight")
+        figure.savefig(buffer, format="png", bbox_inches="tight", dpi=dpi)
         pyplot.close(figure)
         buffer.seek(0)
         return buffer
@@ -57,10 +57,10 @@ class Drawer:
         self._logger.info("Saving graph to file %s.svg", file_name)
         self._save_graph(graph, file_name, "svg")
 
-    def save_graph_to_buffer(self, graph: QuantumGraph, extension: str, **kwargs: str) -> BytesIO:
+    def save_graph_to_buffer(self, graph: QuantumGraph, extension: str, dpi: int = 96) -> BytesIO:
         """Create a buffer with a quantum graph image."""
         image = graphviz.Digraph(format=extension)
-        image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", **kwargs)
+        image.attr(scale=str(2.5), nodesep=str(0.75), splines="ortho", dpi=str(dpi))
 
         self._draw_nodes(graph, image)
         self._draw_edges(graph, image)

@@ -1,18 +1,20 @@
 """FastAPI application entry point."""
 
 import os
-from dataclasses import dataclass
-from http import HTTPStatus
+from typing import Any
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
-from fastapi.encoders import jsonable_encoder
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.openapi.utils import get_openapi
 
 from qsimplify.controller.circuit_controller import circuit_router
-from qsimplify.controller.index_controller import index_router
+from qsimplify.controller.exception_handlers import (
+    handle_gates_validation_error,
+    handle_request_validation_error,
+)
 from qsimplify.model.quantum_gate import GatesValidationError
 
 load_dotenv()
@@ -29,26 +31,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(index_router)
 app.include_router(circuit_router)
 
-
-@dataclass(frozen=True)
-class GateListErrors:
-    """Error messages for a failed validation of a list of gates."""
-
-    errors: dict[int, list[str]]
+app.add_exception_handler(RequestValidationError, handle_request_validation_error)
+app.add_exception_handler(GatesValidationError, handle_gates_validation_error)
 
 
-@app.exception_handler(GatesValidationError)
-async def _handle_gates_validation_error(
-    _: Request, exception: GatesValidationError
-) -> JSONResponse:
-    return JSONResponse(
-        status_code=HTTPStatus.BAD_REQUEST,
-        content=jsonable_encoder(GateListErrors(exception.errors)),
+def _custom_schema() -> dict[str, Any]:
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="QSimplify API",
+        version="0.0.1",
+        description="A REST API for quantum circuit simplification",
+        contact={
+            "name": "Get help with the usage of this API",
+            "email": "v.mardones04@ufromail.cl",
+        },
+        routes=app.routes,
     )
 
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = _custom_schema
 
 if __name__ == "__main__":
     uvicorn.run("qsimplify.app:app", host=_API_HOST, port=_API_PORT, reload=_API_DEBUG)

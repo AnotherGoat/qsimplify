@@ -53,11 +53,11 @@ def compare_metrics(old: QuantumGraph, new: QuantumGraph) -> DeltaMetrics:
 
     deltas: dict[str, int] = {}
 
-    for field in fields(DeltaMetrics):
-        delta = getattr(new_metrics, field.name) - getattr(old_metrics, field.name)
+    for field_name in DeltaMetrics.model_fields:
+        delta = getattr(new_metrics, field_name) - getattr(old_metrics, field_name)
 
         if delta != 0:
-            deltas[field.name] = delta
+            deltas[field_name] = delta
 
     return DeltaMetrics(**deltas)
 

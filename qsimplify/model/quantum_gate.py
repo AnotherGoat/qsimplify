@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -66,31 +66,46 @@ class SingleGate(BaseGate):
 
 
 class IdGate(SingleGate):
-    """The identity gate. It has no practical effect."""
+    """The identity gate. It has no practical effect.
+
+    Supported aliases: 'id', 'i', 'identity'.
+    """
 
     name: Literal[GateName.ID] = GateName.ID
 
 
 class HGate(SingleGate):
-    """Single-qubit Hadamard gate."""
+    """Single-qubit Hadamard gate.
+
+    Supported aliases: 'h', 'hadamard'.
+    """
 
     name: Literal[GateName.H] = GateName.H
 
 
 class XGate(SingleGate):
-    """Single-qubit X gate. Also known as the NOT gate."""
+    """Single-qubit X gate. Also known as the NOT gate.
+
+    Supported aliases: 'x', 'not'.
+    """
 
     name: Literal[GateName.X] = GateName.X
 
 
 class YGate(SingleGate):
-    """Single-qubit Y gate."""
+    """Single-qubit Y gate.
+
+    Supported aliases: 'y'.
+    """
 
     name: Literal[GateName.Y] = GateName.Y
 
 
 class ZGate(SingleGate):
-    """Single-qubit Z gate."""
+    """Single-qubit Z gate.
+
+    Supported aliases: 'z'.
+    """
 
     name: Literal[GateName.Z] = GateName.Z
 
@@ -108,67 +123,100 @@ class RotationGate(SingleGate):
 
 
 class PGate(RotationGate):
-    """Single-qubit phase gate."""
+    """Single-qubit phase gate.
+
+    Supported aliases: 'p', 'phase'.
+    """
 
     name: Literal[GateName.P] = GateName.P
 
 
 class RxGate(RotationGate):
-    """Single-qubit rotation gate, which rotates around the X axis."""
+    """Single-qubit rotation gate, which rotates around the X axis.
+
+    Supported aliases: 'rx'.
+    """
 
     name: Literal[GateName.RX] = GateName.RX
 
 
 class RyGate(RotationGate):
-    """Single-qubit rotation gate, which rotates around the Y axis."""
+    """Single-qubit rotation gate, which rotates around the Y axis.
+
+    Supported aliases: 'ry'.
+    """
 
     name: Literal[GateName.RY] = GateName.RY
 
 
 class RzGate(RotationGate):
-    """Single-qubit rotation gate, which rotates around the Z axis."""
+    """Single-qubit rotation gate, which rotates around the Z axis.
+
+    Supported aliases: 'rz'.
+    """
 
     name: Literal[GateName.RZ] = GateName.RZ
 
 
 class SGate(SingleGate):
-    """Single-qubit S gate. Also known as the sqrt(Z) gate."""
+    """Single-qubit S gate. Also known as the sqrt(Z) gate.
+
+    Supported aliases: 's', 'sz', 'sqrtz'.
+    """
 
     name: Literal[GateName.S] = GateName.S
 
 
 class SdgGate(SingleGate):
-    """Single-qubit S dagger gate. The conjugate transpose of the S gate."""
+    """Single-qubit S dagger gate. The conjugate transpose of the S gate.
+
+    Supported aliases: 'sdg', 'sd', 'szd', 'szdg', 'sqrtzd', 'sqrtzdg'.
+    """
 
     name: Literal[GateName.SDG] = GateName.SDG
 
 
 class SxGate(SingleGate):
-    """Single-qubit sqrt(X) gate."""
+    """Single-qubit sqrt(X) gate.
+
+    Supported aliases: 'sx', 'sqrtx'.
+    """
 
     name: Literal[GateName.SX] = GateName.SX
 
 
 class SyGate(SingleGate):
-    """Single-qubit sqrt(Y) gate."""
+    """Single-qubit sqrt(Y) gate.
+
+    Supported aliases: 'sy', 'sqrty'.
+    """
 
     name: Literal[GateName.SY] = GateName.SY
 
 
 class TGate(SingleGate):
-    """Single-qubit T gate. Equivalent to Z^0.25."""
+    """Single-qubit T gate. Equivalent to Z^0.25.
+
+    Supported aliases: 't'.
+    """
 
     name: Literal[GateName.T] = GateName.T
 
 
 class TdgGate(SingleGate):
-    """Single-qubit T dagger gate. The conjugate transpose of the T gate."""
+    """Single-qubit T dagger gate. The conjugate transpose of the T gate.
+
+    Supported aliases: 'tdg', 'td'.
+    """
 
     name: Literal[GateName.TDG] = GateName.TDG
 
 
 class MeasureGate(SingleGate):
-    """Single-qubit measurement gate. Stores its results on a particular bit."""
+    """Single-qubit measurement gate. Stores its results on a particular bit.
+
+    Supported aliases: 'measure', 'm'.
+    """
 
     name: Literal[GateName.MEASURE] = GateName.MEASURE
     bit: int
@@ -205,7 +253,10 @@ class TwoQubitGate(BaseGate):
 
 
 class SwapGate(TwoQubitGate):
-    """Two-qubit SWAP gate."""
+    """Two-qubit SWAP gate.
+
+    Supported aliases: 'swap'.
+    """
 
     name: Literal[GateName.SWAP] = GateName.SWAP
 
@@ -235,31 +286,46 @@ class SingleControlledGate(BaseGate):
 
 
 class ChGate(SingleControlledGate):
-    """Two-qubit controlled Hadamard gate."""
+    """Two-qubit controlled Hadamard gate.
+
+    Supported aliases: 'ch'.
+    """
 
     name: Literal[GateName.CH] = GateName.CH
 
 
 class CxGate(SingleControlledGate):
-    """Two-qubit controlled X gate. Also known as the CNOT gate."""
+    """Two-qubit controlled X gate. Also known as the CNOT gate.
+
+    Supported aliases: 'cx', 'cnot'.
+    """
 
     name: Literal[GateName.CX] = GateName.CX
 
 
 class CyGate(SingleControlledGate):
-    """Two-qubit controlled Y gate."""
+    """Two-qubit controlled Y gate.
+
+    Supported aliases: 'cy'.
+    """
 
     name: Literal[GateName.CY] = GateName.CY
 
 
 class CzGate(TwoQubitGate):
-    """Two-qubit controlled Z gate."""
+    """Two-qubit controlled Z gate.
+
+    Supported aliases: 'cz'.
+    """
 
     name: Literal[GateName.CZ] = GateName.CZ
 
 
 class CpGate(SingleControlledGate):
-    """Two-qubit controlled phase gate."""
+    """Two-qubit controlled phase gate.
+
+    Supported aliases: 'cp', 'cphase'.
+    """
 
     name: Literal[GateName.CP] = GateName.CP
     angle: float
@@ -272,7 +338,10 @@ class CpGate(SingleControlledGate):
 
 
 class CswapGate(BaseGate):
-    """Three-qubit controlled SWAP gate."""
+    """Three-qubit controlled SWAP gate.
+
+    Supported aliases: 'cswap'.
+    """
 
     name: Literal[GateName.CSWAP] = GateName.CSWAP
     control_qubit: int
@@ -307,7 +376,10 @@ class CswapGate(BaseGate):
 
 
 class CcxGate(BaseGate):
-    """Three-qubit X Gate, controlled by 2 qubits. Also known as the CCNOT or Toffoli gate."""
+    """Three-qubit X Gate, controlled by 2 qubits. Also known as the CCNOT or Toffoli gate.
+
+    Supported aliases: 'ccx', 'ccnot', 'toffoli'.
+    """
 
     name: Literal[GateName.CCX] = GateName.CCX
     control_qubit: int
@@ -342,7 +414,10 @@ class CcxGate(BaseGate):
 
 
 class CczGate(BaseGate):
-    """Three-qubit Z Gate, controlled by 2 qubits."""
+    """Three-qubit Z Gate, controlled by 2 qubits.
+
+    Supported aliases: 'ccz'.
+    """
 
     name: Literal[GateName.CCZ] = GateName.CCZ
     qubit: int
@@ -409,6 +484,8 @@ _gate_adapter = TypeAdapter(QuantumGate)
 type Errors = dict[int, list[str]]
 ALIASES = {
     "i": "id",
+    "identity": "id",
+    "hadamard": "h",
     "not": "x",
     "phase": "p",
     "sz": "s",
@@ -421,6 +498,7 @@ ALIASES = {
     "sqrtx": "sx",
     "sqrty": "sy",
     "td": "tdg",
+    "m": "measure",
     "cnot": "cx",
     "cphase": "cp",
     "ccnot": "ccx",
@@ -440,7 +518,7 @@ class GatesValidationError(Exception):
         super().__init__(f"Gates validation failed {self.errors}")
 
 
-def parse_gates(gates: list[dict]) -> list[QuantumGate]:
+def parse_gates(gates: list[dict[str, Any]]) -> list[QuantumGate]:
     """Validate and convert a JSON list of dictionaries into a list of quantum gates."""
     output: list[QuantumGate] = []
     errors: Errors = {}
@@ -467,9 +545,9 @@ def _extract_error_messages(validation_error: ValidationError) -> list[str]:
 
 
 def _format_error_message(error: ErrorDetails) -> str:
-    message = error["msg"]
+    message = error.get("msg", "Unknown error")
 
-    if message == "Unable to extract tag using discriminator 'name'":
+    if "Unable to extract tag using discriminator 'name'" in message:
         return "name: Field required"
 
     if (
@@ -481,6 +559,6 @@ def _format_error_message(error: ErrorDetails) -> str:
     if message.startswith("Value error, "):
         message = message.replace("Value error, ", "", 1)
 
-    location = error["loc"]
-    last_location = location[-1]
+    location = error.get("loc", ["???"])
+    last_location = location[-1] if len(location) > 0 else "???"
     return f"{last_location}: {message}"

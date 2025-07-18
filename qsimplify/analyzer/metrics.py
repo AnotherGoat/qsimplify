@@ -3,9 +3,10 @@
 import textwrap
 from dataclasses import dataclass
 
+from pydantic import BaseModel
 
-@dataclass(frozen=True)
-class Metrics:
+
+class Metrics(BaseModel):
     """Defines a set of metrics that can be used to estimate the complexity and quality of a quantum circuit.
 
     Attributes:
@@ -47,8 +48,7 @@ class Metrics:
     gate_types_count: int
 
 
-@dataclass(frozen=True)
-class DeltaMetrics:
+class DeltaMetrics(BaseModel):
     """Defines the difference in metrics between two quantum circuits.
 
     Attributes:
@@ -90,8 +90,7 @@ class DeltaMetrics:
     gate_types_count: int | None = None
 
 
-@dataclass(frozen=True)
-class DetailedMetrics:
+class DetailedMetrics(BaseModel):
     """Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
 
     Attributes:
