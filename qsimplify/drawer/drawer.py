@@ -4,11 +4,11 @@ from io import BytesIO
 
 import graphviz
 from graphviz import Digraph
+from loguru import logger
 from matplotlib import pyplot
 from qiskit import QuantumCircuit
 
 from qsimplify.model import EdgeName, GateName, GraphEdge, GraphNode, QuantumGraph
-from qsimplify.utils import setup_logger
 
 _RED = "#EF9A9A"
 _DARK_RED = "#B71C1C"
@@ -27,12 +27,11 @@ class Drawer:
 
     def __init__(self, view: bool = False) -> None:
         """Create a new drawer."""
-        self._logger = setup_logger("Drawer")
         self.view = view
 
     def save_circuit_png(self, circuit: QuantumCircuit, file_name: str) -> None:
         """Save a Qiskit circuit to a png file."""
-        self._logger.info("Saving circuit to file %s.png", file_name)
+        logger.info("Saving circuit to file {}.png", file_name)
 
         figure = circuit.draw("mpl")
         figure.savefig(f"{file_name}.png")
@@ -49,12 +48,12 @@ class Drawer:
 
     def save_graph_png(self, graph: QuantumGraph, file_name: str) -> None:
         """Save a quantum graph to a png file."""
-        self._logger.info("Saving graph to file %s.png", file_name)
+        logger.info("Saving graph to file {}.png", file_name)
         self._save_graph(graph, file_name, "png", dpi=str(150))
 
     def save_graph_svg(self, graph: QuantumGraph, file_name: str) -> None:
         """Save a quantum graph to a svg file."""
-        self._logger.info("Saving graph to file %s.svg", file_name)
+        logger.info("Saving graph to file {}.svg", file_name)
         self._save_graph(graph, file_name, "svg")
 
     def save_graph_to_buffer(self, graph: QuantumGraph, extension: str, dpi: int = 96) -> BytesIO:

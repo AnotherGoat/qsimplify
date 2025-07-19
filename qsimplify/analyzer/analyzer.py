@@ -1,6 +1,5 @@
 """Contains functions for analyzing quantum graphs and calculating metrics."""
 
-from dataclasses import fields
 from typing import Iterable
 
 from qsimplify.analyzer.metrics import DeltaMetrics, DetailedMetrics, Metrics

@@ -1,138 +1,122 @@
 """Contains data structures that store metrics for quantum circuits."""
 
 import textwrap
-from dataclasses import dataclass
 
 from pydantic import BaseModel
 
 
 class Metrics(BaseModel):
-    """Defines a set of metrics that can be used to estimate the complexity and quality of a quantum circuit.
-
-    Attributes:
-        qubit_count: Number of qubits in the circuit.
-        depth: Maximum number of operations applied to a qubit in the circuit.
-        x_count: Number of Pauli X (NOT) gates.
-        y_count: Number of Pauli Y gates.
-        z_count: Number of Pauli Z gates.
-        pauli_count: Total number of Pauli X (NOT), Y and Z gates.
-        hadamard_count: Number of Hadamard gates.
-        rotation_count: Number of rotation gates.
-        square_root_count: Number of square root gates.
-        measure_count: Number of measured qubits.
-        swap_count: Number of SWAP gates.
-        cx_count: Number of CX (CNOT) gates.
-        gate_count: Total number of gates.
-        single_gate_count: Total number of single-qubit gates.
-        controlled_gate_count: Total number of controlled gates.
-        ancilla_qubit_count: Number of ancilla qubits (qubits that are not measured).
-        gate_types_count: Number of different gates used in the circuit.
-    """
+    """Defines a set of metrics that can be used to estimate the complexity and quality of a quantum circuit."""
 
     qubit_count: int
+    """Number of qubits in the circuit."""
     depth: int
+    """Maximum number of operations applied to a qubit in the circuit."""
     x_count: int
+    """Number of Pauli X (NOT) gates."""
     y_count: int
+    """Number of Pauli Y gates."""
     z_count: int
+    """Number of Pauli Z gates."""
     pauli_count: int
+    """Total number of Pauli X (NOT), Y and Z gates."""
     hadamard_count: int
+    """Number of Hadamard gates."""
     rotation_count: int
+    """Number of rotation gates."""
     square_root_count: int
+    """Number of square root gates."""
     measure_count: int
+    """Number of measured qubits."""
     swap_count: int
+    """Number of SWAP gates."""
     cx_count: int
+    """Number of CX (CNOT) gates."""
     gate_count: int
+    """Total number of gates."""
     single_gate_count: int
+    """Total number of single-qubit gates."""
     controlled_gate_count: int
+    """Total number of controlled gates."""
     ancilla_qubit_count: int
+    """Number of ancilla qubits (qubits that are not measured)."""
     gate_types_count: int
+    """Number of different gates used in the circuit."""
 
 
 class DeltaMetrics(BaseModel):
-    """Defines the difference in metrics between two quantum circuits.
-
-    Attributes:
-        qubit_count: Difference in qubits in the circuit.
-        depth: Difference in maximum number of operations applied to a qubit in the circuit.
-        x_count: Difference in Pauli X (NOT) gates.
-        y_count: Difference in Pauli Y gates.
-        z_count: Difference in Pauli Z gates.
-        pauli_count: Difference in total of Pauli X (NOT), Y and Z gates.
-        hadamard_count: Difference in Hadamard gates.
-        rotation_count: Difference in rotation gates.
-        square_root_count: Difference in square root gates.
-        measure_count: Difference in measured qubits.
-        swap_count: Difference in SWAP gates.
-        cx_count: Difference in CX (CNOT) gates.
-        gate_count: Difference in total number of gates.
-        single_gate_count: Difference in single-qubit gates.
-        controlled_gate_count: Difference in controlled gates.
-        ancilla_qubit_count: Difference in ancilla qubits (qubits that are not measured).
-        gate_types_count: Difference in different gates used in the circuit.
-    """
+    """Defines the difference in metrics between two quantum circuits."""
 
     qubit_count: int | None = None
+    """Difference in qubits in the circuit."""
     depth: int | None = None
+    """Difference in maximum number of operations applied to a qubit in the circuit."""
     x_count: int | None = None
+    """Difference in Pauli X (NOT) gates."""
     y_count: int | None = None
+    """Difference in Pauli Y gates."""
     z_count: int | None = None
+    """Difference in Pauli Z gates."""
     pauli_count: int | None = None
+    """Difference in total of Pauli X (NOT), Y and Z gates."""
     hadamard_count: int | None = None
+    """Difference in Hadamard gates."""
     rotation_count: int | None = None
+    """Difference in rotation gates."""
     square_root_count: int | None = None
+    """Difference in square root gates."""
     measure_count: int | None = None
+    """Difference in measured qubits."""
     swap_count: int | None = None
+    """Difference in SWAP gates."""
     cx_count: int | None = None
+    """Difference in CX (CNOT) gates."""
     gate_count: int | None = None
+    """Difference in total number of gates."""
     single_gate_count: int | None = None
+    """Difference in single-qubit gates."""
     controlled_gate_count: int | None = None
+    """Difference in controlled gates."""
     ancilla_qubit_count: int | None = None
+    """Difference in ancilla qubits (qubits that are not measured)."""
     gate_types_count: int | None = None
+    """Difference in different gates used in the circuit."""
 
 
 class DetailedMetrics(BaseModel):
-    """Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage.
-
-    Attributes:
-        width (int): Number of qubits in the circuit.
-        depth (int): Maximum number of operations applied to a qubit in the circuit.
-
-        max_density (int): Maximum number of operations applied to the qubits.
-        average_density (float): Average number of operations applied to the qubits.
-
-        x_count (int): Number of Pauli-X gates (NOT).
-        y_count (int): Number of Pauli-Y gates.
-        z_count (int): Number of Pauli-Z gates.
-        pauli_count (int): Total number of Pauli gates in the circuit (calculated as the sum of Pauli-X, Pauli-Y, and Pauli-Z gates).
-        hadamard_count (int): Number of Hadamard gates.
-        initial_superposition_percent (float): Ratio of qubits with a Hadamard gate as an initial gate (qubits in superposition state).
-        other_single_qubit_count (int): Number of other single-qubit gates in the circuit (excluding Pauli-X, Pauli-Y, Pauli-Z and Hadamard gates).
-        single_qubit_count (int): Total number of single-qubit gates.
-        single_controlled_qubit_count (int): Total number of controlled single-qubit gates.
-
-        gate_count (int): Total number of gates in the circuit.
-        controlled_gate_count (int): Total number of controlled gates in the circuit.
-        single_qubit_percent (float): Ratio of single gates to total gates.
-    """
+    """Represents quality metrics for a quantum circuit, providing insights into its structure and gate usage."""
 
     # Circuit Size
     width: int
+    """Number of qubits in the circuit."""
     depth: int
+    """Maximum number of operations applied to a qubit in the circuit."""
 
     # Circuit Density
     max_density: int
+    """Maximum number of operations applied to the qubits."""
     average_density: float
+    """Average number of operations applied to the qubits."""
 
     # Single-Qubit Gates
     x_count: int
+    """Number of Pauli-X gates (NOT)."""
     y_count: int
+    """Number of Pauli-Y gates."""
     z_count: int
+    """Number of Pauli-Z gates."""
     pauli_count: int
+    """Total number of Pauli gates in the circuit (calculated as the sum of Pauli-X, Pauli-Y, and Pauli-Z gates)."""
     hadamard_count: int
+    """Number of Hadamard gates."""
     initial_superposition_percent: float
+    """Ratio of qubits with a Hadamard gate as an initial gate (qubits in superposition state)."""
     other_single_qubit_count: int
+    """Number of other single-qubit gates in the circuit (excluding Pauli-X, Pauli-Y, Pauli-Z and Hadamard gates)."""
     single_qubit_count: int
+    """Total number of single-qubit gates."""
     single_controlled_qubit_count: int
+    """Total number of controlled single-qubit gates."""
 
     # Multi-Qubit Gates
     swap_count: int
@@ -147,8 +131,11 @@ class DetailedMetrics(BaseModel):
 
     # All Gates in the Circuit
     gate_count: int
+    """Total number of gates in the circuit."""
     controlled_gate_count: int
+    """Total number of controlled gates in the circuit."""
     single_qubit_percent: float
+    """Ratio of single gates to total gates."""
 
     # Measurement Gates
     measure_count: int

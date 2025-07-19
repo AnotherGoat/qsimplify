@@ -1,7 +1,8 @@
 """FastAPI application entry point."""
 
 import os
-from typing import Any
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator
 
 import uvicorn
 from dotenv import load_dotenv
@@ -10,6 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
+from qsimplify import logging_config
 from qsimplify.controller.circuit_controller import circuit_router
 from qsimplify.controller.exception_handlers import (
     handle_gates_validation_error,
@@ -20,9 +22,16 @@ from qsimplify.model.quantum_gate import GatesValidationError
 load_dotenv()
 _API_HOST = os.getenv("API_HOST", "localhost")
 _API_PORT = int(os.getenv("API_PORT", 5001))
-_API_DEBUG = bool(os.getenv("API_DEBUG", True))
+_API_RELOAD = bool(os.getenv("API_RELOAD", True))
 
-app = FastAPI()
+
+@asynccontextmanager
+async def _lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
+    logging_config.set_up_logging()
+    yield
+
+
+app = FastAPI(lifespan=_lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,5 +67,11 @@ def _custom_schema() -> dict[str, Any]:
 
 app.openapi = _custom_schema
 
+
 if __name__ == "__main__":
-    uvicorn.run("qsimplify.app:app", host=_API_HOST, port=_API_PORT, reload=_API_DEBUG)
+    uvicorn.run(
+        "qsimplify.app:app",
+        host=_API_HOST,
+        port=_API_PORT,
+        reload=_API_RELOAD,
+    )

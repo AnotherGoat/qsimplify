@@ -27,10 +27,11 @@ RUN uv sync --no-dev --frozen && \
     chown -R appuser:appgroup /app
 
 # Set app-specific environment variables
-ENV DEBUG=False
+ENV LOG_LEVEL=INFO
+ENV LOG_TO_FILE=False
 ENV API_HOST=0.0.0.0
 ENV API_PORT=5001
-ENV API_DEBUG=False
+ENV API_RELOAD=False
 
 # Set app user
 USER appuser

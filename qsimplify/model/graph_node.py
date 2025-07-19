@@ -8,19 +8,16 @@ from qsimplify.model.position import Position
 
 @dataclass(frozen=True)
 class GraphNode:
-    """A view of a node in a quantum graph.
-
-    Attributes:
-        name: The name of quantum gate represented by this node.
-        position: The position of this node in the graph.
-        angle: The rotation angle attached to this node, only for rotation gates.
-        bit: The classical bit where the measured qubit is stored, only for measure gates.
-    """
+    """A view of a node in a quantum graph."""
 
     name: GateName
+    """The name of quantum gate represented by this node."""
     position: Position
+    """The position of this node in the graph."""
     angle: float | None = None
+    """The rotation angle attached to this node, only for rotation gates."""
     bit: int | None = None
+    """The classical bit where the measured qubit is stored, only for measure gates."""
 
     def __str__(self) -> str:
         """Get a string representation of this view."""

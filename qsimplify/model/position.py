@@ -6,15 +6,12 @@ from typing import Iterator
 
 @dataclass(frozen=True)
 class Position:
-    """Represents a (row, column) position in a QuantumGraph.
-
-    Attributes:
-        row: The row, equivalent to the qubit index. Cannot be negative.
-        column: The column index. Cannot be negative.
-    """
+    """Represents a (row, column) position in a QuantumGraph."""
 
     row: int
+    """The row, equivalent to the qubit index. Cannot be negative."""
     column: int
+    """The column index. Cannot be negative."""
 
     def __post_init__(self) -> None:
         """Check that the position's coordinates are valid."""

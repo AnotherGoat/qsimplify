@@ -30,9 +30,7 @@ def _extract_error_messages(validation_error: RequestValidationError) -> list[st
     return [_format_error_message(error) for error in validation_error.errors()]
 
 
-async def handle_request_validation_error(
-    _: Request, exception: RequestValidationError
-) -> JSONResponse:
+def handle_request_validation_error(_: Request, exception: RequestValidationError) -> JSONResponse:
     """Intercept a RequestValidationError with a more helpful response."""
     return JSONResponse(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
@@ -40,9 +38,7 @@ async def handle_request_validation_error(
     )
 
 
-async def handle_gates_validation_error(
-    _: Request, exception: GatesValidationError
-) -> JSONResponse:
+def handle_gates_validation_error(_: Request, exception: GatesValidationError) -> JSONResponse:
     """Intercept a GatesValidationError to send a response containing errors for each wrong gate."""
     return JSONResponse(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,

@@ -15,6 +15,9 @@ coverage/
 .coverage
 coverage.xml
 
+# Logs
+logs/
+
 # Local configuration files
 .env
 

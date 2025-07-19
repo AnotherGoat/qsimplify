@@ -7,25 +7,22 @@ from qsimplify.model.graph_node import GraphNode
 
 @dataclass(frozen=True)
 class EdgeData:
-    """A view of a node in a quantum graph, including all the nodes in the edges connected to it.
-
-    Attributes:
-        origin: The node at the center of the view.
-        left: The node at the left of the origin node.
-        right: The node at the right of the origin node.
-        swaps_with: The node that is swapped with the origin node.
-        targets: The nodes that are targeted by the origin node.
-        controlled_by: The nodes that control the origin node.
-        works_with: The nodes that work together with the origin node.
-    """
+    """A view of a node in a quantum graph, including all the nodes in the edges connected to it."""
 
     origin: GraphNode
+    """The node at the center of the view."""
     left: GraphNode | None = None
+    """The node at the left of the origin node."""
     right: GraphNode | None = None
+    """The node at the right of the origin node."""
     swaps_with: GraphNode | None = None
+    """The node that is swapped with the origin node."""
     targets: list[GraphNode] = field(default_factory=list)
+    """The nodes that are targeted by the origin node."""
     controlled_by: list[GraphNode] = field(default_factory=list)
+    """The nodes that control the origin node."""
     works_with: list[GraphNode] = field(default_factory=list)
+    """The nodes that work together with the origin node."""
 
     def __str__(self) -> str:
         """Get a string representation of this view."""

@@ -1,6 +1,7 @@
 from qsimplify.model import GraphBuilder, Position
 from qsimplify.model.quantum_graph import QuantumGraph
 from qsimplify.simplifier import Simplifier
+from qsimplify.simplifier.simplification_rule import PositionMask
 
 simplifier = Simplifier()
 
@@ -243,16 +244,18 @@ def test_find_same_mixed_pattern_with_mask():
 
     graph = GraphBuilder().push_cx(0, 1).push_h(0).push_cx(1, 0).push_z(1).build()
 
-    mask = {
-        Position(0, 0): True,
-        Position(0, 1): True,
-        Position(0, 2): True,
-        Position(0, 3): False,
-        Position(1, 0): True,
-        Position(1, 1): False,
-        Position(1, 2): True,
-        Position(1, 3): True,
-    }
+    mask = PositionMask(
+        {
+            Position(0, 0): True,
+            Position(0, 1): True,
+            Position(0, 2): True,
+            Position(0, 3): False,
+            Position(1, 0): True,
+            Position(1, 1): False,
+            Position(1, 2): True,
+            Position(1, 3): True,
+        }
+    )
     mappings = simplifier.find_pattern(graph, pattern, mask=mask)
 
     expected_mappings = {
@@ -277,16 +280,18 @@ def test_find_inverted_pattern_with_mask():
 
     graph = GraphBuilder().push_cx(1, 0).push_h(1).push_cx(0, 1).push_z(0).build()
 
-    mask = {
-        Position(0, 0): True,
-        Position(0, 1): True,
-        Position(0, 2): True,
-        Position(0, 3): False,
-        Position(1, 0): True,
-        Position(1, 1): False,
-        Position(1, 2): True,
-        Position(1, 3): True,
-    }
+    mask = PositionMask(
+        {
+            Position(0, 0): True,
+            Position(0, 1): True,
+            Position(0, 2): True,
+            Position(0, 3): False,
+            Position(1, 0): True,
+            Position(1, 1): False,
+            Position(1, 2): True,
+            Position(1, 3): True,
+        }
+    )
     mappings = simplifier.find_pattern(graph, pattern, mask=mask)
 
     expected_mappings = {

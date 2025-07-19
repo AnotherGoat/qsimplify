@@ -11,6 +11,7 @@ dependencies = [
     "dotenv>=0.9.9",
     "fastapi>=0.116.1",
     "graphviz>=0.20.3",
+    "loguru>=0.7.3",
     "matplotlib>=3.10.1",
     "networkx>=3.4.2",
     "pydantic>=2.11.7",
@@ -50,8 +51,6 @@ select = [
     "C4", # flake8-comprehensions
     "FIX", # flake8-fixme
     "FA", # flake8-future-annotations
-    "LOG", # flake8-logging
-    "G", # flake8-logging-format
     "INP", # flake8-no-pep420
     "PIE", # flake8-pie
     "PT", # flake8-pytest-style
@@ -99,10 +98,13 @@ convention = "google"
 
 [tool.coverage.run]
 omit = [
+    # Tests
     "tests/**",
+    # Entrypoints
     "qsimplify/app.py",
     "qsimplify/demo.py",
     "qsimplify/qft.py",
     "qsimplify/qft2.py",
-    "wsgi.py"
+    # Configuration files
+    "qsimplify/logging_config.py",
 ]
