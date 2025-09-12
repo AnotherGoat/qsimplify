@@ -132,7 +132,7 @@ uv run pysonar --sonar-host-url=http://localhost:9000 --sonar-token=TOKEN
 import numpy
 from qiskit import QuantumCircuit
 from qsimplify.converter import QiskitConverter
-from qsimplify.drawer import Drawer
+from qsimplify import drawer
 
 circuit = QuantumCircuit(3, 1)
 circuit.h(0)
@@ -153,7 +153,6 @@ circuit.measure(0, 0)
 converter = QiskitConverter()
 graph = converter.circuit_to_graph(circuit)
 
-drawer = Drawer(view=True)
 drawer.save_circuit_png(circuit, "circuit")
 drawer.save_graph_png(graph, "graph")
 ```

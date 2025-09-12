@@ -291,8 +291,8 @@ class Simplifier:
 
         return mappings
 
+    @staticmethod
     def _find_next_right_node(
-        self,
         graph: QuantumGraph,
         start: Position,
         can_be_identity: bool,

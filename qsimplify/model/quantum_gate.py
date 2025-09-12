@@ -448,7 +448,7 @@ class CczGate(BaseGate):
         return self
 
 
-QuantumGate = Annotated[
+type QuantumGate = Annotated[
     IdGate
     | HGate
     | XGate

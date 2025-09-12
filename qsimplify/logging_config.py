@@ -1,7 +1,6 @@
 """Contains logging utilities that are used across the project."""
 
 import logging
-import os
 import sys
 from logging import Handler, LogRecord
 from typing import TypedDict
@@ -10,9 +9,9 @@ from dotenv import load_dotenv
 from loguru import logger as loguru_logger
 from uvicorn.logging import AccessFormatter, DefaultFormatter
 
+from qsimplify import env
+
 load_dotenv()
-_LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
-_LOG_TO_FILE = bool(os.getenv("LOG_TO_FILE", False))
 _LEVEL_FORMATTER = DefaultFormatter(fmt="%(levelprefix)s")
 _UVICORN_FORMATTER = DefaultFormatter(fmt="%(message)s")
 _ACCESS_FORMATTER = AccessFormatter(fmt='%(client_addr)s - "%(request_line)s" %(status_code)s')
@@ -57,13 +56,15 @@ class LoguruHandler(Handler):
         message = self._format_message(record)
         loguru_logger.opt(depth=depth, exception=record.exc_info).log(level, message)
 
-    def _find_logging_level(self, record: LogRecord) -> str | int:
+    @staticmethod
+    def _find_logging_level(record: LogRecord) -> str | int:
         try:
             return loguru_logger.level(record.levelname).name
         except ValueError:
             return record.levelno
 
-    def _find_depth(self) -> int:
+    @staticmethod
+    def _find_depth() -> int:
         frame = logging.currentframe()
         depth = 2
 
@@ -73,7 +74,8 @@ class LoguruHandler(Handler):
 
         return depth
 
-    def _format_message(self, record: LogRecord) -> str:
+    @staticmethod
+    def _format_message(record: LogRecord) -> str:
         name = record.name
 
         if name == "uvicorn":
@@ -122,9 +124,9 @@ def set_up_logging() -> None:
     logging.basicConfig(handlers=[LoguruHandler()])
     loguru_logger.remove()
 
-    loguru_logger.add(sys.stdout, format=_format_log, colorize=True, level=_LOG_LEVEL)
+    loguru_logger.add(sys.stdout, format=_format_log, colorize=True, level=env.LOG_LEVEL)
 
-    if _LOG_TO_FILE:
+    if env.LOG_TO_FILE:
         loguru_logger.add(
             "logs/app.log",
             rotation="100 MB",

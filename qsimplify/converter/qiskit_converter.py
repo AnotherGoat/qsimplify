@@ -174,7 +174,8 @@ class QiskitConverter(GraphConverter[QuantumCircuit]):
         builder, _, qubits, _, _ = context.unpack()
         builder.push_z(qubits[0])
 
-    def _add_p_to_graph(self, context: ToGraphContext) -> None:
+    @staticmethod
+    def _add_p_to_graph(context: ToGraphContext) -> None:
         builder, _, qubits, _, params = context.unpack()
         builder.push_p(params[0], qubits[0])
 

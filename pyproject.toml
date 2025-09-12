@@ -34,7 +34,7 @@ dev = [
     "pysonar>=1.1.0.2035",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
-    "ruff>=0.11.4",
+    "ruff>=0.12.4",
 ]
 
 [tool.ruff]
@@ -107,4 +107,6 @@ omit = [
     "qsimplify/qft2.py",
     # Configuration files
     "qsimplify/logging_config.py",
+    # Graphics
+    "qsimplify/drawer.py"
 ]

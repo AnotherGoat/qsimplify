@@ -4,9 +4,9 @@ from pathlib import Path
 
 from qiskit import QuantumCircuit
 
+from qsimplify import drawer
 from qsimplify.analyzer import analyzer
 from qsimplify.converter import QiskitConverter
-from qsimplify.drawer import Drawer
 from qsimplify.generator.qiskit_generator import QiskitGenerator
 from qsimplify.simplifier import Simplifier
 
@@ -55,7 +55,6 @@ def _run_demo() -> None:
 
     Path("out").mkdir(exist_ok=True)
 
-    drawer = Drawer()
     drawer.save_circuit_png(circuit, "out/original_circuit")
     drawer.save_graph_png(graph, "out/original_graph")
     drawer.save_graph_svg(graph, "out/original_graph")

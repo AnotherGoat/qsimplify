@@ -26,6 +26,10 @@ COPY qsimplify ./qsimplify/
 RUN uv sync --no-dev --frozen && \
     chown -R appuser:appgroup /app
 
+# Set app-specific environment variables
+ENV LOG_LEVEL=INFO
+ENV LOG_TO_FILE=false
+
 # Set app user
 USER appuser
 

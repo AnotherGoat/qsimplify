@@ -28,7 +28,8 @@ class RuleParser:
     def _parse_rules(self, json_data: list[dict]) -> list[SimplificationRule]:
         return [self._parse_rule(rule_data) for rule_data in json_data]
 
-    def _parse_rule(self, rule_data: dict) -> SimplificationRule | None:
+    @staticmethod
+    def _parse_rule(rule_data: dict) -> SimplificationRule | None:
         if "pattern" not in rule_data or "replacement" not in rule_data:
             raise ValueError(f"The rule {rule_data} is missing its pattern or replacement keys")
 

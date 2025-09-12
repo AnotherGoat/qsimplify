@@ -28,10 +28,10 @@ RUN uv sync --no-dev --frozen && \
 
 # Set app-specific environment variables
 ENV LOG_LEVEL=INFO
-ENV LOG_TO_FILE=False
+ENV LOG_TO_FILE=false
 ENV API_HOST=0.0.0.0
 ENV API_PORT=5001
-ENV API_RELOAD=False
+ENV API_RELOAD=false
 
 # Set app user
 USER appuser

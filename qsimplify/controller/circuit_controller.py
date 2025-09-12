@@ -7,6 +7,7 @@ from typing import Generator
 from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse
 
+from qsimplify import drawer
 from qsimplify.analyzer import analyzer
 from qsimplify.controller.dto import (
     DeltaMetricsResult,
@@ -21,7 +22,6 @@ from qsimplify.controller.dto import (
     SimplifiedCircuit,
 )
 from qsimplify.converter import GatesConverter, QiskitConverter
-from qsimplify.drawer import Drawer
 from qsimplify.generator import QiskitGenerator
 from qsimplify.model.quantum_gate import CxGate, HGate, IdGate, XGate, YGate, ZGate
 from qsimplify.simplifier import Simplifier
@@ -32,7 +32,6 @@ circuit_router = APIRouter(prefix="/api/circuit")
 gates_converter = GatesConverter()
 qiskit_converter = QiskitConverter()
 simplifier = Simplifier()
-drawer = Drawer()
 qiskit_generator = QiskitGenerator()
 
 EXAMPLE_SIMPLIFICATION_REQUEST = Body(

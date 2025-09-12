@@ -1,28 +1,21 @@
 """FastAPI application entry point."""
 
-import os
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
-from qsimplify import logging_config
+from qsimplify import env, logging_config
 from qsimplify.controller.circuit_controller import circuit_router
 from qsimplify.controller.exception_handlers import (
     handle_gates_validation_error,
     handle_request_validation_error,
 )
 from qsimplify.model.quantum_gate import GatesValidationError
-
-load_dotenv()
-_API_HOST = os.getenv("API_HOST", "localhost")
-_API_PORT = int(os.getenv("API_PORT", 5001))
-_API_RELOAD = bool(os.getenv("API_RELOAD", True))
 
 
 @asynccontextmanager
@@ -71,7 +64,7 @@ app.openapi = _custom_schema
 if __name__ == "__main__":
     uvicorn.run(
         "qsimplify.app:app",
-        host=_API_HOST,
-        port=_API_PORT,
-        reload=_API_RELOAD,
+        host=env.API_HOST,
+        port=env.API_PORT,
+        reload=env.API_RELOAD,
     )
