@@ -1,7 +1,7 @@
 """Contains the position data structure."""
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator
 
 
 @dataclass(frozen=True)

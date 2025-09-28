@@ -1,3 +1,5 @@
+import pytest
+
 from qsimplify.model import GraphBuilder, Position
 from qsimplify.model.quantum_graph import QuantumGraph
 from qsimplify.simplifier import Simplifier
@@ -13,16 +15,23 @@ def test_simplified_graph_is_new_instance():
     assert simplified_graph is not graph
 
 
+def test_simplify_wrong_number_of_iterations():
+    graph = QuantumGraph()
+
+    with pytest.raises(ValueError, match="Number of iterations must be greater than 0"):
+        simplifier.simplify_graph(graph, iterations=0)
+
+    with pytest.raises(ValueError, match="Number of iterations must be greater than 0"):
+        simplifier.simplify_graph(graph, iterations=-1)
+
+
 def test_remove_filler_and_identities():
     graph = GraphBuilder().push_id(0).push_id(1).push_cx(0, 1).push_id(0).push_id(1).build(False)
 
     simplified_graph = simplifier.simplify_graph(graph)
-    expected_graph = GraphBuilder().push_cx(0, 1).build()
+    expected = GraphBuilder().push_cx(0, 1).build()
 
-    print(simplified_graph.draw_grid())
-    print(expected_graph.draw_grid())
-
-    assert simplified_graph == expected_graph
+    assert simplified_graph == expected
 
 
 def test_remove_duplicate_hadamards():
@@ -396,7 +405,6 @@ def test_find_uneven():
     graph = GraphBuilder().push_x(0).push_y(0).put_z(1, 1).push_h(1).build()
     mappings = simplifier.find_pattern(graph, pattern)
 
-    print(mappings)
     assert mappings == {
         Position(0, 0): Position(0, 0),
         Position(0, 1): Position(0, 1),
@@ -492,8 +500,6 @@ def test_replace_adds_identities():
         .put_h(1, 4)
         .build()
     )
-
-    print(graph)
 
     mappings = {
         Position(1, 1): None,

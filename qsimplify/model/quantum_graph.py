@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterator
+from collections.abc import Iterator
 
 import networkx
 from networkx.classes import DiGraph
@@ -58,8 +58,7 @@ class QuantumGraph:
         return highest_bit + 1
 
     def _get_positions(self) -> Iterator[Position]:
-        for position in self._network.nodes:
-            yield position
+        yield from self._network.nodes
 
     def is_empty(self) -> bool:
         """Check whether this graph is empty (has no gates) or not."""

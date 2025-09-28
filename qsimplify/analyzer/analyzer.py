@@ -1,6 +1,6 @@
 """Contains functions for analyzing quantum graphs and calculating metrics."""
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from qsimplify.analyzer.metrics import DeltaMetrics, DetailedMetrics, Metrics
 from qsimplify.model import EdgeName, GateName, GraphNode, Position, QuantumGraph

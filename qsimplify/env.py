@@ -53,8 +53,23 @@ def _parse_log_level() -> str:
     return level
 
 
-API_HOST = os.getenv("API_HOST", "localhost")
-API_PORT = _parse_int("API_PORT", 5000)
-API_RELOAD = _parse_bool("API_RELOAD", True)
 LOG_LEVEL = _parse_log_level()
+"""The log level to use for the root Loguru logger. Defaults to INFO.
+
+Note that logging_config.set_up_logging() needs to be called for this setting to take effect.
+"""
+
 LOG_TO_FILE = _parse_bool("LOG_TO_FILE", False)
+"""Whether to log to a file or not. Defaults to False.
+
+Note that logging_config.set_up_logging() needs to be called for this setting to take effect.
+"""
+
+API_HOST = os.getenv("API_HOST", "localhost")
+"""The host to bind the FastAPI server to. Defaults to localhost."""
+
+API_PORT = _parse_int("API_PORT", 5000)
+"""The port to bind the FastAPI server to. Defaults to 5000."""
+
+API_RELOAD = _parse_bool("API_RELOAD", True)
+"""Whether to reload the FastAPI server or not when code changes. Defaults to True."""

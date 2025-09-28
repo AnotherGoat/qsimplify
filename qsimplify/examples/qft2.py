@@ -1,30 +1,32 @@
+"""Contains part 2 of the QFT example usage, where job results are fetched from IBM's cloud and stored as a CSV file."""
+
 import csv
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy
-from dotenv import load_dotenv
 from qiskit import QuantumCircuit, transpile
 from qiskit.circuit.library import QFTGate
 from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import QiskitRuntimeService
 
-load_dotenv()
+from qsimplify import logging_config
 
-IBM_API_KEY = os.getenv("IBM_API_KEY", None)
+logging_config.set_up_logging()
+_IBM_API_KEY = os.getenv("IBM_API_KEY", None)
 
 
-class QftError(Exception):
+class _QftError(Exception):
     pass
 
 
-if IBM_API_KEY is None:
-    raise QftError("Please set the IBM_API_KEY environment variable")
+if _IBM_API_KEY is None:
+    raise _QftError("Please set the IBM_API_KEY environment variable")
 
 
 @dataclass
-class Result:
+class _Result:
     circuit_name: str
     backend: str
     shots: int
@@ -50,7 +52,7 @@ class Result:
         return error / 2
 
 
-results: list[Result] = []
+results: list[_Result] = []
 
 # Circuit for running the simulation
 circuit = QuantumCircuit(3)
@@ -74,41 +76,45 @@ transpiled_circuit = transpile(circuit, simulator)
 simulated_result = simulator.run(transpiled_circuit, shots=16384).result()
 counts = simulated_result.get_counts()
 
-results.append(Result("Simplified", "aer_simulator", 16384, counts))
+results.append(_Result("Simplified", "aer_simulator", 16384, counts))
 
 QiskitRuntimeService.save_account(
-    channel="ibm_quantum", token=IBM_API_KEY, set_as_default=True, overwrite=True
+    channel="ibm_quantum_platform",
+    instance="qsimplify",
+    token=_IBM_API_KEY,
+    set_as_default=True,
+    overwrite=True,
 )
 service = QiskitRuntimeService()
 
 
 @dataclass
-class Job:
+class _Job:
     id: str
     name: str
     shots: int
 
 
-JOBS = [
-    Job("d107w2rv3z5000827vj0", "Polluted", 1024),
-    Job("d107w38n2txg008jdc70", "Simplified", 1024),
-    Job("d109rw3mya70008e779g", "Polluted", 16384),
-    Job("d109rwkmya70008e77a0", "Simplified", 16384),
-    Job("d109t9hmya70008e77g0", "Polluted", 65536),
-    Job("d109ta15z6q00086yyjg", "Simplified", 65536),
-    Job("d10e8esqf56g0081dkng", "Polluted", 131072),
-    Job("d10e8fhv3z5000829pw0", "Simplified", 131072),
+_JOBS = [
+    _Job("d107w2rv3z5000827vj0", "Polluted", 1024),
+    _Job("d107w38n2txg008jdc70", "Simplified", 1024),
+    _Job("d109rw3mya70008e779g", "Polluted", 16384),
+    _Job("d109rwkmya70008e77a0", "Simplified", 16384),
+    _Job("d109t9hmya70008e77g0", "Polluted", 65536),
+    _Job("d109ta15z6q00086yyjg", "Simplified", 65536),
+    _Job("d10e8esqf56g0081dkng", "Polluted", 131072),
+    _Job("d10e8fhv3z5000829pw0", "Simplified", 131072),
 ]
 
-for job in JOBS:
+for job in _JOBS:
     ibm_job = service.job(job.id)
     result = ibm_job.result()
     counts = result[0].data.meas.get_counts()
 
-    results.append(Result(job.name, "ibm_brisbane", job.shots, counts))
+    results.append(_Result(job.name, "ibm_brisbane", job.shots, counts))
 
 
-def format_percent(percent: float) -> str:
+def _format_percent(percent: float) -> str:
     return f"{percent * 100:.2f}%"
 
 
@@ -138,14 +144,14 @@ with Path("results.csv").open("w") as csv_file:
                 result.circuit_name,
                 result.backend,
                 result.shots,
-                format_percent(result.percentages.get("000", 0)),
-                format_percent(result.percentages.get("001", 0)),
-                format_percent(result.percentages.get("010", 0)),
-                format_percent(result.percentages.get("011", 0)),
-                format_percent(result.percentages.get("100", 0)),
-                format_percent(result.percentages.get("101", 0)),
-                format_percent(result.percentages.get("110", 0)),
-                format_percent(result.percentages.get("111", 0)),
-                format_percent(result.total_variation_distance(expected_counts)),
+                _format_percent(result.percentages.get("000", 0)),
+                _format_percent(result.percentages.get("001", 0)),
+                _format_percent(result.percentages.get("010", 0)),
+                _format_percent(result.percentages.get("011", 0)),
+                _format_percent(result.percentages.get("100", 0)),
+                _format_percent(result.percentages.get("101", 0)),
+                _format_percent(result.percentages.get("110", 0)),
+                _format_percent(result.percentages.get("111", 0)),
+                _format_percent(result.total_variation_distance(expected_counts)),
             ]
         )

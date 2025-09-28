@@ -1,8 +1,8 @@
 """A controller for the /api/circuit endpoint."""
 
+from collections.abc import Generator
 from http import HTTPStatus
 from io import BytesIO
-from typing import Generator
 
 from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse

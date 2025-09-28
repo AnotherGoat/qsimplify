@@ -9,92 +9,106 @@ authors = [
 requires-python = ">=3.12,<4"
 dependencies = [
     "dotenv>=0.9.9",
-    "fastapi>=0.116.1",
+    "fastapi>=0.117.1",
     "graphviz>=0.20.3",
     "loguru>=0.7.3",
-    "matplotlib>=3.10.1",
+    "matplotlib>=3.10.6",
     "networkx>=3.4.2",
-    "pydantic>=2.11.7",
+    "pydantic>=2.11.9",
     "pylatexenc>=2.10",
-    "qiskit>=2.0.0",
-    "uvicorn>=0.35.0",
+    "qiskit>=2.2.0",
+    "qiskit-aer>=0.17.1",
+    "qiskit-ibm-runtime>=0.40.0",
+    "uvicorn>=0.37.0",
 ]
 
 [project.optional-dependencies]
 qft = [
-    "qiskit-aer>=0.17.1",
-    "qiskit-ibm-runtime>=0.40.0",
+    "qiskit-aer>=0.17.2",
+    "qiskit-ibm-runtime>=0.41.1",
 ]
 
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
-    "pre-commit>=4.2.0",
-    "pyright>=1.1.398",
-    "pysonar>=1.1.0.2035",
-    "pytest>=8.3.5",
-    "pytest-cov>=6.1.1",
-    "ruff>=0.12.4",
+    "pre-commit>=4.3.0",
+    "pyright>=1.1.405",
+    "pysonar>=1.2.0.2419",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.13.1",
 ]
 
 [tool.ruff]
 line-length = 100
 
+# List of rules can be found here: https://docs.astral.sh/ruff/rules/
 [tool.ruff.lint]
 select = [
-    "F", # Pyflakes
-    "ERA", # eradicate
     "ANN", # flake8-annotations
-    "S", # flake8-bandit
-    "B", # flake8-bugbear
-    "A", # flake8-builtins
-    "C4", # flake8-comprehensions
-    "FIX", # flake8-fixme
-    "FA", # flake8-future-annotations
-    "INP", # flake8-no-pep420
-    "PIE", # flake8-pie
-    "PT", # flake8-pytest-style
-    "RSE", # flake8-raise
-    "RET", # flake8-return
-    "SLF", # flake8-self
-    "SIM", # flake8-simplify
     "ARG", # flake8-unused-arguments
-    "PTH", # flake8-use-pathlib
-    "FLY", # flynt
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
     "C90", # mccabe
-    "N", #  pep8-naming
-    "PERF", # Perflint
-    "E", # Error (pycodestyle)
-    "DOC", # pydoclint
     "D", # pydocstyle
+    "DOC", # pydoclint
+    "E", # Error (pycodestyle)
+    "ERA", # eradicate
+    "F", # Pyflakes
+    "FA", # flake8-future-annotations
+    "FIX", # flake8-fixme
+    "FLY", # flynt
+    "FURB", # refurb
+    "G", # flake8-logging-format
+    "I", # isort
+    "INP", # flake8-no-pep420
+    "ISC", # flake8-implicit-str-concat
+    "N", #  pep8-naming
+    "NPY", # NumPy-specific rules
+    "PERF", # Perflint
+    "PIE", # flake8-pie
     "PLC", # Convention (Pylint)
     "PLE", # Error (Pylint)
-    "FURB", # refurb
-    "RUF" # Ruff-specific rules
+    "PT", # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
+    "Q", # flake8-quotes
+    "RET", # flake8-return
+    "RSE", # flake8-raise
+    "RUF", # Ruff-specific rules
+    "S", # flake8-bandit
+    "SIM", # flake8-simplify
+    "SLF", # flake8-self
+    "T10", # flake8-debugger
+    "T20", # flake8-print
+    "TRY", # tryceratops
+    "UP", # pyupgrade
 ]
 ignore = [
-    "E501", # line-too-long
     "D203", # incorrect-blank-line-before-class
     "D213", # multi-line-summary-first-line
     "D413", # missing-blank-line-after-last-section
-    "PLC0414" # useless-import-alias
-]
-exclude = [
-    "qsimplify/qft.py",
-    "qsimplify/qft2.py",
+    "E501", # line-too-long
+    "PLC0414", # useless-import-alias
+    "TRY003", # raise-vanilla-args
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = [
-    "DOC", # pydoclint
-    "D", # pydocstyle
     "ANN201", # missing-return-type-undocumented-public-function
-    "ANN202", #missing-return-type-private-function
+    "ANN202", # missing-return-type-private-function
+    "D", # pydocstyle
+    "DOC", # pydoclint
     "S101", # assert
 ]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.pyright]
+exclude = [
+    ".venv/**",
+    "tests/**"
+]
 
 [tool.coverage.run]
 omit = [
@@ -102,11 +116,15 @@ omit = [
     "tests/**",
     # Entrypoints
     "qsimplify/app.py",
-    "qsimplify/demo.py",
-    "qsimplify/qft.py",
-    "qsimplify/qft2.py",
+    # Examples
+    "qsimplify/examples/**",
     # Configuration files
     "qsimplify/logging_config.py",
     # Graphics
     "qsimplify/drawer.py"
+]
+
+[tool.coverage.report]
+exclude_also = [
+    '^ +assert_never\(.*?\)$',
 ]

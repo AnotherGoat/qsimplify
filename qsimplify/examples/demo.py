@@ -1,14 +1,17 @@
-"""Quantum circuit simplification demo entry point."""
+"""Quantum circuit simplification demo, which showcases."""
 
 from pathlib import Path
 
+from loguru import logger
 from qiskit import QuantumCircuit
 
-from qsimplify import drawer
+from qsimplify import drawer, logging_config
 from qsimplify.analyzer import analyzer
 from qsimplify.converter import QiskitConverter
 from qsimplify.generator.qiskit_generator import QiskitGenerator
 from qsimplify.simplifier import Simplifier
+
+logging_config.set_up_logging()
 
 
 def _run_demo() -> None:
@@ -19,39 +22,31 @@ def _run_demo() -> None:
     circuit.id(0)
     circuit.cx(0, 1)
 
-    print("\n===== Original circuit =====")
-    print(circuit.draw())
+    logger.info(f"===== Original circuit =====\n{circuit.draw()}")
 
     qiskit_converter = QiskitConverter()
     graph = qiskit_converter.to_graph(circuit)
 
-    print("\n===== Original grid =====")
-    print(graph.draw_grid())
-
-    print("\n===== Original graph =====")
-    print(graph)
+    logger.info(f"===== Original grid =====\n{graph.draw_grid()}")
+    logger.info(f"===== Original graph =====\n{graph}")
 
     metrics = analyzer.calculate_detailed_metrics(graph)
 
-    print("\n===== Original metrics =====")
-    print(metrics)
+    logger.info(f"===== Original metrics =====\n{metrics}")
 
     simplifier = Simplifier()
     simplified_graph = simplifier.simplify_graph(graph)
     simplified_circuit = qiskit_converter.from_graph(simplified_graph)
 
-    print("\n===== Simplified circuit =====")
-    print(simplified_circuit.draw())
+    logger.info(f"===== Simplified circuit =====\n{simplified_circuit.draw()}")
 
     qiskit_generator = QiskitGenerator()
     build_steps = qiskit_generator.generate(simplified_graph)
 
-    print("\n===== Simplified build steps =====")
-    print(build_steps)
+    logger.info(f"===== Simplified build steps =====\n{build_steps}")
 
     simplified_metrics = analyzer.calculate_detailed_metrics(simplified_graph)
-    print("\n===== Simplified metrics =====")
-    print(simplified_metrics)
+    logger.info(f"===== Simplified metrics ====={simplified_metrics}")
 
     Path("out").mkdir(exist_ok=True)
 

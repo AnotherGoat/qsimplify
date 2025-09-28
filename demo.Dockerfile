@@ -33,4 +33,4 @@ ENV LOG_TO_FILE=false
 # Set app user
 USER appuser
 
-CMD ["uv", "run", "--no-dev", "python", "-m", "qsimplify.demo"]
+CMD ["uv", "run", "--no-dev", "python", "-m", "qsimplify.examples.demo"]

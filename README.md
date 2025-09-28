@@ -69,7 +69,7 @@ uv run pyright
 - Run demo (doesn't start a server)
 
 ```shell
-uv run python -m qsimplify.demo
+uv run python -m qsimplify.examples.demo
 ```
 
 - Start as a FastAPI server
@@ -126,33 +126,4 @@ uv run pysonar --sonar-host-url=http://localhost:9000 --sonar-token=TOKEN
 
 ## Examples
 
-### Draw supported gates
-
-```python
-import numpy
-from qiskit import QuantumCircuit
-from qsimplify.converter import QiskitConverter
-from qsimplify import drawer
-
-circuit = QuantumCircuit(3, 1)
-circuit.h(0)
-circuit.ch(1, 2)
-circuit.x(0)
-circuit.cx(1, 2)
-circuit.y(0)
-circuit.swap(1, 2)
-circuit.z(0)
-circuit.cz(1, 2)
-circuit.ccx(0, 1, 2)
-circuit.cswap(0, 1, 2)
-circuit.rx(numpy.pi, 0)
-circuit.ry(numpy.pi / 2, 1)
-circuit.rz(numpy.pi / 4, 2)
-circuit.measure(0, 0)
-
-converter = QiskitConverter()
-graph = converter.circuit_to_graph(circuit)
-
-drawer.save_circuit_png(circuit, "circuit")
-drawer.save_graph_png(graph, "graph")
-```
+Some usage samples can be found in the [examples](qsimplify/examples) directory.

@@ -1,14 +1,21 @@
+"""Contains part 1 of the QFT example usage, where both the original and simplified circuits can be sent to IBM's cloud."""
+
 import os
 
 import numpy
-from dotenv import load_dotenv
-from qiskit import QuantumCircuit
+from loguru import logger
+from qiskit import QuantumCircuit, generate_preset_pass_manager
 from qiskit.circuit.library import QFTGate
 from qiskit.quantum_info import Operator
+from qiskit_aer.primitives import SamplerV2 as Sampler
 from qiskit_ibm_runtime import QiskitRuntimeService
 
+from qsimplify import logging_config
 from qsimplify.converter.qiskit_converter import QiskitConverter
 from qsimplify.simplifier import Simplifier
+
+_SEND_TO_IBM_CLOUD = True
+logging_config.set_up_logging()
 
 circuit = QuantumCircuit(3)
 
@@ -24,9 +31,9 @@ qft_circuit.append(QFTGate(3), range(3))
 circuit.compose(qft_circuit.decompose(), qubits=range(3), inplace=True)
 
 circuit.draw("mpl").savefig("original.png")
-print(circuit.draw())
-print("QFT3 gates:", circuit.count_ops())
-print("QFT3 depth:", circuit.depth())
+logger.info(f"QFT3 circuit:\n{circuit.draw()}")
+logger.info("QFT3 gates:", circuit.count_ops())
+logger.info("QFT3 depth:", circuit.depth())
 
 polluted = QuantumCircuit(3)
 
@@ -54,9 +61,9 @@ polluted.cx(2, 0)
 polluted.cx(0, 2)
 
 polluted.draw("mpl").savefig("polluted.png")
-print(polluted.draw())
-print("Polluted gates:", polluted.count_ops())
-print("Polluted depth:", polluted.depth())
+logger.info(f"Polluted circuit:\n{polluted.draw()}")
+logger.info("Polluted gates:", polluted.count_ops())
+logger.info("Polluted depth:", polluted.depth())
 
 simplifier = Simplifier()
 converter = QiskitConverter()
@@ -66,36 +73,39 @@ simplified_graph = simplifier.simplify_graph(graph, iterations=2)
 simplified = converter.from_graph(simplified_graph)
 
 simplified.draw("mpl").savefig("simplified.png")
-print(simplified.draw())
-print("Simplified gates:", simplified.count_ops())
-print("Simplified depth:", simplified.depth())
+logger.info(f"Simplified circuit:\n{simplified.draw()}")
+logger.info("Simplified gates:", simplified.count_ops())
+logger.info("Simplified depth:", simplified.depth())
 
-print("Is it the same as QFT(3)?", Operator(circuit).equiv(Operator(simplified)))
+logger.info("Is it the same as QFT(3)?", Operator(circuit).equiv(Operator(simplified)))
 
-load_dotenv()
+if not _SEND_TO_IBM_CLOUD:
+    raise AssertionError("Exiting because SEND_TO_IBM_CLOUD is False")
 
-IBM_API_KEY = os.getenv("IBM_API_KEY", None)
+_IBM_API_KEY = os.getenv("IBM_API_KEY", None)
 
 
-class QftError(Exception):
+class _QftError(Exception):
     pass
 
 
-assert False
-
-if IBM_API_KEY is None:
-    raise QftError("Please set the IBM_API_KEY environment variable")
+if _IBM_API_KEY is None:
+    raise _QftError("Please set the IBM_API_KEY environment variable")
 
 QiskitRuntimeService.save_account(
-    channel="ibm_quantum", token=IBM_API_KEY, set_as_default=True, overwrite=True
+    channel="ibm_quantum_platform",
+    instance="qsimplify",
+    token=_IBM_API_KEY,
+    set_as_default=True,
+    overwrite=True,
 )
 service = QiskitRuntimeService()
 
 # Backend configuration
 backend = service.backend(name="ibm_brisbane")
 pass_manager = generate_preset_pass_manager(backend=backend, optimization_level=1)
-sampler = Sampler(mode=backend)
-SHOTS = 131072
+sampler = Sampler()
+SHOTS = 1024
 sampler.options.default_shots = SHOTS
 
 # Add measurements
@@ -104,6 +114,6 @@ simplified.measure_all()
 
 # Job scheduling
 polluted_job = sampler.run([pass_manager.run(polluted)])
-print(f"Polluted circuit ({SHOTS} shots) job ID is {polluted_job.job_id()}")
+logger.info(f"Polluted circuit ({SHOTS} shots) job ID is {polluted_job.job_id()}")
 simplified_job = sampler.run([pass_manager.run(simplified)])
-print(f"Simplified circuit ({SHOTS} shots) job ID is {simplified_job.job_id()}")
+logger.info(f"Simplified circuit ({SHOTS} shots) job ID is {simplified_job.job_id()}")

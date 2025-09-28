@@ -1,17 +1,15 @@
-"""Contains logging utilities that are used across the project."""
+"""Contains logging configuration utilities that are used across the project."""
 
 import logging
 import sys
 from logging import Handler, LogRecord
 from typing import TypedDict
 
-from dotenv import load_dotenv
 from loguru import logger as loguru_logger
 from uvicorn.logging import AccessFormatter, DefaultFormatter
 
 from qsimplify import env
 
-load_dotenv()
 _LEVEL_FORMATTER = DefaultFormatter(fmt="%(levelprefix)s")
 _UVICORN_FORMATTER = DefaultFormatter(fmt="%(message)s")
 _ACCESS_FORMATTER = AccessFormatter(fmt='%(client_addr)s - "%(request_line)s" %(status_code)s')
@@ -43,7 +41,7 @@ def _propagate_fastapi_loggers() -> None:
         logging_logger.propagate = True
 
 
-class LoguruHandler(Handler):
+class _LoguruHandler(Handler):
     """A custom logging interceptor to redirect Python's built-in logging to Loguru.
 
     This is needed because FastAPI uses Python's built-in logger, which doesn't offer Loguru's ease of use.
@@ -118,10 +116,14 @@ def _format_log(record: _LoguruRecord) -> str:
 
 
 def set_up_logging() -> None:
-    """Configure the root logger to use Loguru and redirect Python's built-in logger to Loguru's."""
+    """Configure the root logger to use Loguru and redirect Python's built-in logger to Loguru's.
+
+    This should be called from any entry point that wants to use Loguru's logger with a simpler format.
+    LOG_LEVEL environment variable will be ignored if this is not called.
+    """
     _remove_existing_handlers()
     _propagate_fastapi_loggers()
-    logging.basicConfig(handlers=[LoguruHandler()])
+    logging.basicConfig(handlers=[_LoguruHandler()])
     loguru_logger.remove()
 
     loguru_logger.add(sys.stdout, format=_format_log, colorize=True, level=env.LOG_LEVEL)

@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from qsimplify import math_utils
 from qsimplify.model.gate_name import GateName
 from qsimplify.model.position import Position
 
@@ -21,6 +22,6 @@ class GraphNode:
 
     def __str__(self) -> str:
         """Get a string representation of this view."""
-        angle_data = f" (angle={self.angle})" if self.angle else ""
+        angle_data = f" (angle={math_utils.format_angle(self.angle)})" if self.angle else ""
         bit_data = f" (bit={self.bit})" if self.bit else ""
         return f"{self.name.value} at {self.position}{angle_data}{bit_data}"
