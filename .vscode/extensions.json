@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "charliermarsh.ruff",
+    "detachhead.basedpyright",
+    "ms-azuretools.vscode-docker",
+    "ms-python.vscode-python-envs",
+    "tamasfe.even-better-toml"
+  ]
+}

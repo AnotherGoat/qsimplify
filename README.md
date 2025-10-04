@@ -63,7 +63,7 @@ uv run ruff check --fix --select I && uv run ruff format
 - Check types
 
 ```shell
-uv run pyright
+uv run basedpyright
 ```
 
 - Run demo (doesn't start a server)

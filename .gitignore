@@ -1,5 +1,6 @@
 # IDE configuration files
 .idea/
+.vscode/settings.json
 
 # Caches
 .pytest_cache/

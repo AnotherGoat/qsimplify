@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from typing import assert_never, override
 
 import networkx
 from networkx.classes import DiGraph
@@ -25,6 +26,8 @@ class QuantumGraph:
     Empty spaces are filled by ID (identity) gates.
     It's recommended to use the graph builder to build the graph with ease.
     """
+
+    _network: DiGraph[Position]
 
     def __init__(self) -> None:
         """Create an empty quantum graph."""
@@ -148,6 +151,19 @@ class QuantumGraph:
                 if self.has_node_at(position):
                     yield position
 
+    def iter_nodes_by_row(self) -> Iterator[GraphNode]:
+        """Iterate over the graph's nodes, first row by row and then column by column.
+
+        Empty or identity nodes are skipped.
+        """
+        for position in self.iter_positions_by_row():
+            node = self[position]
+
+            if node is None:
+                assert_never(node)
+
+            yield node
+
     def iter_positions_by_column(self) -> Iterator[Position]:
         """Iterate over the graph's positions, first column by column and then row by row.
 
@@ -159,6 +175,19 @@ class QuantumGraph:
 
                 if self.has_node_at(position):
                     yield position
+
+    def iter_nodes_by_column(self) -> Iterator[GraphNode]:
+        """Iterate over the graph's nodes, first column by column and then row by row.
+
+        Empty or identity nodes are skipped.
+        """
+        for position in self.iter_positions_by_column():
+            node = self[position]
+
+            if node is None:
+                assert_never(node)
+
+            yield node
 
     def nodes(self) -> list[GraphNode]:
         """Retrieve all the nodes in the graph."""
@@ -255,6 +284,7 @@ class QuantumGraph:
 
         return "\n".join(rows)
 
+    @override
     def __eq__(self, other: object) -> bool:
         """Check whether this graph is equal to another graph. Fails automatically if other is not a graph."""
         if not isinstance(other, QuantumGraph):

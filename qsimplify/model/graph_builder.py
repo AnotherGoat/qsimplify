@@ -21,7 +21,7 @@ class GraphBuilder:
         return str(self._graph)
 
     def push_id(self, qubit: int) -> GraphBuilder:
-        """Push a ID gate at the end of the graph, which effectively does nothing."""
+        """Push a ID gate at the end of the graph."""
         return self.put_id(qubit, self._find_push_column([qubit]))
 
     def push_h(self, qubit: int) -> GraphBuilder:
@@ -329,7 +329,7 @@ class GraphBuilder:
         return self
 
     def _find_push_column(self, qubits: list[int]) -> int:
-        latest_columns = []
+        latest_columns: list[int] = []
 
         for row in qubits:
             for column in reversed(range(self._graph.width)):
