@@ -1,9 +1,11 @@
+"""Contains functions that replace patterns in graphs, by providing pattern matches."""
+
 from typing import assert_never
 
 from loguru import logger
 
 from qsimplify.model import QuantumGraph, graph_cleaner
-from qsimplify.simplifier import PatternMatch, QuantumPattern
+from qsimplify.simplifier.pattern_match import PatternMatch
 
 
 def replace_pattern(graph: QuantumGraph, replacement: QuantumGraph, match: PatternMatch) -> None:
@@ -14,7 +16,7 @@ def replace_pattern(graph: QuantumGraph, replacement: QuantumGraph, match: Patte
     Parameters:
         graph: The graph to replace the pattern in.
         replacement: The pattern to put in the graph.
-        match: Set of mappings that indicates where each pattern node should go in the graph.
+        match: An object that indicates where each pattern node should go in the graph.
     """
     logger.debug("Removing nodes with match {}", match)
 

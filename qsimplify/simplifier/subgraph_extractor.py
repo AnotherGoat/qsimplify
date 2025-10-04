@@ -32,16 +32,16 @@ def extract_subgraph(
     if mask is None:
         mask = _generate_full_mask(width, len(rows))
 
-    mappings = _extract_subgraph_mappings(graph, rows, starting_column, width, mask)
-    logger.debug("Extracting mappings for width {}", width)
+    match = _extract_subgraph_match(graph, rows, starting_column, width, mask)
+    logger.debug("Extracting match with a width of {}", width)
 
-    if mappings is None:
+    if match is None:
         logger.debug("Mappings couldn't be extracted")
         return None, None
 
     subgraph = QuantumGraph()
 
-    for old_position, new_position in mappings.items():
+    for old_position, new_position in match.items():
         node = graph[old_position]
 
         if node is None:
@@ -58,13 +58,13 @@ def extract_subgraph(
         for edge in edges:
             subgraph.add_edge(
                 edge.name,
-                mappings[edge.start.position],
-                mappings[edge.end.position],
+                match[edge.start.position],
+                match[edge.end.position],
             )
 
     logger.debug("Mappings are valid, filling the subgraph")
     graph_cleaner.clean_and_fill(subgraph)
-    return subgraph, mappings
+    return subgraph, match
 
 
 def _generate_full_mask(width: int, height: int) -> PositionMask:
@@ -78,14 +78,14 @@ def _generate_full_mask(width: int, height: int) -> PositionMask:
     return PositionMask(mask_data)
 
 
-def _extract_subgraph_mappings(
+def _extract_subgraph_match(
     graph: QuantumGraph,
     rows: list[int],
     starting_column: int,
     width: int,
     mask: PositionMask,
 ) -> PatternMatch | None:
-    mappings: PatternMatch = {}
+    match: PatternMatch = {}
     logger.debug("Starting mapping extraction")
 
     for new_row, old_row in enumerate(rows):
@@ -111,19 +111,19 @@ def _extract_subgraph_mappings(
                 logger.debug("No node found at the right side")
                 return None
 
-            mappings[node.position] = Position(new_row, new_column)
-            logger.debug("Mappings updated to {}", mappings)
+            match[node.position] = Position(new_row, new_column)
+            logger.debug("Mappings updated to {}", match)
             old_column = node.position.column + 1
             new_column += 1
 
-    for old_position in mappings:
+    for old_position in match:
         edges = [edge for edge in graph.node_edges(old_position) if not edge.name.is_positional()]
 
         for edge in edges:
-            if edge.end.position not in mappings:
+            if edge.end.position not in match:
                 return None
 
-    return mappings
+    return match
 
 
 def _find_next_right_node(

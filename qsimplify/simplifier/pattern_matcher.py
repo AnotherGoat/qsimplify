@@ -1,3 +1,5 @@
+"""Contains functions that try to match a patterns against graphs."""
+
 import itertools
 
 from loguru import logger

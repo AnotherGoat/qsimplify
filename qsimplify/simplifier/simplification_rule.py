@@ -1,17 +1,9 @@
 """Contains the base for subgraph-based simplification rules."""
 
-import itertools
 from abc import ABC, abstractmethod
-from typing import assert_never, override
+from typing import override
 
-from loguru import logger
-
-from qsimplify import math_utils
-from qsimplify.model import GateName, QuantumGraph, graph_cleaner
-from qsimplify.model.graph_node import GraphNode
-from qsimplify.model.position import Position
-from qsimplify.simplifier import QuantumPattern
-from qsimplify.simplifier.pattern_match import PatternMatch
+from qsimplify.model import QuantumGraph
 
 
 class SimplificationRule(ABC):

@@ -8,11 +8,11 @@ def test_match_pattern_in_same_pattern():
 
     graph = GraphBuilder().push_h(0).push_h(0).build()
 
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_mappings = {position: position for position in [Position(0, 0), Position(0, 1)]}
+    expected_match = {position: position for position in [Position(0, 0), Position(0, 1)]}
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_pattern_in_same_two_qubit_pattern():
@@ -20,14 +20,14 @@ def test_match_pattern_in_same_two_qubit_pattern():
 
     graph = GraphBuilder().push_x(0).push_y(1).push_z(0).push_h(1).build()
 
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_mappings = {
+    expected_match = {
         position: position
         for position in [Position(0, 0), Position(0, 1), Position(1, 0), Position(1, 1)]
     }
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_inverted_two_qubit_pattern():
@@ -35,16 +35,16 @@ def test_match_inverted_two_qubit_pattern():
 
     graph = GraphBuilder().push_y(0).push_x(1).push_h(0).push_z(1).build()
 
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_mappings = {
+    expected_match = {
         Position(0, 0): Position(1, 0),
         Position(0, 1): Position(1, 1),
         Position(1, 0): Position(0, 0),
         Position(1, 1): Position(0, 1),
     }
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_same_controlled_pattern():
@@ -52,11 +52,11 @@ def test_match_same_controlled_pattern():
 
     graph = GraphBuilder().push_cx(0, 1).build()
 
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_mappings = {position: position for position in [Position(0, 0), Position(1, 0)]}
+    expected_match = {position: position for position in [Position(0, 0), Position(1, 0)]}
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_same_mixed_pattern():
@@ -64,9 +64,9 @@ def test_match_same_mixed_pattern():
 
     graph = GraphBuilder().push_cx(0, 1).push_h(0).push_z(1).push_cx(1, 0).build()
 
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_mappings = {
+    expected_match = {
         position: position
         for position in [
             Position(0, 0),
@@ -78,7 +78,7 @@ def test_match_same_mixed_pattern():
         ]
     }
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_same_mixed_pattern_with_mask():
@@ -98,9 +98,9 @@ def test_match_same_mixed_pattern_with_mask():
             Position(1, 3): True,
         }
     )
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph, mask=mask)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph, mask=mask)
 
-    expected_mappings = {
+    expected_match = {
         position: position
         for position in [
             Position(0, 0),
@@ -114,7 +114,7 @@ def test_match_same_mixed_pattern_with_mask():
         ]
     }
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_inverted_pattern_with_mask():
@@ -134,9 +134,9 @@ def test_match_inverted_pattern_with_mask():
             Position(1, 3): True,
         }
     )
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph, mask=mask)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph, mask=mask)
 
-    expected_mappings = {
+    expected_match = {
         Position(0, 0): Position(1, 0),
         Position(0, 1): Position(1, 1),
         Position(0, 2): Position(1, 2),
@@ -147,17 +147,17 @@ def test_match_inverted_pattern_with_mask():
         Position(1, 3): Position(0, 3),
     }
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
-def test_match_symmetrical_mappings():
+def test_match_symmetrical_match():
     pattern = GraphBuilder().push_h(0).push_x(1).push_cz(0, 1).push_swap(1, 0).build()
 
     graph = GraphBuilder().push_h(0).push_x(1).push_cz(1, 0).push_swap(0, 1).build()
 
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_mappings = {
+    expected_match = {
         position: position
         for position in [
             Position(0, 0),
@@ -169,35 +169,35 @@ def test_match_symmetrical_mappings():
         ]
     }
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_three_qubit_permutations():
     pattern = GraphBuilder().push_h(0).push_x(1).build()
 
     graph = GraphBuilder().push_h(0).push_x(1).build()
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings == {position: position for position in [Position(0, 0), Position(1, 0)]}
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match == {position: position for position in [Position(0, 0), Position(1, 0)]}
 
     graph = GraphBuilder().push_h(1).push_x(0).build()
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings == {Position(0, 0): Position(1, 0), Position(1, 0): Position(0, 0)}
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match == {Position(0, 0): Position(1, 0), Position(1, 0): Position(0, 0)}
 
     graph = GraphBuilder().push_h(0).push_x(2).build(clean_up=False)
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings == {Position(0, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match == {Position(0, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
     graph = GraphBuilder().push_h(2).push_x(0).build(clean_up=False)
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings == {Position(0, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match == {Position(0, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 
     graph = GraphBuilder().push_h(1).push_x(2).build(clean_up=False)
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings == {Position(1, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match == {Position(1, 0): Position(0, 0), Position(2, 0): Position(1, 0)}
 
     graph = GraphBuilder().push_h(2).push_x(1).build(clean_up=False)
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings == {Position(1, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match == {Position(1, 0): Position(1, 0), Position(2, 0): Position(0, 0)}
 
 
 def test_match_same_with_parameters():
@@ -205,40 +205,40 @@ def test_match_same_with_parameters():
 
     graph = GraphBuilder().push_rx(0.5, 0).push_p(0.75, 0).build()
 
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_mappings = {position: position for position in [Position(0, 0), Position(0, 1)]}
+    expected_match = {position: position for position in [Position(0, 0), Position(0, 1)]}
 
-    assert mappings == expected_mappings
+    assert match == expected_match
 
 
 def test_match_fails_if_parameters_dont_match():
     pattern = GraphBuilder().push_rx(0.5, 0).push_ry(0.5, 0).build()
 
     graph = GraphBuilder().push_rx(0.25, 0).push_ry(0.5, 0).build()
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings is None
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match is None
 
     graph = GraphBuilder().push_rx(0.5, 0).push_ry(0.75, 0).build()
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings is None
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match is None
 
 
 def test_match_on_second_column():
     pattern = GraphBuilder().push_x(0).push_z(0).build()
 
     graph = GraphBuilder().push_h(0).push_x(0).push_z(0).build()
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
-    assert mappings == {Position(0, 1): Position(0, 0), Position(0, 2): Position(0, 1)}
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    assert match == {Position(0, 1): Position(0, 0), Position(0, 2): Position(0, 1)}
 
 
 def test_match_uneven():
     pattern = GraphBuilder().push_x(0).push_y(0).push_z(1).push_h(1).build()
 
     graph = GraphBuilder().push_x(0).push_y(0).put_z(1, 1).push_h(1).build()
-    mappings = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
+    match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    assert mappings == {
+    assert match == {
         Position(0, 0): Position(0, 0),
         Position(0, 1): Position(0, 1),
         Position(1, 1): Position(1, 0),

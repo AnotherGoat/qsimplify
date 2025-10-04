@@ -1,3 +1,5 @@
+"""Contains the base simplification rule for pattern replacement."""
+
 from typing import override
 
 from loguru import logger
