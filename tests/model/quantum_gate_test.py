@@ -459,6 +459,7 @@ def test_parse_gate_aliases():
         {"name": "sqrty", "qubit": 4},
         {"name": "td", "qubit": 7},
         {"name": "cnot", "control_qubit": 0, "target_qubit": 1},
+        {"name": "fredkin", "control_qubit": 0, "target_qubit": 1, "target_qubit2": 2},
         {"name": "ccnot", "control_qubit": 3, "control_qubit2": 1, "target_qubit": 2},
         {"name": "toffoli", "control_qubit": 0, "control_qubit2": 2, "target_qubit": 1},
     ]
@@ -479,6 +480,7 @@ def test_parse_gate_aliases():
         SyGate(qubit=4),
         TdgGate(qubit=7),
         CxGate(control_qubit=0, target_qubit=1),
+        CswapGate(control_qubit=0, target_qubit=1, target_qubit2=2),
         CcxGate(control_qubit=3, control_qubit2=1, target_qubit=2),
         CcxGate(control_qubit=0, control_qubit2=2, target_qubit=1),
     ]

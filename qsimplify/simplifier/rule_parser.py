@@ -31,7 +31,7 @@ class RuleParser:
         return [self._parse_rule(rule_data) for rule_data in json_data]
 
     @staticmethod
-    def _parse_rule(rule_data: dict[str, Any]) -> PatternReplacementRule | None:
+    def _parse_rule(rule_data: dict[str, Any]) -> PatternReplacementRule:
         if "original" not in rule_data or "replacement" not in rule_data:
             raise ValueError(f"The rule {rule_data} is missing its original or replacement keys")
 

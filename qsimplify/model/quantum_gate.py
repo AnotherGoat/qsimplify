@@ -338,9 +338,9 @@ class CpGate(SingleControlledGate):
 
 
 class CswapGate(BaseGate):
-    """Three-qubit controlled SWAP gate.
+    """Three-qubit controlled SWAP gate. Also known as the Fredkin gate.
 
-    Supported aliases: 'cswap'.
+    Supported aliases: 'cswap', 'fredkin'.
     """
 
     name: Literal[GateName.CSWAP] = GateName.CSWAP
@@ -501,6 +501,7 @@ ALIASES = {
     "m": "measure",
     "cnot": "cx",
     "cphase": "cp",
+    "fredkin": "cswap",
     "ccnot": "ccx",
     "toffoli": "ccx",
 }

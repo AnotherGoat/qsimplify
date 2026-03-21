@@ -10,9 +10,9 @@ def test_match_pattern_in_same_pattern():
 
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_match = {position: position for position in [Position(0, 0), Position(0, 1)]}
+    expected = {position: position for position in [Position(0, 0), Position(0, 1)]}
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_pattern_in_same_two_qubit_pattern():
@@ -22,12 +22,12 @@ def test_match_pattern_in_same_two_qubit_pattern():
 
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_match = {
+    expected = {
         position: position
         for position in [Position(0, 0), Position(0, 1), Position(1, 0), Position(1, 1)]
     }
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_inverted_two_qubit_pattern():
@@ -37,14 +37,14 @@ def test_match_inverted_two_qubit_pattern():
 
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_match = {
+    expected = {
         Position(0, 0): Position(1, 0),
         Position(0, 1): Position(1, 1),
         Position(1, 0): Position(0, 0),
         Position(1, 1): Position(0, 1),
     }
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_same_controlled_pattern():
@@ -54,9 +54,9 @@ def test_match_same_controlled_pattern():
 
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_match = {position: position for position in [Position(0, 0), Position(1, 0)]}
+    expected = {position: position for position in [Position(0, 0), Position(1, 0)]}
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_same_mixed_pattern():
@@ -66,7 +66,7 @@ def test_match_same_mixed_pattern():
 
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_match = {
+    expected = {
         position: position
         for position in [
             Position(0, 0),
@@ -78,7 +78,7 @@ def test_match_same_mixed_pattern():
         ]
     }
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_same_mixed_pattern_with_mask():
@@ -100,7 +100,7 @@ def test_match_same_mixed_pattern_with_mask():
     )
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph, mask=mask)
 
-    expected_match = {
+    expected = {
         position: position
         for position in [
             Position(0, 0),
@@ -114,7 +114,7 @@ def test_match_same_mixed_pattern_with_mask():
         ]
     }
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_inverted_pattern_with_mask():
@@ -136,7 +136,7 @@ def test_match_inverted_pattern_with_mask():
     )
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph, mask=mask)
 
-    expected_match = {
+    expected = {
         Position(0, 0): Position(1, 0),
         Position(0, 1): Position(1, 1),
         Position(0, 2): Position(1, 2),
@@ -147,7 +147,7 @@ def test_match_inverted_pattern_with_mask():
         Position(1, 3): Position(0, 3),
     }
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_symmetrical_match():
@@ -157,7 +157,7 @@ def test_match_symmetrical_match():
 
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_match = {
+    expected = {
         position: position
         for position in [
             Position(0, 0),
@@ -169,7 +169,7 @@ def test_match_symmetrical_match():
         ]
     }
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_three_qubit_permutations():
@@ -207,9 +207,9 @@ def test_match_same_with_parameters():
 
     match = pattern_matcher.match_pattern(QuantumPattern(pattern), graph)
 
-    expected_match = {position: position for position in [Position(0, 0), Position(0, 1)]}
+    expected = {position: position for position in [Position(0, 0), Position(0, 1)]}
 
-    assert match == expected_match
+    assert match == expected
 
 
 def test_match_fails_if_parameters_dont_match():

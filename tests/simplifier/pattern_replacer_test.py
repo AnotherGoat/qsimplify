@@ -28,9 +28,9 @@ def test_replace_single_qubit_gates():
     }
 
     pattern_replacer.replace_pattern(graph, replacement, match)
-    expected_graph = GraphBuilder().push_z(0).push_h(0).push_x(1).push_y(1).build()
+    expected = GraphBuilder().push_z(0).push_h(0).push_x(1).push_y(1).build()
 
-    assert graph == expected_graph
+    assert graph == expected
 
 
 def test_replace_with_parameters():
@@ -45,11 +45,9 @@ def test_replace_with_parameters():
     }
 
     pattern_replacer.replace_pattern(graph, replacement, match)
-    expected_graph = (
-        GraphBuilder().push_p(0.55, 0).push_h(0).push_rx(0.25, 1).push_ry(0.1, 1).build()
-    )
+    expected = GraphBuilder().push_p(0.55, 0).push_h(0).push_rx(0.25, 1).push_ry(0.1, 1).build()
 
-    assert graph == expected_graph
+    assert graph == expected
 
 
 def test_replace_controlled_gates():
@@ -65,9 +63,9 @@ def test_replace_controlled_gates():
     }
 
     pattern_replacer.replace_pattern(graph, replacement, match)
-    expected_graph = GraphBuilder().push_cx(1, 0).push_cx(1, 0).build()
+    expected = GraphBuilder().push_cx(1, 0).push_cx(1, 0).build()
 
-    assert graph == expected_graph
+    assert graph == expected
 
 
 def test_replace_uneven():
@@ -82,11 +80,9 @@ def test_replace_uneven():
     }
 
     pattern_replacer.replace_pattern(graph, replacement, match)
-    expected_graph = (
-        GraphBuilder().push_x(0).push_y(0).push_h(0).push_h(1).push_z(1).push_x(1).build()
-    )
+    expected = GraphBuilder().push_x(0).push_y(0).push_h(0).push_h(1).push_z(1).push_x(1).build()
 
-    assert graph == expected_graph
+    assert graph == expected
 
 
 def test_replace_adds_identities():
@@ -112,6 +108,6 @@ def test_replace_adds_identities():
     }
 
     pattern_replacer.replace_pattern(graph, replacement, match)
-    expected_graph = GraphBuilder().push_y(0).push_y(0).push_z(1).push_cz(0, 1).push_z(0).build()
+    expected = GraphBuilder().push_y(0).push_y(0).push_z(1).push_cz(0, 1).push_z(0).build()
 
-    assert graph == expected_graph
+    assert graph == expected

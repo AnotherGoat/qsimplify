@@ -53,7 +53,7 @@ class GateName(str, Enum):
     CP = "cp"
     """Two-qubit controlled phase gate."""
     CSWAP = "cswap"
-    """Three-qubit controlled SWAP gate."""
+    """Three-qubit controlled SWAP gate. Also known as the Fredkin gate."""
     CCX = "ccx"
     """Three-qubit X Gate, controlled by 2 qubits. Also known as the Toffoli gate."""
     CCZ = "ccz"
@@ -98,6 +98,10 @@ class GateName(str, Enum):
                 return 3
             case _:
                 return 1
+
+    def is_multi_qubit(self) -> bool:
+        """Check whether this gate type uses multiple qubits or not."""
+        return self.number_of_qubits() > 1
 
     def is_controlled(self) -> bool:
         """Check whether this gate type has control and target qubits or not."""

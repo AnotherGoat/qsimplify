@@ -683,7 +683,7 @@ def test_example_b_metrics():
 
     metrics = analyzer.calculate_detailed_metrics(graph)
 
-    expected_metrics = DetailedMetrics(
+    expected = DetailedMetrics(
         width=5,
         depth=7,
         max_density=1,
@@ -714,7 +714,7 @@ def test_example_b_metrics():
         ancilla_percent=0.0,
     )
 
-    assert metrics == expected_metrics
+    assert metrics == expected
 
 
 def test_visualization_example_metrics():
@@ -733,7 +733,7 @@ def test_visualization_example_metrics():
 
     metrics = analyzer.calculate_detailed_metrics(graph)
 
-    expected_metrics = DetailedMetrics(
+    expected = DetailedMetrics(
         width=3,
         depth=7,
         max_density=2,
@@ -764,4 +764,4 @@ def test_visualization_example_metrics():
         ancilla_percent=1 / 3,
     )
 
-    assert metrics == expected_metrics
+    assert metrics == expected
