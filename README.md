@@ -48,6 +48,12 @@ uv run pytest
 uv run pytest --cov=qsimplify --cov-report=html:coverage
 ```
 
+- Run performance benchmarks (saves results to `benchmarks/benchmark_results.json`)
+
+```shell
+uv run pytest benchmarks/ --benchmark-only --benchmark-json benchmarks/benchmark_results.json
+```
+
 - Lint code
 
 ```shell
