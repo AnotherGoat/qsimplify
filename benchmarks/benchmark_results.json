@@ -1,0 +1,592 @@
+{
+    "machine_info": {
+        "node": "LAPTOP-RP6N336S",
+        "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+        "machine": "AMD64",
+        "python_compiler": "MSC v.1943 64 bit (AMD64)",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.12.10",
+        "python_version": "3.12.10",
+        "python_build": [
+            "tags/v3.12.10:0cc8128",
+            "Apr  8 2025 12:21:36"
+        ],
+        "release": "10",
+        "system": "Windows",
+        "cpu": {
+            "python_version": "3.12.10.final.0 (64 bit)",
+            "cpuinfo_version": [
+                9,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "9.0.0",
+            "arch": "X86_64",
+            "bits": 64,
+            "count": 8,
+            "arch_string_raw": "AMD64",
+            "vendor_id_raw": "GenuineIntel",
+            "brand_raw": "11th Gen Intel(R) Core(TM) i7-11370H @ 3.30GHz",
+            "hz_advertised_friendly": "3.3000 GHz",
+            "hz_actual_friendly": "3.3020 GHz",
+            "hz_advertised": [
+                3300000000,
+                0
+            ],
+            "hz_actual": [
+                3302000000,
+                0
+            ],
+            "l2_cache_size": 5242880,
+            "stepping": 1,
+            "model": 140,
+            "family": 6,
+            "l3_cache_size": 12582912,
+            "flags": [
+                "3dnow",
+                "3dnowprefetch",
+                "abm",
+                "acpi",
+                "adx",
+                "aes",
+                "apic",
+                "avx",
+                "avx2",
+                "avx512bitalg",
+                "avx512bw",
+                "avx512cd",
+                "avx512dq",
+                "avx512f",
+                "avx512ifma",
+                "avx512vbmi",
+                "avx512vbmi2",
+                "avx512vl",
+                "avx512vnni",
+                "avx512vpopcntdq",
+                "bmi1",
+                "bmi2",
+                "clflush",
+                "clflushopt",
+                "clwb",
+                "cmov",
+                "cx16",
+                "cx8",
+                "de",
+                "dtes64",
+                "dts",
+                "erms",
+                "est",
+                "f16c",
+                "fma",
+                "fpu",
+                "fxsr",
+                "gfni",
+                "ht",
+                "hypervisor",
+                "ia64",
+                "intel_pt",
+                "invpcid",
+                "lahf_lm",
+                "mca",
+                "mce",
+                "mmx",
+                "movbe",
+                "msr",
+                "mtrr",
+                "osxsave",
+                "pae",
+                "pat",
+                "pbe",
+                "pcid",
+                "pclmulqdq",
+                "pdcm",
+                "pge",
+                "pni",
+                "popcnt",
+                "pqe",
+                "pse",
+                "pse36",
+                "rdpid",
+                "rdrnd",
+                "rdseed",
+                "sep",
+                "serial",
+                "sha",
+                "smap",
+                "smep",
+                "ss",
+                "sse",
+                "sse2",
+                "sse4_1",
+                "sse4_2",
+                "ssse3",
+                "tm",
+                "tm2",
+                "tsc",
+                "umip",
+                "vaes",
+                "vme",
+                "vpclmulqdq",
+                "xsave",
+                "xtpr"
+            ],
+            "l2_cache_line_size": 256,
+            "l2_cache_associativity": 7
+        }
+    },
+    "commit_info": {
+        "id": "f861e4b5e88669993303f1f548f370a29c1597e4",
+        "time": "2026-03-21T10:45:38-03:00",
+        "author_time": "2026-03-21T10:45:38-03:00",
+        "dirty": true,
+        "project": "qsimplify",
+        "branch": "develop"
+    },
+    "benchmarks": [
+        {
+            "group": null,
+            "name": "test_cancellation_chain[1]",
+            "fullname": "benchmarks/test_performance.py::test_cancellation_chain[1]",
+            "params": {
+                "n_qubits": 1
+            },
+            "param": "1",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.3581785000005766,
+                "max": 0.3581785000005766,
+                "mean": 0.3581785000005766,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 0.3581785000005766,
+                "iqr": 0.0,
+                "q1": 0.3581785000005766,
+                "q3": 0.3581785000005766,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 0.3581785000005766,
+                "hd15iqr": 0.3581785000005766,
+                "ops": 2.791904036669957,
+                "total": 0.3581785000005766,
+                "data": [
+                    0.3581785000005766
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_cancellation_chain[2]",
+            "fullname": "benchmarks/test_performance.py::test_cancellation_chain[2]",
+            "params": {
+                "n_qubits": 2
+            },
+            "param": "2",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.0030270999995992,
+                "max": 1.0030270999995992,
+                "mean": 1.0030270999995992,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 1.0030270999995992,
+                "iqr": 0.0,
+                "q1": 1.0030270999995992,
+                "q3": 1.0030270999995992,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 1.0030270999995992,
+                "hd15iqr": 1.0030270999995992,
+                "ops": 0.9969820356801922,
+                "total": 1.0030270999995992,
+                "data": [
+                    1.0030270999995992
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_cancellation_chain[4]",
+            "fullname": "benchmarks/test_performance.py::test_cancellation_chain[4]",
+            "params": {
+                "n_qubits": 4
+            },
+            "param": "4",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.2131599000003916,
+                "max": 3.2131599000003916,
+                "mean": 3.2131599000003916,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 3.2131599000003916,
+                "iqr": 0.0,
+                "q1": 3.2131599000003916,
+                "q3": 3.2131599000003916,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 3.2131599000003916,
+                "hd15iqr": 3.2131599000003916,
+                "ops": 0.3112201169944509,
+                "total": 3.2131599000003916,
+                "data": [
+                    3.2131599000003916
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_cancellation_chain[8]",
+            "fullname": "benchmarks/test_performance.py::test_cancellation_chain[8]",
+            "params": {
+                "n_qubits": 8
+            },
+            "param": "8",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 11.286369999999806,
+                "max": 11.286369999999806,
+                "mean": 11.286369999999806,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 11.286369999999806,
+                "iqr": 0.0,
+                "q1": 11.286369999999806,
+                "q3": 11.286369999999806,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 11.286369999999806,
+                "hd15iqr": 11.286369999999806,
+                "ops": 0.08860244702238339,
+                "total": 11.286369999999806,
+                "data": [
+                    11.286369999999806
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_cnot_cascade[2]",
+            "fullname": "benchmarks/test_performance.py::test_cnot_cascade[2]",
+            "params": {
+                "n_qubits": 2
+            },
+            "param": "2",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.08087950000117416,
+                "max": 0.08087950000117416,
+                "mean": 0.08087950000117416,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 0.08087950000117416,
+                "iqr": 0.0,
+                "q1": 0.08087950000117416,
+                "q3": 0.08087950000117416,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 0.08087950000117416,
+                "hd15iqr": 0.08087950000117416,
+                "ops": 12.364072478013373,
+                "total": 0.08087950000117416,
+                "data": [
+                    0.08087950000117416
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_cnot_cascade[4]",
+            "fullname": "benchmarks/test_performance.py::test_cnot_cascade[4]",
+            "params": {
+                "n_qubits": 4
+            },
+            "param": "4",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.8748749999995198,
+                "max": 0.8748749999995198,
+                "mean": 0.8748749999995198,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 0.8748749999995198,
+                "iqr": 0.0,
+                "q1": 0.8748749999995198,
+                "q3": 0.8748749999995198,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 0.8748749999995198,
+                "hd15iqr": 0.8748749999995198,
+                "ops": 1.1430204314908403,
+                "total": 0.8748749999995198,
+                "data": [
+                    0.8748749999995198
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_cnot_cascade[8]",
+            "fullname": "benchmarks/test_performance.py::test_cnot_cascade[8]",
+            "params": {
+                "n_qubits": 8
+            },
+            "param": "8",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 8.873704999999973,
+                "max": 8.873704999999973,
+                "mean": 8.873704999999973,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 8.873704999999973,
+                "iqr": 0.0,
+                "q1": 8.873704999999973,
+                "q3": 8.873704999999973,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 8.873704999999973,
+                "hd15iqr": 8.873704999999973,
+                "ops": 0.11269249991970694,
+                "total": 8.873704999999973,
+                "data": [
+                    8.873704999999973
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_irreducible_brick_wall[1]",
+            "fullname": "benchmarks/test_performance.py::test_irreducible_brick_wall[1]",
+            "params": {
+                "n_qubits": 1
+            },
+            "param": "1",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.0889730000017153,
+                "max": 1.0889730000017153,
+                "mean": 1.0889730000017153,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 1.0889730000017153,
+                "iqr": 0.0,
+                "q1": 1.0889730000017153,
+                "q3": 1.0889730000017153,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 1.0889730000017153,
+                "hd15iqr": 1.0889730000017153,
+                "ops": 0.9182964132245931,
+                "total": 1.0889730000017153,
+                "data": [
+                    1.0889730000017153
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_irreducible_brick_wall[2]",
+            "fullname": "benchmarks/test_performance.py::test_irreducible_brick_wall[2]",
+            "params": {
+                "n_qubits": 2
+            },
+            "param": "2",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 6.386829400000352,
+                "max": 6.386829400000352,
+                "mean": 6.386829400000352,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 6.386829400000352,
+                "iqr": 0.0,
+                "q1": 6.386829400000352,
+                "q3": 6.386829400000352,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 6.386829400000352,
+                "hd15iqr": 6.386829400000352,
+                "ops": 0.15657221093144352,
+                "total": 6.386829400000352,
+                "data": [
+                    6.386829400000352
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_irreducible_brick_wall[4]",
+            "fullname": "benchmarks/test_performance.py::test_irreducible_brick_wall[4]",
+            "params": {
+                "n_qubits": 4
+            },
+            "param": "4",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 104.82629319999978,
+                "max": 104.82629319999978,
+                "mean": 104.82629319999978,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 104.82629319999978,
+                "iqr": 0.0,
+                "q1": 104.82629319999978,
+                "q3": 104.82629319999978,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 104.82629319999978,
+                "hd15iqr": 104.82629319999978,
+                "ops": 0.009539591351304236,
+                "total": 104.82629319999978,
+                "data": [
+                    104.82629319999978
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_irreducible_brick_wall[8]",
+            "fullname": "benchmarks/test_performance.py::test_irreducible_brick_wall[8]",
+            "params": {
+                "n_qubits": 8
+            },
+            "param": "8",
+            "extra_info": {
+                "limite_superado": true,
+                "diagnostico": "FALLO: Excedi\u00f3 el tiempo m\u00e1ximo aceptable de 5 minutos."
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 1,
+                "max_time": 1e-06,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 300.0108799999998,
+                "max": 300.0108799999998,
+                "mean": 300.0108799999998,
+                "stddev": 0,
+                "rounds": 1,
+                "median": 300.0108799999998,
+                "iqr": 0.0,
+                "q1": 300.0108799999998,
+                "q3": 300.0108799999998,
+                "iqr_outliers": 0,
+                "stddev_outliers": 0,
+                "outliers": "0;0",
+                "ld15iqr": 300.0108799999998,
+                "hd15iqr": 300.0108799999998,
+                "ops": 0.0033332124488285246,
+                "total": 300.0108799999998,
+                "data": [
+                    300.0108799999998
+                ],
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2026-05-07T20:07:07.756806+00:00",
+    "version": "5.2.3"
+}
