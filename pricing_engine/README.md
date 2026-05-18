@@ -1,8 +1,8 @@
-# QSimplify Pricing Engine 💸
+# QSimplify Pricing Engine 
 
 Este módulo es el núcleo financiero de QSimplify. Su objetivo actual es obtener, almacenar en caché y visualizar de forma dinámica los precios en tiempo real del hardware cuántico de los principales proveedores de la nube (AWS e IBM).
 
-## 🚀 Estado Actual (Qué tenemos implementado)
+##  Estado Actual (Qué tenemos implementado)
 
 Hasta el momento, el motor cuenta con una infraestructura robusta para la obtención de datos, compuesta por los siguientes elementos:
 
@@ -17,7 +17,7 @@ Hasta el momento, el motor cuenta con una infraestructura robusta para la obtenc
 3. **Visualizador de Consola (`viewer.py`)**
    - Utiliza la librería `rich` para parsear la caché y generar tablas formateadas directamente en la terminal, separando claramente los proveedores, familias de hardware y métodos de cobro.
 
-## 🛠️ Próximos Pasos (En desarrollo)
+## Próximos Pasos (En desarrollo)
 
 El siguiente objetivo para este módulo es la construcción del **Estimador de Circuitos**. 
 Una vez definida la fórmula matemática oficial o modelo de IA para calcular el tiempo de ejecución basado en la profundidad (`depth`) de un circuito, se creará el puente que multiplique ese tiempo por estos precios dinámicos, retornando finalmente la métrica de eficiencia `(Costo * Tiempo)` que servirá a QSimplify para optimizar la ejecución.
