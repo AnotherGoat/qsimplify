@@ -21,6 +21,9 @@ dependencies = [
     "qiskit-aer>=0.17.1",
     "qiskit-ibm-runtime>=0.40.0",
     "uvicorn>=0.37.0",
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.2",
+    "rich>=15.0.0",
 ]
 
 [project.optional-dependencies]
