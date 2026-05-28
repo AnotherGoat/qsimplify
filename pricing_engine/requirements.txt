@@ -1,3 +1,6 @@
 requests==2.31.0
 beautifulsoup4==4.12.2
 rich==15.0.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pytest>=7.4.0
