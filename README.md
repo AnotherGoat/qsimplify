@@ -133,3 +133,9 @@ uv run pysonar --sonar-host-url=http://localhost:9000 --sonar-token=TOKEN
 ## Examples
 
 Some usage samples can be found in the [examples](qsimplify/examples) directory.
+
+### License
+
+This project is licensed under the [MIT License](LICENSE).
+
+Copyright (c) 2025 The QSimplify Authors
