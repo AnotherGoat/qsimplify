@@ -2,6 +2,7 @@
 name = "qsimplify"
 version = "0.1.0"
 description = "A quantum circuit simplifier"
+license = "MIT"
 readme = "README.md"
 authors = [
     { name = "Víctor Mardones", email = "vmardones.dev@gmail.com" }
